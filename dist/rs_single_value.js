@@ -70,11 +70,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2078);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 0:
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -264,119 +265,24 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 1 */
+
+/***/ 1:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(7);
+  module.exports = __webpack_require__(74);
 } else {
-  module.exports = __webpack_require__(8);
+  module.exports = __webpack_require__(75);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-
-/***/ }),
-/* 3 */
+/***/ 1008:
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! @preserve
@@ -1399,32 +1305,163 @@ return numeral;
 
 
 /***/ }),
-/* 4 */
+
+/***/ 15:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+
+/***/ }),
+
+/***/ 17:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
+function checkDCE() {
+  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+  if (
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
+  ) {
+    return;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    // This branch is unreachable because this function is only called
+    // in production, but the condition is true only in development.
+    // Therefore if the branch is still here, dead code elimination wasn't
+    // properly applied.
+    // Don't change the message. React DevTools relies on it. Also make sure
+    // this message doesn't occur elsewhere in this function, or it will cause
+    // a false positive.
+    throw new Error('^_^');
+  }
+  try {
+    // Verify that the code above has been dead code eliminated (DCE'd).
+    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
+  } catch (err) {
+    // DevTools shouldn't crash React, no matter what.
+    // We should still report in case we break this code.
+    console.error(err);
+  }
+}
+
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(13);
+  // DCE check should happen before ReactDOM bundle executes so that
+  // DevTools can report bad minification during injection.
+  checkDCE();
+  module.exports = __webpack_require__(79);
 } else {
-  module.exports = __webpack_require__(14);
+  module.exports = __webpack_require__(82);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 5 */
+
+/***/ 2078:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _My_Vis = __webpack_require__(6);
+var _My_Vis = __webpack_require__(2079);
 
 var _My_Vis2 = _interopRequireDefault(_My_Vis);
 
-var _reactDom = __webpack_require__(11);
+var _reactDom = __webpack_require__(17);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -1432,17 +1469,17 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _modifyOptions = __webpack_require__(21);
+var _modifyOptions = __webpack_require__(2080);
 
 var _modifyOptions2 = _interopRequireDefault(_modifyOptions);
 
-var _constants = __webpack_require__(22);
+var _constants = __webpack_require__(2081);
 
-var _parser = __webpack_require__(23);
+var _parser = __webpack_require__(2082);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var style = __webpack_require__(24);
+var style = __webpack_require__(2083);
 
 looker.plugins.visualizations.add({
   id: "new_vis",
@@ -1505,7 +1542,8 @@ looker.plugins.visualizations.add({
 });
 
 /***/ }),
-/* 6 */
+
+/***/ 2079:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1520,7 +1558,7 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _numeral = __webpack_require__(3);
+var _numeral = __webpack_require__(1008);
 
 var _numeral2 = _interopRequireDefault(_numeral);
 
@@ -1593,6 +1631,12 @@ function MyVis(_ref) {
       { className: "val-2 format-val-2" },
       _react2.default.createElement(
         "span",
+        { className: "label" },
+        label,
+        " "
+      ),
+      _react2.default.createElement(
+        "span",
         { className: percentageSpanClass, id: "percent-val" },
         values.percentage.rendered,
         " ",
@@ -1611,18 +1655,553 @@ function MyVis(_ref) {
         displaySecondValue,
         " "
       ),
-      " ",
-      _react2.default.createElement(
-        "span",
-        { className: "label" },
-        label
-      )
+      " "
     )
   );
 }
 
 /***/ }),
-/* 7 */
+
+/***/ 2080:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var modifyOptions = function modifyOptions(vis, config, qr) {
+  var options = {};
+
+  options.valueColor = {
+    order: 0,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Value Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.secondValueColor = {
+    order: 1,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Second Value Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.titleColor = {
+    order: 2,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Title Color",
+    section: "Style",
+    type: "string"
+  };
+  options.labelColor = {
+    order: 3,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Label Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.valueSize = {
+    order: 4,
+    default: 72,
+    display_size: 'third',
+    label: "Value Size",
+    section: "Style",
+    type: 'number'
+  }, options.labelSize = {
+    order: 5,
+    default: 16,
+    display_size: "third",
+    label: "Label Size",
+    section: "Style",
+    type: "number"
+  };
+
+  options.secondValueSize = {
+    order: 6,
+    default: 16,
+    display_size: "third",
+    label: "Value 2 Size",
+    section: "Style",
+    type: "number"
+  };
+  options.labelStyle = {
+    order: 7,
+    default: "choose",
+    display: "select",
+    label: "Select Label Style",
+    section: "Style",
+    type: "string",
+    values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
+
+  options.show_title = {
+    order: 8,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show Title",
+    default: false,
+    section: "Style"
+  };
+
+  if (config.show_title) {
+    options.title = {
+      order: 9,
+      display_size: "whole",
+      type: "string",
+      label: "Title",
+      placeholder: "Title overide",
+      section: "Style",
+      default: ""
+    };
+    options.titleSize = {
+      order: 10,
+      default: 20,
+      display_size: "whole",
+      label: "Title Font Size",
+      section: "Style",
+      type: "number"
+    };
+  }
+
+  options.show_comparison = {
+    order: 0,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show Comparison",
+    default: false,
+    section: "Comparison"
+  };
+
+  if (config.show_comparison) {
+
+    options.compareType = {
+      default: "show_as_value",
+      display: "select",
+      label: "Value Label",
+      order: 0.5,
+      section: "Comparison",
+      type: "string",
+      values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }]
+    };
+    if (config.compareType === "show_as_change") {
+      options.pos_bad = {
+        order: 1,
+        display_size: "whole",
+        type: "boolean",
+        label: "Positive Values Are bad",
+        default: false,
+        section: "Comparison"
+      };
+    }
+
+    options.show_label = {
+      order: 2,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show Label",
+      default: false,
+      section: "Comparison"
+    };
+    if (config.show_label) {
+      options.label = {
+        order: 3,
+        display_size: "whole",
+        type: "string",
+        label: "Label",
+        placeholder: "Leave blank to use field label",
+        section: "Comparison",
+        default: ""
+      };
+    }
+  }
+
+  options.format = {
+    default: "select",
+    display: "select",
+    label: "Format Filter",
+    order: 0,
+    section: "Formatting",
+    type: "string",
+    values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }, { "not null": "not_null" }]
+  };
+
+  if (config.format !== "select") {
+    options.formatVal = {
+      order: 1,
+      display_size: "whole",
+      type: "string",
+      label: "Value",
+      placeholder: "value to format against",
+      section: "Formatting",
+      default: ""
+    };
+
+    options.formatBGColor = {
+      order: 2,
+      default: "#592EC2",
+      display: "color",
+      display_size: "half",
+      label: "Background Color",
+      section: "Formatting",
+      type: "string"
+    };
+
+    options.formatFontColor = {
+      order: 3,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Font Color",
+      section: "Formatting",
+      type: "string"
+    };
+    // options.hidden = {
+    //   order: 21,
+    //     display_size: "whole",
+    //     type: "boolean",
+    //     label: "kudsryfgc",
+    //     default: true,
+    //     hidden: true
+    // };
+  }
+
+  vis.trigger("registerOptions", options);
+};
+
+exports.default = modifyOptions;
+
+/***/ }),
+
+/***/ 2081:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var ELEMENT_ID = exports.ELEMENT_ID = 'new_vis';
+
+/***/ }),
+
+/***/ 2082:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parseData = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var bodyColor = "#ffffff00";
+
+function getLeftMostField(fieldsObj) {
+  var name = "";
+  var label = "";
+  if (fieldsObj.measures.length) {
+    var measure = fieldsObj.measures[0];
+    name = measure.name;
+    label = measure.label;
+  } else if (fieldsObj.dimensions.length) {
+    var dimension = fieldsObj.dimensions[0];
+    name = dimension.name;
+    label = dimension.label;
+  }
+  return { name: name, label: label };
+}
+
+function getSecondLeftMostField(fieldsObj) {
+  var measureLength = fieldsObj.measures.length;
+  var dimensionLength = fieldsObj.dimensions.length;
+  var name = "";
+  var label = "";
+
+  function assignNameLabel(fieldParam) {
+    name = fieldParam.name;
+    label = fieldParam.label;
+  }
+
+  if (measureLength > 1) {
+    assignNameLabel(fieldsObj.measures[1]);
+  } else if (measureLength === 1 && dimensionLength) {
+    assignNameLabel(fieldsObj.dimensions[0]);
+  } else if (!measureLength && dimensionLength > 1) {
+    assignNameLabel(fieldsObj.dimensions[1]);
+  } else {
+    var fieldObj = getLeftMostField(fieldsObj);
+    assignNameLabel(fieldObj);
+  }
+  return { name: name, label: label };
+}
+
+function getComparisonValue(data, field) {
+  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var value = "";
+  if (isLeftMostAlsoSecondLeftMost) {
+    value = data[1][field.name];
+  } else {
+    !data.length ? value = "No Data" : value = data[0][field.name];
+  }
+  return value;
+}
+
+function getComparisonDrillLinks(data, field) {
+  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var links = [];
+  if (isLeftMostAlsoSecondLeftMost) {
+    links = data[1][field.name].links;
+  } else {
+    !data.length ? links = "No Data" : links = data[0][field.name].links;
+  }
+  return links;
+}
+
+function makeLabel(config, secondLeftMostField) {
+  var label = "";
+  if (config.show_comparison && config.show_label) {
+    config.label ? label = config.label : label = secondLeftMostField.label;
+  }
+
+  if (config.labelStyle !== "choose") {
+    if (config.labelStyle === "italic") {
+      label = _react2.default.createElement(
+        "i",
+        null,
+        "l",
+        abel
+      );
+    } else {
+      label = _react2.default.createElement(
+        "b",
+        null,
+        label
+      );
+    }
+  }
+  return label;
+}
+
+function makeTitle(config) {
+  var title = "";
+  if (config.show_title) {
+    title = config.title;
+  }
+  return title;
+}
+
+function showAsChange(val, pos_bad) {
+  var formattedValue = val;
+  var posSpan = _react2.default.createElement(
+    "span",
+    { style: { color: "#5f9524" } },
+    "\u25B2 " + val
+  );
+  var badSpan = _react2.default.createElement(
+    "span",
+    { style: { color: "#cc1F37" } },
+    "\u25BC " + val
+  );
+  var pos = pos_bad ? badSpan : posSpan;
+  var bad = pos_bad ? posSpan : badSpan;
+  if (typeof val === "number") {
+    if (Math.sign(val) === 1) {
+      formattedValue = pos;
+    } else if (Math.sign(val) === -1) {
+      formattedValue = bad;
+    } else {
+      formattedValue = _react2.default.createElement(
+        "span",
+        null,
+        "" + val
+      );
+    }
+  }
+  return formattedValue;
+}
+
+function calcPercentage(val1, val2) {
+  var percentage = { value: 0, rendered: "" };
+  if (typeof val1 !== "number" || typeof val2 !== "number") {
+    percentage.rendered = "∅";
+  } else {
+    percentage.value = val1 / val2 * 100;
+    percentage.rendered = Math.floor(percentage.value) + "%";
+  }
+  return percentage;
+}
+
+function returnOperation(string) {
+  var operation;
+  if (string === "equal_to") {
+    operation = "===";
+  } else if (string === "not_equal_to") {
+    operation = "!==";
+  } else if (string === "less_than") {
+    operation = "<";
+  } else if (string === "not_null") {
+    operation = "+";
+  } else {
+    operation = ">";
+  }
+  return operation;
+}
+
+function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
+  if (!leftVal || !comparedVal) {
+    return leftVal;
+  }
+  if (typeof leftVal === "string") {
+    if (returnOperation(operation) === "+") {
+      document.body.style.backgroundColor = BG;
+      return _react2.default.createElement(
+        "span",
+        {
+          style: {
+            color: "" + fontCol
+          }
+        },
+        "" + leftVal
+      );
+    } else {
+      document.body.style.backgroundColor = "white";
+      return leftVal;
+    }
+  } else if (returnOperation(operation) === "+") {
+    document.body.style.backgroundColor = BG;
+    return _react2.default.createElement(
+      "span",
+      {
+        style: {
+          color: "" + fontCol
+        }
+      },
+      "" + leftVal
+    );
+  } else if (eval(leftVal + " " + returnOperation(operation) + " " + comparedVal)) {
+    document.body.style.backgroundColor = BG;
+    return _react2.default.createElement(
+      "span",
+      {
+        style: {
+          color: "" + fontCol
+        }
+      },
+      "" + leftVal
+    );
+  } else {
+    document.body.style.backgroundColor = "white";
+    return leftVal;
+  }
+}
+
+var parseData = exports.parseData = function parseData(data, queryResponse, config) {
+  var leftMostField = getLeftMostField(queryResponse.fields);
+  var secondLeftMostField = getSecondLeftMostField(queryResponse.fields);
+  var leftMostValue = getComparisonValue(data, leftMostField);
+  var leftMostLinks = getComparisonDrillLinks(data, leftMostField);
+
+  var secondLeftMostLinks = config.show_comparison ? getComparisonDrillLinks(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : [];
+
+  var secondLeftMostValue = config.show_comparison ? getComparisonValue(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : "";
+
+  if (config.compareType === "show_as_change" && (typeof secondLeftMostValue === "undefined" ? "undefined" : _typeof(secondLeftMostValue)) === "object") {
+    secondLeftMostValue.value = showAsChange(secondLeftMostValue.value, config.pos_bad);
+  }
+
+  var percentage = calcPercentage(leftMostValue.value, secondLeftMostValue.value);
+
+  var label = makeLabel(config, secondLeftMostField);
+  var title = makeTitle(config);
+  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object") {
+    leftMostValue.value = conditionallyFormat(leftMostValue.value, config.format, config.formatVal, config.formatFontColor, config.formatBGColor);
+  }
+
+  return {
+    leftMostValue: leftMostValue,
+    secondLeftMostValue: secondLeftMostValue,
+    label: label,
+    title: title,
+    percentage: percentage,
+    leftMostLinks: leftMostLinks,
+    secondLeftMostLinks: secondLeftMostLinks,
+    bodyColor: bodyColor
+  };
+};
+
+/***/ }),
+
+/***/ 2083:
+/***/ (function(module, exports, __webpack_require__) {
+
+
+        var result = __webpack_require__(2084);
+
+        if (typeof result === "string") {
+            module.exports = result;
+        } else {
+            module.exports = result.toString();
+        }
+    
+
+/***/ }),
+
+/***/ 2084:
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(99)(false);
+// imports
+
+
+// module
+exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ 40:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(80);
+} else {
+  module.exports = __webpack_require__(81);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+
+/***/ 74:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1635,7 +2214,7 @@ function MyVis(_ref) {
  * LICENSE file in the root directory of this source tree.
  */
 
-var l=__webpack_require__(2),n="function"===typeof Symbol&&Symbol.for,p=n?Symbol.for("react.element"):60103,q=n?Symbol.for("react.portal"):60106,r=n?Symbol.for("react.fragment"):60107,t=n?Symbol.for("react.strict_mode"):60108,u=n?Symbol.for("react.profiler"):60114,v=n?Symbol.for("react.provider"):60109,w=n?Symbol.for("react.context"):60110,x=n?Symbol.for("react.forward_ref"):60112,y=n?Symbol.for("react.suspense"):60113,z=n?Symbol.for("react.memo"):60115,A=n?Symbol.for("react.lazy"):
+var l=__webpack_require__(15),n="function"===typeof Symbol&&Symbol.for,p=n?Symbol.for("react.element"):60103,q=n?Symbol.for("react.portal"):60106,r=n?Symbol.for("react.fragment"):60107,t=n?Symbol.for("react.strict_mode"):60108,u=n?Symbol.for("react.profiler"):60114,v=n?Symbol.for("react.provider"):60109,w=n?Symbol.for("react.context"):60110,x=n?Symbol.for("react.forward_ref"):60112,y=n?Symbol.for("react.suspense"):60113,z=n?Symbol.for("react.memo"):60115,A=n?Symbol.for("react.lazy"):
 60116,B="function"===typeof Symbol&&Symbol.iterator;function C(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}
 var D={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}},E={};function F(a,b,c){this.props=a;this.context=b;this.refs=E;this.updater=c||D}F.prototype.isReactComponent={};F.prototype.setState=function(a,b){if("object"!==typeof a&&"function"!==typeof a&&null!=a)throw Error(C(85));this.updater.enqueueSetState(this,a,b,"setState")};F.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};
 function G(){}G.prototype=F.prototype;function H(a,b,c){this.props=a;this.context=b;this.refs=E;this.updater=c||D}var I=H.prototype=new G;I.constructor=H;l(I,F.prototype);I.isPureReactComponent=!0;var J={current:null},K=Object.prototype.hasOwnProperty,L={key:!0,ref:!0,__self:!0,__source:!0};
@@ -1654,7 +2233,8 @@ exports.useLayoutEffect=function(a,b){return Z().useLayoutEffect(a,b)};exports.u
 
 
 /***/ }),
-/* 8 */
+
+/***/ 75:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1675,8 +2255,8 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var _assign = __webpack_require__(2);
-var checkPropTypes = __webpack_require__(9);
+var _assign = __webpack_require__(15);
+var checkPropTypes = __webpack_require__(76);
 
 var ReactVersion = '16.13.1';
 
@@ -3574,7 +4154,8 @@ exports.version = ReactVersion;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 9 */
+
+/***/ 76:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3590,7 +4171,7 @@ exports.version = ReactVersion;
 var printWarning = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
-  var ReactPropTypesSecret = __webpack_require__(10);
+  var ReactPropTypesSecret = __webpack_require__(77);
   var loggedTypeFailures = {};
 
   printWarning = function(text) {
@@ -3673,7 +4254,8 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 10 */
+
+/***/ 77:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3692,53 +4274,8 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-function checkDCE() {
-  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
-  if (
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
-  ) {
-    return;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    // This branch is unreachable because this function is only called
-    // in production, but the condition is true only in development.
-    // Therefore if the branch is still here, dead code elimination wasn't
-    // properly applied.
-    // Don't change the message. React DevTools relies on it. Also make sure
-    // this message doesn't occur elsewhere in this function, or it will cause
-    // a false positive.
-    throw new Error('^_^');
-  }
-  try {
-    // Verify that the code above has been dead code eliminated (DCE'd).
-    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
-  } catch (err) {
-    // DevTools shouldn't crash React, no matter what.
-    // We should still report in case we break this code.
-    console.error(err);
-  }
-}
-
-if (process.env.NODE_ENV === 'production') {
-  // DCE check should happen before ReactDOM bundle executes so that
-  // DevTools can report bad minification during injection.
-  checkDCE();
-  module.exports = __webpack_require__(12);
-} else {
-  module.exports = __webpack_require__(15);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 12 */
+/***/ 79:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3754,7 +4291,7 @@ if (process.env.NODE_ENV === 'production') {
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(1),n=__webpack_require__(2),r=__webpack_require__(4);function u(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(u(227));
+var aa=__webpack_require__(1),n=__webpack_require__(15),r=__webpack_require__(40);function u(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(u(227));
 function ba(a,b,c,d,e,f,g,h,k){var l=Array.prototype.slice.call(arguments,3);try{b.apply(c,l)}catch(m){this.onError(m)}}var da=!1,ea=null,fa=!1,ha=null,ia={onError:function(a){da=!0;ea=a}};function ja(a,b,c,d,e,f,g,h,k){da=!1;ea=null;ba.apply(ia,arguments)}function ka(a,b,c,d,e,f,g,h,k){ja.apply(this,arguments);if(da){if(da){var l=ea;da=!1;ea=null}else throw Error(u(198));fa||(fa=!0,ha=l)}}var la=null,ma=null,na=null;
 function oa(a,b,c){var d=a.type||"unknown-event";a.currentTarget=na(c);ka(d,b,void 0,a);a.currentTarget=null}var pa=null,qa={};
 function ra(){if(pa)for(var a in qa){var b=qa[a],c=pa.indexOf(a);if(!(-1<c))throw Error(u(96,a));if(!sa[c]){if(!b.extractEvents)throw Error(u(97,a));sa[c]=b;c=b.eventTypes;for(var d in c){var e=void 0;var f=c[d],g=b,h=d;if(ta.hasOwnProperty(h))throw Error(u(99,h));ta[h]=f;var k=f.phasedRegistrationNames;if(k){for(e in k)k.hasOwnProperty(e)&&ua(k[e],g,h);e=!0}else f.registrationName?(ua(f.registrationName,g,h),e=!0):e=!1;if(!e)throw Error(u(98,d,a));}}}}
@@ -4037,7 +4574,8 @@ exports.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!gk(c))throw Er
 
 
 /***/ }),
-/* 13 */
+
+/***/ 80:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4065,7 +4603,8 @@ exports.unstable_shouldYield=function(){var a=exports.unstable_now();V(a);var b=
 
 
 /***/ }),
-/* 14 */
+
+/***/ 81:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4931,7 +5470,8 @@ exports.unstable_wrapCallback = unstable_wrapCallback;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 15 */
+
+/***/ 82:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4953,10 +5493,10 @@ if (process.env.NODE_ENV !== "production") {
 'use strict';
 
 var React = __webpack_require__(1);
-var _assign = __webpack_require__(2);
-var Scheduler = __webpack_require__(4);
-var checkPropTypes = __webpack_require__(16);
-var tracing = __webpack_require__(18);
+var _assign = __webpack_require__(15);
+var Scheduler = __webpack_require__(40);
+var checkPropTypes = __webpack_require__(83);
+var tracing = __webpack_require__(85);
 
 var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED; // Prevent newer renderers from RTE when used with older react package versions.
 // Current owner and dispatcher used to share the same ref,
@@ -29951,7 +30491,8 @@ exports.version = ReactVersion;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 16 */
+
+/***/ 83:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29967,7 +30508,7 @@ exports.version = ReactVersion;
 var printWarning = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
-  var ReactPropTypesSecret = __webpack_require__(17);
+  var ReactPropTypesSecret = __webpack_require__(84);
   var loggedTypeFailures = {};
 
   printWarning = function(text) {
@@ -30050,7 +30591,8 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 17 */
+
+/***/ 84:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30069,22 +30611,24 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 18 */
+
+/***/ 85:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(19);
+  module.exports = __webpack_require__(86);
 } else {
-  module.exports = __webpack_require__(20);
+  module.exports = __webpack_require__(87);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 19 */
+
+/***/ 86:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30101,7 +30645,8 @@ var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unst
 
 
 /***/ }),
-/* 20 */
+
+/***/ 87:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30458,505 +31003,8 @@ exports.unstable_wrap = unstable_wrap;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var modifyOptions = function modifyOptions(vis, config, qr) {
-  var options = {};
-
-  options.valueColor = {
-    order: 0,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.secondValueColor = {
-    order: 1,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Second Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.titleColor = {
-    order: 2,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Title Color",
-    section: "Style",
-    type: "string"
-  };
-  options.labelColor = {
-    order: 3,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Label Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.valueSize = {
-    order: 4,
-    default: 72,
-    display_size: 'third',
-    label: "Value Size",
-    section: "Style",
-    type: 'number'
-  }, options.labelSize = {
-    order: 5,
-    default: 16,
-    display_size: "third",
-    label: "Label Size",
-    section: "Style",
-    type: "number"
-  };
-
-  options.secondValueSize = {
-    order: 6,
-    default: 16,
-    display_size: "third",
-    label: "Value 2 Size",
-    section: "Style",
-    type: "number"
-  };
-  options.labelStyle = {
-    order: 7,
-    default: "choose",
-    display: "select",
-    label: "Select Label Style",
-    section: "Style",
-    type: "string",
-    values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
-
-  options.show_title = {
-    order: 8,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Title",
-    default: false,
-    section: "Style"
-  };
-
-  if (config.show_title) {
-    options.title = {
-      order: 9,
-      display_size: "whole",
-      type: "string",
-      label: "Title",
-      placeholder: "Title overide",
-      section: "Style",
-      default: ""
-    };
-    options.titleSize = {
-      order: 10,
-      default: 20,
-      display_size: "whole",
-      label: "Title Font Size",
-      section: "Style",
-      type: "number"
-    };
-  }
-
-  options.show_comparison = {
-    order: 0,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Comparison",
-    default: false,
-    section: "Comparison"
-  };
-
-  if (config.show_comparison) {
-
-    options.compareType = {
-      default: "show_as_value",
-      display: "select",
-      label: "Value Label",
-      order: 0.5,
-      section: "Comparison",
-      type: "string",
-      values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }]
-    };
-    if (config.compareType === "show_as_change") {
-      options.pos_bad = {
-        order: 1,
-        display_size: "whole",
-        type: "boolean",
-        label: "Positive Values Are bad",
-        default: false,
-        section: "Comparison"
-      };
-    }
-
-    options.show_label = {
-      order: 2,
-      display_size: "whole",
-      type: "boolean",
-      label: "Show Label",
-      default: false,
-      section: "Comparison"
-    };
-    if (config.show_label) {
-      options.label = {
-        order: 3,
-        display_size: "whole",
-        type: "string",
-        label: "Label",
-        placeholder: "Leave blank to use field label",
-        section: "Comparison",
-        default: ""
-      };
-    }
-  }
-
-  options.format = {
-    default: "select",
-    display: "select",
-    label: "Format Filter",
-    order: 0,
-    section: "Formatting",
-    type: "string",
-    values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }]
-  };
-
-  if (config.format !== "select") {
-    options.formatVal = {
-      order: 1,
-      display_size: "whole",
-      type: "string",
-      label: "Value",
-      placeholder: "value to format against",
-      section: "Formatting",
-      default: ""
-    };
-
-    options.formatBGColor = {
-      order: 2,
-      default: "#592EC2",
-      display: "color",
-      display_size: "half",
-      label: "Background Color",
-      section: "Formatting",
-      type: "string"
-    };
-
-    options.formatFontColor = {
-      order: 3,
-      default: "rgb(39, 39, 39)",
-      display: "color",
-      display_size: "half",
-      label: "Font Color",
-      section: "Formatting",
-      type: "string"
-    };
-    // options.hidden = {
-    //   order: 21,
-    //     display_size: "whole",
-    //     type: "boolean",
-    //     label: "kudsryfgc",
-    //     default: true,
-    //     hidden: true
-    // };
-  }
-
-  vis.trigger("registerOptions", options);
-};
-
-exports.default = modifyOptions;
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var ELEMENT_ID = exports.ELEMENT_ID = 'new_vis';
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.parseData = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _numeral = __webpack_require__(3);
-
-var _numeral2 = _interopRequireDefault(_numeral);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function getLeftMostField(fieldsObj) {
-  var name = "";
-  var label = "";
-  var valueFormat = "";
-  if (fieldsObj.measures.length) {
-    var measure = fieldsObj.measures[0];
-    name = measure.name;
-    label = measure.label;
-    valueFormat = measure.value_format;
-  } else if (fieldsObj.dimensions.length) {
-    var dimension = fieldsObj.dimensions[0];
-    name = dimension.name;
-    label = dimension.label;
-    valueFormat = dimension.value_format;
-  }
-  if (!valueFormat) {
-    valueFormat = '0,0';
-  }
-  return { name: name, label: label, valueFormat: valueFormat };
-}
-
-function getSecondLeftMostField(fieldsObj) {
-  var measureLength = fieldsObj.measures.length;
-  var dimensionLength = fieldsObj.dimensions.length;
-  var name = "";
-  var label = "";
-  var valueFormat = "";
-  function assignNameLabel(fieldParam) {
-    name = fieldParam.name;
-    label = fieldParam.label;
-    valueFormat = fieldParam.value_format;
-  }
-
-  if (measureLength > 1) {
-    assignNameLabel(fieldsObj.measures[1]);
-  } else if (measureLength === 1 && dimensionLength) {
-    assignNameLabel(fieldsObj.dimensions[0]);
-  } else if (!measureLength && dimensionLength > 1) {
-    assignNameLabel(fieldsObj.dimensions[1]);
-  } else {
-    var fieldObj = getLeftMostField(fieldsObj);
-    assignNameLabel(fieldObj);
-  }
-
-  if (!valueFormat) {
-    valueFormat = '0,0';
-  }
-  return { name: name, label: label, valueFormat: valueFormat };
-}
-
-function getComparisonValue(data, field) {
-  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var value = "";
-  if (isLeftMostAlsoSecondLeftMost) {
-    value = data[1][field.name];
-  } else {
-    !data.length ? value = "No Data" : value = data[0][field.name];
-  }
-  return value;
-}
-
-function getComparisonDrillLinks(data, field) {
-  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var links = [];
-  if (isLeftMostAlsoSecondLeftMost) {
-    links = data[1][field.name].links;
-  } else {
-    !data.length ? links = "No Data" : links = data[0][field.name].links;
-  }
-  return links;
-}
-
-function makeLabel(config, secondLeftMostField) {
-  var label = "";
-  if (config.show_comparison && config.show_label) {
-    config.label ? label = config.label : label = secondLeftMostField.label;
-  }
-
-  if (config.labelStyle !== "choose") {
-    if (config.labelStyle === "italic") {
-      label = _react2.default.createElement(
-        "i",
-        null,
-        label
-      );
-    } else {
-      label = _react2.default.createElement(
-        "b",
-        null,
-        label
-      );
-    }
-  }
-  return label;
-}
-
-function makeTitle(config) {
-  var title = "";
-  if (config.show_title) {
-    title = config.title;
-  }
-  return title;
-}
-
-function showAsChange(val, pos_bad, format) {
-  var formattedValue = val;
-  var posSpan = _react2.default.createElement(
-    "span",
-    { style: { color: "#5f9524" } },
-    "\u25B2 " + (0, _numeral2.default)(val).format(format)
-  );
-  var badSpan = _react2.default.createElement(
-    "span",
-    { style: { color: "#cc1F37" } },
-    "\u25BC " + (0, _numeral2.default)(val).format(format)
-  );
-  var pos = pos_bad ? badSpan : posSpan;
-  var bad = pos_bad ? posSpan : badSpan;
-  if (typeof val === "number") {
-    if (Math.sign(val) === 1) {
-      formattedValue = pos;
-    } else if (Math.sign(val) === -1) {
-      formattedValue = bad;
-    } else {
-      formattedValue = _react2.default.createElement(
-        "span",
-        null,
-        "" + val
-      );
-    }
-  }
-  console.log(formattedValue);
-  return formattedValue;
-}
-
-function calcPercentage(val1, val2) {
-  var percentage = { value: 0, rendered: "" };
-  if (typeof val1 !== "number" || typeof val2 !== "number") {
-    percentage.rendered = "∅";
-  } else {
-    percentage.value = val1 / val2 * 100;
-    percentage.rendered = Math.floor(percentage.value) + "%";
-  }
-  return percentage;
-}
-
-function returnOperation(string) {
-  var operation;
-  if (string === "equal_to") {
-    operation = "===";
-  } else if (string === "not_equal_to") {
-    operation = "!==";
-  } else if (string === "less_than") {
-    operation = "<";
-  } else {
-    operation = ">";
-  }
-  return operation;
-}
-
-function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
-  if (typeof leftVal !== "number" || !comparedVal) {
-    return leftVal;
-  }
-
-  if (eval(leftVal + " " + returnOperation(operation) + " " + comparedVal)) {
-    // bodyColor = BG
-    document.body.style.backgroundColor = BG;
-    return _react2.default.createElement(
-      "span",
-      {
-        style: {
-          padding: "100vw",
-          backgroundColor: "" + BG,
-          color: "" + fontCol
-        }
-      },
-      "" + leftVal
-    );
-  } else {
-    document.body.style.backgroundColor = "rgba(255, 0, 0, 0.0)";
-    return leftVal;
-  }
-}
-
-var parseData = exports.parseData = function parseData(data, queryResponse, config) {
-  var leftMostField = getLeftMostField(queryResponse.fields);
-  var secondLeftMostField = getSecondLeftMostField(queryResponse.fields);
-  var leftMostValue = getComparisonValue(data, leftMostField);
-  var leftMostLinks = getComparisonDrillLinks(data, leftMostField);
-  var leftMostFormat = leftMostField.valueFormat;
-  var secondLeftMostFormat = secondLeftMostField.valueFormat;
-  var secondLeftMostLinks = config.show_comparison ? getComparisonDrillLinks(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : [];
-
-  var secondLeftMostValue = config.show_comparison ? getComparisonValue(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : "";
-  // console.log("val", secondLeftMostValue.value)
-  if (config.compareType === "show_as_change" && (typeof secondLeftMostValue === "undefined" ? "undefined" : _typeof(secondLeftMostValue)) === "object" && typeof secondLeftMostValue.value === "number") {
-    secondLeftMostValue.rendered = showAsChange(secondLeftMostValue.value, config.pos_bad, secondLeftMostFormat);
-  }
-
-  var percentage = calcPercentage(leftMostValue.value, secondLeftMostValue.value);
-
-  var label = makeLabel(config, secondLeftMostField);
-  var title = makeTitle(config);
-  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object") {
-    leftMostValue.value = conditionallyFormat(leftMostValue.value, config.format, config.formatVal, config.formatFontColor, config.formatBGColor);
-  }
-
-  return { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, label: label, title: title, percentage: percentage, leftMostLinks: leftMostLinks, secondLeftMostLinks: secondLeftMostLinks, leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat };
-};
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-        var result = __webpack_require__(25);
-
-        if (typeof result === "string") {
-            module.exports = result;
-        } else {
-            module.exports = result.toString();
-        }
-    
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(26)(false);
-// imports
-
-
-// module
-exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}", ""]);
-
-// exports
-
-
-/***/ }),
-/* 26 */
+/***/ 99:
 /***/ (function(module, exports) {
 
 /*
@@ -31038,5 +31086,6 @@ function toComment(sourceMap) {
 
 
 /***/ })
-/******/ ]);
+
+/******/ });
 });
