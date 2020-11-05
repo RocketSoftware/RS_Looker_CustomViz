@@ -1576,7 +1576,7 @@ function MyVis(_ref) {
 
   // const displayFirstValue = values.leftMostValue.value;
   // const displaySecondValue = values.secondLeftMostValue.value;
-  console.log(values);
+
   var leftMostFormatted = typeof values.leftMostValue.value === "number" ? (0, _numeral2.default)(values.leftMostValue.value).format(format.leftMostFormat) : values.leftMostValue.value;
   var secondLeftMostFormatted = typeof values.secondLeftMostValue.value === "number" ? (0, _numeral2.default)(values.secondLeftMostValue.value).format(format.secondLeftMostFormat) : values.secondLeftMostValue.value;
 
@@ -2072,9 +2072,8 @@ function returnOperation(string) {
 }
 
 function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
-  if (!leftVal || !comparedVal) {
-    return leftVal;
-  }
+  console.log("format");
+
   if (typeof leftVal === "string") {
     if (returnOperation(operation) === "+") {
       document.body.style.backgroundColor = BG;
@@ -2088,7 +2087,7 @@ function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
         "" + leftVal
       );
     } else {
-      document.body.style.backgroundColor = "white";
+      document.body.style.backgroundColor = bodyColor;
       return leftVal;
     }
   } else if (returnOperation(operation) === "+") {
@@ -2102,19 +2101,23 @@ function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
       },
       "" + leftVal
     );
+  } else if (!comparedVal) {
+    document.body.style.backgroundColor = bodyColor;
+    return leftVal;
   } else if (eval(leftVal + " " + returnOperation(operation) + " " + comparedVal)) {
     document.body.style.backgroundColor = BG;
     return _react2.default.createElement(
       "span",
       {
         style: {
+
           color: "" + fontCol
         }
       },
       "" + leftVal
     );
   } else {
-    document.body.style.backgroundColor = "white";
+    document.body.style.backgroundColor = bodyColor;
     return leftVal;
   }
 }
