@@ -477,6 +477,10 @@ looker.plugins.visualizations.add({
 
       // document.body.style.backgroundColor = bodyColor
     }
+    if (config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress") {
+      document.querySelector(".overlay").style.backgroundColor = config.barColor;
+      document.querySelector(".underlay-BG").style.backgroundColor = config.barUnderColor;
+    }
 
     done();
   }
@@ -30637,6 +30641,27 @@ var modifyOptions = function modifyOptions(vis, config, qr) {
         label: "Positive Values Are bad",
         default: false,
         section: "Comparison"
+      };
+    }
+
+    if (config.compareType === "calculate_progress" || config.compareType === "calculate_progress_with_percentage") {
+      options.barColor = {
+        order: 1,
+        default: "#E2E3E4",
+        display: "color",
+        display_size: "half",
+        label: "Bar Fill Color",
+        section: "Comparison",
+        type: "string"
+      };
+      options.barUnderColor = {
+        order: 1,
+        default: "#F5F5F6",
+        display: "color",
+        display_size: "half",
+        label: "Bar Color",
+        section: "Comparison",
+        type: "string"
       };
     }
 
