@@ -70,12 +70,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2078);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 0:
+/******/ ([
+/* 0 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -265,1048 +264,22 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-
-/***/ 1:
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(74);
+  module.exports = __webpack_require__(6);
 } else {
-  module.exports = __webpack_require__(75);
+  module.exports = __webpack_require__(7);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 1008:
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! @preserve
- * numeral.js
- * version : 2.0.6
- * author : Adam Draper
- * license : MIT
- * http://adamwdraper.github.com/Numeral-js/
- */
-
-(function (global, factory) {
-    if (true) {
-        !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
-				__WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        global.numeral = factory();
-    }
-}(this, function () {
-    /************************************
-        Variables
-    ************************************/
-
-    var numeral,
-        _,
-        VERSION = '2.0.6',
-        formats = {},
-        locales = {},
-        defaults = {
-            currentLocale: 'en',
-            zeroFormat: null,
-            nullFormat: null,
-            defaultFormat: '0,0',
-            scalePercentBy100: true
-        },
-        options = {
-            currentLocale: defaults.currentLocale,
-            zeroFormat: defaults.zeroFormat,
-            nullFormat: defaults.nullFormat,
-            defaultFormat: defaults.defaultFormat,
-            scalePercentBy100: defaults.scalePercentBy100
-        };
-
-
-    /************************************
-        Constructors
-    ************************************/
-
-    // Numeral prototype object
-    function Numeral(input, number) {
-        this._input = input;
-
-        this._value = number;
-    }
-
-    numeral = function(input) {
-        var value,
-            kind,
-            unformatFunction,
-            regexp;
-
-        if (numeral.isNumeral(input)) {
-            value = input.value();
-        } else if (input === 0 || typeof input === 'undefined') {
-            value = 0;
-        } else if (input === null || _.isNaN(input)) {
-            value = null;
-        } else if (typeof input === 'string') {
-            if (options.zeroFormat && input === options.zeroFormat) {
-                value = 0;
-            } else if (options.nullFormat && input === options.nullFormat || !input.replace(/[^0-9]+/g, '').length) {
-                value = null;
-            } else {
-                for (kind in formats) {
-                    regexp = typeof formats[kind].regexps.unformat === 'function' ? formats[kind].regexps.unformat() : formats[kind].regexps.unformat;
-
-                    if (regexp && input.match(regexp)) {
-                        unformatFunction = formats[kind].unformat;
-
-                        break;
-                    }
-                }
-
-                unformatFunction = unformatFunction || numeral._.stringToNumber;
-
-                value = unformatFunction(input);
-            }
-        } else {
-            value = Number(input)|| null;
-        }
-
-        return new Numeral(input, value);
-    };
-
-    // version number
-    numeral.version = VERSION;
-
-    // compare numeral object
-    numeral.isNumeral = function(obj) {
-        return obj instanceof Numeral;
-    };
-
-    // helper functions
-    numeral._ = _ = {
-        // formats numbers separators, decimals places, signs, abbreviations
-        numberToFormat: function(value, format, roundingFunction) {
-            var locale = locales[numeral.options.currentLocale],
-                negP = false,
-                optDec = false,
-                leadingCount = 0,
-                abbr = '',
-                trillion = 1000000000000,
-                billion = 1000000000,
-                million = 1000000,
-                thousand = 1000,
-                decimal = '',
-                neg = false,
-                abbrForce, // force abbreviation
-                abs,
-                min,
-                max,
-                power,
-                int,
-                precision,
-                signed,
-                thousands,
-                output;
-
-            // make sure we never format a null value
-            value = value || 0;
-
-            abs = Math.abs(value);
-
-            // see if we should use parentheses for negative number or if we should prefix with a sign
-            // if both are present we default to parentheses
-            if (numeral._.includes(format, '(')) {
-                negP = true;
-                format = format.replace(/[\(|\)]/g, '');
-            } else if (numeral._.includes(format, '+') || numeral._.includes(format, '-')) {
-                signed = numeral._.includes(format, '+') ? format.indexOf('+') : value < 0 ? format.indexOf('-') : -1;
-                format = format.replace(/[\+|\-]/g, '');
-            }
-
-            // see if abbreviation is wanted
-            if (numeral._.includes(format, 'a')) {
-                abbrForce = format.match(/a(k|m|b|t)?/);
-
-                abbrForce = abbrForce ? abbrForce[1] : false;
-
-                // check for space before abbreviation
-                if (numeral._.includes(format, ' a')) {
-                    abbr = ' ';
-                }
-
-                format = format.replace(new RegExp(abbr + 'a[kmbt]?'), '');
-
-                if (abs >= trillion && !abbrForce || abbrForce === 't') {
-                    // trillion
-                    abbr += locale.abbreviations.trillion;
-                    value = value / trillion;
-                } else if (abs < trillion && abs >= billion && !abbrForce || abbrForce === 'b') {
-                    // billion
-                    abbr += locale.abbreviations.billion;
-                    value = value / billion;
-                } else if (abs < billion && abs >= million && !abbrForce || abbrForce === 'm') {
-                    // million
-                    abbr += locale.abbreviations.million;
-                    value = value / million;
-                } else if (abs < million && abs >= thousand && !abbrForce || abbrForce === 'k') {
-                    // thousand
-                    abbr += locale.abbreviations.thousand;
-                    value = value / thousand;
-                }
-            }
-
-            // check for optional decimals
-            if (numeral._.includes(format, '[.]')) {
-                optDec = true;
-                format = format.replace('[.]', '.');
-            }
-
-            // break number and format
-            int = value.toString().split('.')[0];
-            precision = format.split('.')[1];
-            thousands = format.indexOf(',');
-            leadingCount = (format.split('.')[0].split(',')[0].match(/0/g) || []).length;
-
-            if (precision) {
-                if (numeral._.includes(precision, '[')) {
-                    precision = precision.replace(']', '');
-                    precision = precision.split('[');
-                    decimal = numeral._.toFixed(value, (precision[0].length + precision[1].length), roundingFunction, precision[1].length);
-                } else {
-                    decimal = numeral._.toFixed(value, precision.length, roundingFunction);
-                }
-
-                int = decimal.split('.')[0];
-
-                if (numeral._.includes(decimal, '.')) {
-                    decimal = locale.delimiters.decimal + decimal.split('.')[1];
-                } else {
-                    decimal = '';
-                }
-
-                if (optDec && Number(decimal.slice(1)) === 0) {
-                    decimal = '';
-                }
-            } else {
-                int = numeral._.toFixed(value, 0, roundingFunction);
-            }
-
-            // check abbreviation again after rounding
-            if (abbr && !abbrForce && Number(int) >= 1000 && abbr !== locale.abbreviations.trillion) {
-                int = String(Number(int) / 1000);
-
-                switch (abbr) {
-                    case locale.abbreviations.thousand:
-                        abbr = locale.abbreviations.million;
-                        break;
-                    case locale.abbreviations.million:
-                        abbr = locale.abbreviations.billion;
-                        break;
-                    case locale.abbreviations.billion:
-                        abbr = locale.abbreviations.trillion;
-                        break;
-                }
-            }
-
-
-            // format number
-            if (numeral._.includes(int, '-')) {
-                int = int.slice(1);
-                neg = true;
-            }
-
-            if (int.length < leadingCount) {
-                for (var i = leadingCount - int.length; i > 0; i--) {
-                    int = '0' + int;
-                }
-            }
-
-            if (thousands > -1) {
-                int = int.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + locale.delimiters.thousands);
-            }
-
-            if (format.indexOf('.') === 0) {
-                int = '';
-            }
-
-            output = int + decimal + (abbr ? abbr : '');
-
-            if (negP) {
-                output = (negP && neg ? '(' : '') + output + (negP && neg ? ')' : '');
-            } else {
-                if (signed >= 0) {
-                    output = signed === 0 ? (neg ? '-' : '+') + output : output + (neg ? '-' : '+');
-                } else if (neg) {
-                    output = '-' + output;
-                }
-            }
-
-            return output;
-        },
-        // unformats numbers separators, decimals places, signs, abbreviations
-        stringToNumber: function(string) {
-            var locale = locales[options.currentLocale],
-                stringOriginal = string,
-                abbreviations = {
-                    thousand: 3,
-                    million: 6,
-                    billion: 9,
-                    trillion: 12
-                },
-                abbreviation,
-                value,
-                i,
-                regexp;
-
-            if (options.zeroFormat && string === options.zeroFormat) {
-                value = 0;
-            } else if (options.nullFormat && string === options.nullFormat || !string.replace(/[^0-9]+/g, '').length) {
-                value = null;
-            } else {
-                value = 1;
-
-                if (locale.delimiters.decimal !== '.') {
-                    string = string.replace(/\./g, '').replace(locale.delimiters.decimal, '.');
-                }
-
-                for (abbreviation in abbreviations) {
-                    regexp = new RegExp('[^a-zA-Z]' + locale.abbreviations[abbreviation] + '(?:\\)|(\\' + locale.currency.symbol + ')?(?:\\))?)?$');
-
-                    if (stringOriginal.match(regexp)) {
-                        value *= Math.pow(10, abbreviations[abbreviation]);
-                        break;
-                    }
-                }
-
-                // check for negative number
-                value *= (string.split('-').length + Math.min(string.split('(').length - 1, string.split(')').length - 1)) % 2 ? 1 : -1;
-
-                // remove non numbers
-                string = string.replace(/[^0-9\.]+/g, '');
-
-                value *= Number(string);
-            }
-
-            return value;
-        },
-        isNaN: function(value) {
-            return typeof value === 'number' && isNaN(value);
-        },
-        includes: function(string, search) {
-            return string.indexOf(search) !== -1;
-        },
-        insert: function(string, subString, start) {
-            return string.slice(0, start) + subString + string.slice(start);
-        },
-        reduce: function(array, callback /*, initialValue*/) {
-            if (this === null) {
-                throw new TypeError('Array.prototype.reduce called on null or undefined');
-            }
-
-            if (typeof callback !== 'function') {
-                throw new TypeError(callback + ' is not a function');
-            }
-
-            var t = Object(array),
-                len = t.length >>> 0,
-                k = 0,
-                value;
-
-            if (arguments.length === 3) {
-                value = arguments[2];
-            } else {
-                while (k < len && !(k in t)) {
-                    k++;
-                }
-
-                if (k >= len) {
-                    throw new TypeError('Reduce of empty array with no initial value');
-                }
-
-                value = t[k++];
-            }
-            for (; k < len; k++) {
-                if (k in t) {
-                    value = callback(value, t[k], k, t);
-                }
-            }
-            return value;
-        },
-        /**
-         * Computes the multiplier necessary to make x >= 1,
-         * effectively eliminating miscalculations caused by
-         * finite precision.
-         */
-        multiplier: function (x) {
-            var parts = x.toString().split('.');
-
-            return parts.length < 2 ? 1 : Math.pow(10, parts[1].length);
-        },
-        /**
-         * Given a variable number of arguments, returns the maximum
-         * multiplier that must be used to normalize an operation involving
-         * all of them.
-         */
-        correctionFactor: function () {
-            var args = Array.prototype.slice.call(arguments);
-
-            return args.reduce(function(accum, next) {
-                var mn = _.multiplier(next);
-                return accum > mn ? accum : mn;
-            }, 1);
-        },
-        /**
-         * Implementation of toFixed() that treats floats more like decimals
-         *
-         * Fixes binary rounding issues (eg. (0.615).toFixed(2) === '0.61') that present
-         * problems for accounting- and finance-related software.
-         */
-        toFixed: function(value, maxDecimals, roundingFunction, optionals) {
-            var splitValue = value.toString().split('.'),
-                minDecimals = maxDecimals - (optionals || 0),
-                boundedPrecision,
-                optionalsRegExp,
-                power,
-                output;
-
-            // Use the smallest precision value possible to avoid errors from floating point representation
-            if (splitValue.length === 2) {
-              boundedPrecision = Math.min(Math.max(splitValue[1].length, minDecimals), maxDecimals);
-            } else {
-              boundedPrecision = minDecimals;
-            }
-
-            power = Math.pow(10, boundedPrecision);
-
-            // Multiply up by precision, round accurately, then divide and use native toFixed():
-            output = (roundingFunction(value + 'e+' + boundedPrecision) / power).toFixed(boundedPrecision);
-
-            if (optionals > maxDecimals - boundedPrecision) {
-                optionalsRegExp = new RegExp('\\.?0{1,' + (optionals - (maxDecimals - boundedPrecision)) + '}$');
-                output = output.replace(optionalsRegExp, '');
-            }
-
-            return output;
-        }
-    };
-
-    // avaliable options
-    numeral.options = options;
-
-    // avaliable formats
-    numeral.formats = formats;
-
-    // avaliable formats
-    numeral.locales = locales;
-
-    // This function sets the current locale.  If
-    // no arguments are passed in, it will simply return the current global
-    // locale key.
-    numeral.locale = function(key) {
-        if (key) {
-            options.currentLocale = key.toLowerCase();
-        }
-
-        return options.currentLocale;
-    };
-
-    // This function provides access to the loaded locale data.  If
-    // no arguments are passed in, it will simply return the current
-    // global locale object.
-    numeral.localeData = function(key) {
-        if (!key) {
-            return locales[options.currentLocale];
-        }
-
-        key = key.toLowerCase();
-
-        if (!locales[key]) {
-            throw new Error('Unknown locale : ' + key);
-        }
-
-        return locales[key];
-    };
-
-    numeral.reset = function() {
-        for (var property in defaults) {
-            options[property] = defaults[property];
-        }
-    };
-
-    numeral.zeroFormat = function(format) {
-        options.zeroFormat = typeof(format) === 'string' ? format : null;
-    };
-
-    numeral.nullFormat = function (format) {
-        options.nullFormat = typeof(format) === 'string' ? format : null;
-    };
-
-    numeral.defaultFormat = function(format) {
-        options.defaultFormat = typeof(format) === 'string' ? format : '0.0';
-    };
-
-    numeral.register = function(type, name, format) {
-        name = name.toLowerCase();
-
-        if (this[type + 's'][name]) {
-            throw new TypeError(name + ' ' + type + ' already registered.');
-        }
-
-        this[type + 's'][name] = format;
-
-        return format;
-    };
-
-
-    numeral.validate = function(val, culture) {
-        var _decimalSep,
-            _thousandSep,
-            _currSymbol,
-            _valArray,
-            _abbrObj,
-            _thousandRegEx,
-            localeData,
-            temp;
-
-        //coerce val to string
-        if (typeof val !== 'string') {
-            val += '';
-
-            if (console.warn) {
-                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
-            }
-        }
-
-        //trim whitespaces from either sides
-        val = val.trim();
-
-        //if val is just digits return true
-        if (!!val.match(/^\d+$/)) {
-            return true;
-        }
-
-        //if val is empty return false
-        if (val === '') {
-            return false;
-        }
-
-        //get the decimal and thousands separator from numeral.localeData
-        try {
-            //check if the culture is understood by numeral. if not, default it to current locale
-            localeData = numeral.localeData(culture);
-        } catch (e) {
-            localeData = numeral.localeData(numeral.locale());
-        }
-
-        //setup the delimiters and currency symbol based on culture/locale
-        _currSymbol = localeData.currency.symbol;
-        _abbrObj = localeData.abbreviations;
-        _decimalSep = localeData.delimiters.decimal;
-        if (localeData.delimiters.thousands === '.') {
-            _thousandSep = '\\.';
-        } else {
-            _thousandSep = localeData.delimiters.thousands;
-        }
-
-        // validating currency symbol
-        temp = val.match(/^[^\d]+/);
-        if (temp !== null) {
-            val = val.substr(1);
-            if (temp[0] !== _currSymbol) {
-                return false;
-            }
-        }
-
-        //validating abbreviation symbol
-        temp = val.match(/[^\d]+$/);
-        if (temp !== null) {
-            val = val.slice(0, -1);
-            if (temp[0] !== _abbrObj.thousand && temp[0] !== _abbrObj.million && temp[0] !== _abbrObj.billion && temp[0] !== _abbrObj.trillion) {
-                return false;
-            }
-        }
-
-        _thousandRegEx = new RegExp(_thousandSep + '{2}');
-
-        if (!val.match(/[^\d.,]/g)) {
-            _valArray = val.split(_decimalSep);
-            if (_valArray.length > 2) {
-                return false;
-            } else {
-                if (_valArray.length < 2) {
-                    return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx));
-                } else {
-                    if (_valArray[0].length === 1) {
-                        return ( !! _valArray[0].match(/^\d+$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
-                    } else {
-                        return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
-                    }
-                }
-            }
-        }
-
-        return false;
-    };
-
-
-    /************************************
-        Numeral Prototype
-    ************************************/
-
-    numeral.fn = Numeral.prototype = {
-        clone: function() {
-            return numeral(this);
-        },
-        format: function(inputString, roundingFunction) {
-            var value = this._value,
-                format = inputString || options.defaultFormat,
-                kind,
-                output,
-                formatFunction;
-
-            // make sure we have a roundingFunction
-            roundingFunction = roundingFunction || Math.round;
-
-            // format based on value
-            if (value === 0 && options.zeroFormat !== null) {
-                output = options.zeroFormat;
-            } else if (value === null && options.nullFormat !== null) {
-                output = options.nullFormat;
-            } else {
-                for (kind in formats) {
-                    if (format.match(formats[kind].regexps.format)) {
-                        formatFunction = formats[kind].format;
-
-                        break;
-                    }
-                }
-
-                formatFunction = formatFunction || numeral._.numberToFormat;
-
-                output = formatFunction(value, format, roundingFunction);
-            }
-
-            return output;
-        },
-        value: function() {
-            return this._value;
-        },
-        input: function() {
-            return this._input;
-        },
-        set: function(value) {
-            this._value = Number(value);
-
-            return this;
-        },
-        add: function(value) {
-            var corrFactor = _.correctionFactor.call(null, this._value, value);
-
-            function cback(accum, curr, currI, O) {
-                return accum + Math.round(corrFactor * curr);
-            }
-
-            this._value = _.reduce([this._value, value], cback, 0) / corrFactor;
-
-            return this;
-        },
-        subtract: function(value) {
-            var corrFactor = _.correctionFactor.call(null, this._value, value);
-
-            function cback(accum, curr, currI, O) {
-                return accum - Math.round(corrFactor * curr);
-            }
-
-            this._value = _.reduce([value], cback, Math.round(this._value * corrFactor)) / corrFactor;
-
-            return this;
-        },
-        multiply: function(value) {
-            function cback(accum, curr, currI, O) {
-                var corrFactor = _.correctionFactor(accum, curr);
-                return Math.round(accum * corrFactor) * Math.round(curr * corrFactor) / Math.round(corrFactor * corrFactor);
-            }
-
-            this._value = _.reduce([this._value, value], cback, 1);
-
-            return this;
-        },
-        divide: function(value) {
-            function cback(accum, curr, currI, O) {
-                var corrFactor = _.correctionFactor(accum, curr);
-                return Math.round(accum * corrFactor) / Math.round(curr * corrFactor);
-            }
-
-            this._value = _.reduce([this._value, value], cback);
-
-            return this;
-        },
-        difference: function(value) {
-            return Math.abs(numeral(this._value).subtract(value).value());
-        }
-    };
-
-    /************************************
-        Default Locale && Format
-    ************************************/
-
-    numeral.register('locale', 'en', {
-        delimiters: {
-            thousands: ',',
-            decimal: '.'
-        },
-        abbreviations: {
-            thousand: 'k',
-            million: 'm',
-            billion: 'b',
-            trillion: 't'
-        },
-        ordinal: function(number) {
-            var b = number % 10;
-            return (~~(number % 100 / 10) === 1) ? 'th' :
-                (b === 1) ? 'st' :
-                (b === 2) ? 'nd' :
-                (b === 3) ? 'rd' : 'th';
-        },
-        currency: {
-            symbol: '$'
-        }
-    });
-
-    
-
-(function() {
-        numeral.register('format', 'bps', {
-            regexps: {
-                format: /(BPS)/,
-                unformat: /(BPS)/
-            },
-            format: function(value, format, roundingFunction) {
-                var space = numeral._.includes(format, ' BPS') ? ' ' : '',
-                    output;
-
-                value = value * 10000;
-
-                // check for space before BPS
-                format = format.replace(/\s?BPS/, '');
-
-                output = numeral._.numberToFormat(value, format, roundingFunction);
-
-                if (numeral._.includes(output, ')')) {
-                    output = output.split('');
-
-                    output.splice(-1, 0, space + 'BPS');
-
-                    output = output.join('');
-                } else {
-                    output = output + space + 'BPS';
-                }
-
-                return output;
-            },
-            unformat: function(string) {
-                return +(numeral._.stringToNumber(string) * 0.0001).toFixed(15);
-            }
-        });
-})();
-
-
-(function() {
-        var decimal = {
-            base: 1000,
-            suffixes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-        },
-        binary = {
-            base: 1024,
-            suffixes: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
-        };
-
-    var allSuffixes =  decimal.suffixes.concat(binary.suffixes.filter(function (item) {
-            return decimal.suffixes.indexOf(item) < 0;
-        }));
-        var unformatRegex = allSuffixes.join('|');
-        // Allow support for BPS (http://www.investopedia.com/terms/b/basispoint.asp)
-        unformatRegex = '(' + unformatRegex.replace('B', 'B(?!PS)') + ')';
-
-    numeral.register('format', 'bytes', {
-        regexps: {
-            format: /([0\s]i?b)/,
-            unformat: new RegExp(unformatRegex)
-        },
-        format: function(value, format, roundingFunction) {
-            var output,
-                bytes = numeral._.includes(format, 'ib') ? binary : decimal,
-                suffix = numeral._.includes(format, ' b') || numeral._.includes(format, ' ib') ? ' ' : '',
-                power,
-                min,
-                max;
-
-            // check for space before
-            format = format.replace(/\s?i?b/, '');
-
-            for (power = 0; power <= bytes.suffixes.length; power++) {
-                min = Math.pow(bytes.base, power);
-                max = Math.pow(bytes.base, power + 1);
-
-                if (value === null || value === 0 || value >= min && value < max) {
-                    suffix += bytes.suffixes[power];
-
-                    if (min > 0) {
-                        value = value / min;
-                    }
-
-                    break;
-                }
-            }
-
-            output = numeral._.numberToFormat(value, format, roundingFunction);
-
-            return output + suffix;
-        },
-        unformat: function(string) {
-            var value = numeral._.stringToNumber(string),
-                power,
-                bytesMultiplier;
-
-            if (value) {
-                for (power = decimal.suffixes.length - 1; power >= 0; power--) {
-                    if (numeral._.includes(string, decimal.suffixes[power])) {
-                        bytesMultiplier = Math.pow(decimal.base, power);
-
-                        break;
-                    }
-
-                    if (numeral._.includes(string, binary.suffixes[power])) {
-                        bytesMultiplier = Math.pow(binary.base, power);
-
-                        break;
-                    }
-                }
-
-                value *= (bytesMultiplier || 1);
-            }
-
-            return value;
-        }
-    });
-})();
-
-
-(function() {
-        numeral.register('format', 'currency', {
-        regexps: {
-            format: /(\$)/
-        },
-        format: function(value, format, roundingFunction) {
-            var locale = numeral.locales[numeral.options.currentLocale],
-                symbols = {
-                    before: format.match(/^([\+|\-|\(|\s|\$]*)/)[0],
-                    after: format.match(/([\+|\-|\)|\s|\$]*)$/)[0]
-                },
-                output,
-                symbol,
-                i;
-
-            // strip format of spaces and $
-            format = format.replace(/\s?\$\s?/, '');
-
-            // format the number
-            output = numeral._.numberToFormat(value, format, roundingFunction);
-
-            // update the before and after based on value
-            if (value >= 0) {
-                symbols.before = symbols.before.replace(/[\-\(]/, '');
-                symbols.after = symbols.after.replace(/[\-\)]/, '');
-            } else if (value < 0 && (!numeral._.includes(symbols.before, '-') && !numeral._.includes(symbols.before, '('))) {
-                symbols.before = '-' + symbols.before;
-            }
-
-            // loop through each before symbol
-            for (i = 0; i < symbols.before.length; i++) {
-                symbol = symbols.before[i];
-
-                switch (symbol) {
-                    case '$':
-                        output = numeral._.insert(output, locale.currency.symbol, i);
-                        break;
-                    case ' ':
-                        output = numeral._.insert(output, ' ', i + locale.currency.symbol.length - 1);
-                        break;
-                }
-            }
-
-            // loop through each after symbol
-            for (i = symbols.after.length - 1; i >= 0; i--) {
-                symbol = symbols.after[i];
-
-                switch (symbol) {
-                    case '$':
-                        output = i === symbols.after.length - 1 ? output + locale.currency.symbol : numeral._.insert(output, locale.currency.symbol, -(symbols.after.length - (1 + i)));
-                        break;
-                    case ' ':
-                        output = i === symbols.after.length - 1 ? output + ' ' : numeral._.insert(output, ' ', -(symbols.after.length - (1 + i) + locale.currency.symbol.length - 1));
-                        break;
-                }
-            }
-
-
-            return output;
-        }
-    });
-})();
-
-
-(function() {
-        numeral.register('format', 'exponential', {
-        regexps: {
-            format: /(e\+|e-)/,
-            unformat: /(e\+|e-)/
-        },
-        format: function(value, format, roundingFunction) {
-            var output,
-                exponential = typeof value === 'number' && !numeral._.isNaN(value) ? value.toExponential() : '0e+0',
-                parts = exponential.split('e');
-
-            format = format.replace(/e[\+|\-]{1}0/, '');
-
-            output = numeral._.numberToFormat(Number(parts[0]), format, roundingFunction);
-
-            return output + 'e' + parts[1];
-        },
-        unformat: function(string) {
-            var parts = numeral._.includes(string, 'e+') ? string.split('e+') : string.split('e-'),
-                value = Number(parts[0]),
-                power = Number(parts[1]);
-
-            power = numeral._.includes(string, 'e-') ? power *= -1 : power;
-
-            function cback(accum, curr, currI, O) {
-                var corrFactor = numeral._.correctionFactor(accum, curr),
-                    num = (accum * corrFactor) * (curr * corrFactor) / (corrFactor * corrFactor);
-                return num;
-            }
-
-            return numeral._.reduce([value, Math.pow(10, power)], cback, 1);
-        }
-    });
-})();
-
-
-(function() {
-        numeral.register('format', 'ordinal', {
-        regexps: {
-            format: /(o)/
-        },
-        format: function(value, format, roundingFunction) {
-            var locale = numeral.locales[numeral.options.currentLocale],
-                output,
-                ordinal = numeral._.includes(format, ' o') ? ' ' : '';
-
-            // check for space before
-            format = format.replace(/\s?o/, '');
-
-            ordinal += locale.ordinal(value);
-
-            output = numeral._.numberToFormat(value, format, roundingFunction);
-
-            return output + ordinal;
-        }
-    });
-})();
-
-
-(function() {
-        numeral.register('format', 'percentage', {
-        regexps: {
-            format: /(%)/,
-            unformat: /(%)/
-        },
-        format: function(value, format, roundingFunction) {
-            var space = numeral._.includes(format, ' %') ? ' ' : '',
-                output;
-
-            if (numeral.options.scalePercentBy100) {
-                value = value * 100;
-            }
-
-            // check for space before %
-            format = format.replace(/\s?\%/, '');
-
-            output = numeral._.numberToFormat(value, format, roundingFunction);
-
-            if (numeral._.includes(output, ')')) {
-                output = output.split('');
-
-                output.splice(-1, 0, space + '%');
-
-                output = output.join('');
-            } else {
-                output = output + space + '%';
-            }
-
-            return output;
-        },
-        unformat: function(string) {
-            var number = numeral._.stringToNumber(string);
-            if (numeral.options.scalePercentBy100) {
-                return number * 0.01;
-            }
-            return number;
-        }
-    });
-})();
-
-
-(function() {
-        numeral.register('format', 'time', {
-        regexps: {
-            format: /(:)/,
-            unformat: /(:)/
-        },
-        format: function(value, format, roundingFunction) {
-            var hours = Math.floor(value / 60 / 60),
-                minutes = Math.floor((value - (hours * 60 * 60)) / 60),
-                seconds = Math.round(value - (hours * 60 * 60) - (minutes * 60));
-
-            return hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
-        },
-        unformat: function(string) {
-            var timeArray = string.split(':'),
-                seconds = 0;
-
-            // turn hours and minutes into seconds and add them all up
-            if (timeArray.length === 3) {
-                // hours
-                seconds = seconds + (Number(timeArray[0]) * 60 * 60);
-                // minutes
-                seconds = seconds + (Number(timeArray[1]) * 60);
-                // seconds
-                seconds = seconds + Number(timeArray[2]);
-            } else if (timeArray.length === 2) {
-                // minutes
-                seconds = seconds + (Number(timeArray[0]) * 60);
-                // seconds
-                seconds = seconds + Number(timeArray[1]);
-            }
-            return Number(seconds);
-        }
-    });
-})();
-
-return numeral;
-}));
-
-
-/***/ }),
-
-/***/ 15:
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1403,65 +376,32 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-
-/***/ 17:
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-function checkDCE() {
-  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
-  if (
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
-  ) {
-    return;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    // This branch is unreachable because this function is only called
-    // in production, but the condition is true only in development.
-    // Therefore if the branch is still here, dead code elimination wasn't
-    // properly applied.
-    // Don't change the message. React DevTools relies on it. Also make sure
-    // this message doesn't occur elsewhere in this function, or it will cause
-    // a false positive.
-    throw new Error('^_^');
-  }
-  try {
-    // Verify that the code above has been dead code eliminated (DCE'd).
-    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
-  } catch (err) {
-    // DevTools shouldn't crash React, no matter what.
-    // We should still report in case we break this code.
-    console.error(err);
-  }
-}
-
 if (process.env.NODE_ENV === 'production') {
-  // DCE check should happen before ReactDOM bundle executes so that
-  // DevTools can report bad minification during injection.
-  checkDCE();
-  module.exports = __webpack_require__(79);
+  module.exports = __webpack_require__(13);
 } else {
-  module.exports = __webpack_require__(82);
+  module.exports = __webpack_require__(14);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 2078:
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _My_Vis = __webpack_require__(2079);
+var _My_Vis = __webpack_require__(5);
 
 var _My_Vis2 = _interopRequireDefault(_My_Vis);
 
-var _reactDom = __webpack_require__(17);
+var _reactDom = __webpack_require__(11);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -1469,17 +409,17 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _modifyOptions = __webpack_require__(2080);
+var _modifyOptions = __webpack_require__(21);
 
 var _modifyOptions2 = _interopRequireDefault(_modifyOptions);
 
-var _constants = __webpack_require__(2081);
+var _constants = __webpack_require__(22);
 
-var _parser = __webpack_require__(2082);
+var _parser = __webpack_require__(23);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var style = __webpack_require__(2083);
+var style = __webpack_require__(24);
 
 looker.plugins.visualizations.add({
   id: "new_vis",
@@ -1505,6 +445,7 @@ looker.plugins.visualizations.add({
         secondLeftMostValue = _parseData.secondLeftMostValue,
         label = _parseData.label,
         title = _parseData.title,
+        link = _parseData.link,
         percentage = _parseData.percentage,
         leftMostLinks = _parseData.leftMostLinks,
         secondLeftMostLinks = _parseData.secondLeftMostLinks,
@@ -1512,7 +453,7 @@ looker.plugins.visualizations.add({
         secondLeftMostFormat = _parseData.secondLeftMostFormat;
 
     if (config.valueColor) {
-      this.chart = _reactDom2.default.render(_react2.default.createElement(_My_Vis2.default, { links: [leftMostLinks, secondLeftMostLinks], config: config, title: title, format: { leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat }, label: label, values: { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, percentage: percentage } }), this.vis);
+      this.chart = _reactDom2.default.render(_react2.default.createElement(_My_Vis2.default, { links: [leftMostLinks, secondLeftMostLinks], config: config, title: title, link: link, format: { leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat }, label: label, values: { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, percentage: percentage } }), this.vis);
 
       document.querySelector(".val-1").style.color = config.valueColor;
       document.querySelector(".label").style.color = config.labelColor;
@@ -1542,8 +483,7 @@ looker.plugins.visualizations.add({
 });
 
 /***/ }),
-
-/***/ 2079:
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1558,7 +498,7 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _numeral = __webpack_require__(1008);
+var _numeral = __webpack_require__(10);
 
 var _numeral2 = _interopRequireDefault(_numeral);
 
@@ -1572,7 +512,8 @@ function MyVis(_ref) {
       title = _ref.title,
       config = _ref.config,
       links = _ref.links,
-      format = _ref.format;
+      format = _ref.format,
+      link = _ref.link;
 
   // const displayFirstValue = values.leftMostValue.value;
   // const displaySecondValue = values.secondLeftMostValue.value;
@@ -1625,6 +566,11 @@ function MyVis(_ref) {
       { id: "title", className: "title" },
       title
     ),
+    _react2.default.createElement(
+      "div",
+      null,
+      link && link
+    ),
     overlay && overlayBlock,
     _react2.default.createElement(
       "div",
@@ -1661,550 +607,7 @@ function MyVis(_ref) {
 }
 
 /***/ }),
-
-/***/ 2080:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var modifyOptions = function modifyOptions(vis, config, qr) {
-  var options = {};
-
-  options.valueColor = {
-    order: 0,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.secondValueColor = {
-    order: 1,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Second Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.titleColor = {
-    order: 2,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Title Color",
-    section: "Style",
-    type: "string"
-  };
-  options.labelColor = {
-    order: 3,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Label Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.valueSize = {
-    order: 4,
-    default: 72,
-    display_size: 'third',
-    label: "Value Size",
-    section: "Style",
-    type: 'number'
-  }, options.labelSize = {
-    order: 5,
-    default: 16,
-    display_size: "third",
-    label: "Label Size",
-    section: "Style",
-    type: "number"
-  };
-
-  options.secondValueSize = {
-    order: 6,
-    default: 16,
-    display_size: "third",
-    label: "Value 2 Size",
-    section: "Style",
-    type: "number"
-  };
-  options.labelStyle = {
-    order: 7,
-    default: "choose",
-    display: "select",
-    label: "Select Label Style",
-    section: "Style",
-    type: "string",
-    values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
-
-  options.show_title = {
-    order: 8,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Title",
-    default: false,
-    section: "Style"
-  };
-
-  if (config.show_title) {
-    options.valueTitle = {
-      order: 9,
-      display_size: "whole",
-      type: "string",
-      label: "Title",
-      placeholder: "Title overide",
-      section: "Style",
-      default: ""
-    };
-
-    options.titleSize = {
-      order: 10,
-      default: 20,
-      display_size: "whole",
-      label: "Title Font Size",
-      section: "Style",
-      type: "number"
-    };
-  }
-
-  options.show_comparison = {
-    order: 0,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Comparison",
-    default: false,
-    section: "Comparison"
-  };
-
-  if (config.show_comparison) {
-
-    options.compareType = {
-      default: "show_as_value",
-      display: "select",
-      label: "Value Label",
-      order: 0.5,
-      section: "Comparison",
-      type: "string",
-      values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }]
-    };
-    if (config.compareType === "show_as_change") {
-      options.pos_bad = {
-        order: 1,
-        display_size: "whole",
-        type: "boolean",
-        label: "Positive Values Are bad",
-        default: false,
-        section: "Comparison"
-      };
-    }
-
-    options.show_label = {
-      order: 2,
-      display_size: "whole",
-      type: "boolean",
-      label: "Show Label",
-      default: false,
-      section: "Comparison"
-    };
-    if (config.show_label) {
-      options.label = {
-        order: 3,
-        display_size: "whole",
-        type: "string",
-        label: "Label",
-        placeholder: "Leave blank to use field label",
-        section: "Comparison",
-        default: ""
-      };
-    }
-  }
-
-  options.format = {
-    default: "select",
-    display: "select",
-    label: "Format Filter",
-    order: 0,
-    section: "Formatting",
-    type: "string",
-    values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }, { "not null": "not_null" }]
-  };
-
-  if (config.format !== "select") {
-    options.formatVal = {
-      order: 1,
-      display_size: "whole",
-      type: "string",
-      label: "Value",
-      placeholder: "value to format against",
-      section: "Formatting",
-      default: ""
-    };
-
-    options.formatBGColor = {
-      order: 2,
-      default: "#592EC2",
-      display: "color",
-      display_size: "half",
-      label: "Background Color",
-      section: "Formatting",
-      type: "string"
-    };
-
-    options.formatFontColor = {
-      order: 3,
-      default: "rgb(39, 39, 39)",
-      display: "color",
-      display_size: "half",
-      label: "Font Color",
-      section: "Formatting",
-      type: "string"
-    };
-    // options.hidden = {
-    //   order: 21,
-    //     display_size: "whole",
-    //     type: "boolean",
-    //     label: "kudsryfgc",
-    //     default: true,
-    //     hidden: true
-    // };
-  }
-
-  vis.trigger("registerOptions", options);
-};
-
-exports.default = modifyOptions;
-
-/***/ }),
-
-/***/ 2081:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var ELEMENT_ID = exports.ELEMENT_ID = 'new_vis';
-
-/***/ }),
-
-/***/ 2082:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.parseData = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var bodyColor = "#ffffff00";
-
-function getLeftMostField(fieldsObj) {
-  var name = "";
-  var label = "";
-  if (fieldsObj.measures.length) {
-    var measure = fieldsObj.measures[0];
-    name = measure.name;
-    label = measure.label;
-  } else if (fieldsObj.dimensions.length) {
-    var dimension = fieldsObj.dimensions[0];
-    name = dimension.name;
-    label = dimension.label;
-  }
-  return { name: name, label: label };
-}
-
-function getSecondLeftMostField(fieldsObj) {
-  var measureLength = fieldsObj.measures.length;
-  var dimensionLength = fieldsObj.dimensions.length;
-  var name = "";
-  var label = "";
-
-  function assignNameLabel(fieldParam) {
-    name = fieldParam.name;
-    label = fieldParam.label;
-  }
-
-  if (measureLength > 1) {
-    assignNameLabel(fieldsObj.measures[1]);
-  } else if (measureLength === 1 && dimensionLength) {
-    assignNameLabel(fieldsObj.dimensions[0]);
-  } else if (!measureLength && dimensionLength > 1) {
-    assignNameLabel(fieldsObj.dimensions[1]);
-  } else {
-    var fieldObj = getLeftMostField(fieldsObj);
-    assignNameLabel(fieldObj);
-  }
-  return { name: name, label: label };
-}
-
-function getComparisonValue(data, field) {
-  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var value = "";
-  if (isLeftMostAlsoSecondLeftMost) {
-    value = data[1][field.name];
-  } else {
-    !data.length ? value = "No Data" : value = data[0][field.name];
-  }
-  return value;
-}
-
-function getComparisonDrillLinks(data, field) {
-  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var links = [];
-  if (isLeftMostAlsoSecondLeftMost) {
-    links = data[1][field.name].links;
-  } else {
-    !data.length ? links = "No Data" : links = data[0][field.name].links;
-  }
-  return links;
-}
-
-function makeLabel(config, secondLeftMostField) {
-  var label = "";
-  if (config.show_comparison && config.show_label) {
-    config.label ? label = config.label : label = secondLeftMostField.label;
-  }
-
-  if (config.labelStyle !== "choose") {
-    if (config.labelStyle === "italic") {
-      label = _react2.default.createElement(
-        "i",
-        null,
-        "l",
-        abel
-      );
-    } else {
-      label = _react2.default.createElement(
-        "b",
-        null,
-        label
-      );
-    }
-  }
-  return label;
-}
-
-function makeTitle(config) {
-  var title = "";
-  if (config.show_title) {
-    title = config.valueTitle;
-  }
-  return title;
-}
-
-function showAsChange(val, pos_bad) {
-  var formattedValue = val;
-  var posSpan = _react2.default.createElement(
-    "span",
-    { style: { color: "#5f9524" } },
-    "\u25B2 " + val
-  );
-  var badSpan = _react2.default.createElement(
-    "span",
-    { style: { color: "#cc1F37" } },
-    "\u25BC " + val
-  );
-  var pos = pos_bad ? badSpan : posSpan;
-  var bad = pos_bad ? posSpan : badSpan;
-  if (typeof val === "number") {
-    if (Math.sign(val) === 1) {
-      formattedValue = pos;
-    } else if (Math.sign(val) === -1) {
-      formattedValue = bad;
-    } else {
-      formattedValue = _react2.default.createElement(
-        "span",
-        null,
-        "" + val
-      );
-    }
-  }
-  return formattedValue;
-}
-
-function calcPercentage(val1, val2) {
-  var percentage = { value: 0, rendered: "" };
-  if (typeof val1 !== "number" || typeof val2 !== "number") {
-    percentage.rendered = "∅";
-  } else {
-    percentage.value = val1 / val2 * 100;
-    percentage.rendered = Math.floor(percentage.value) + "%";
-  }
-  return percentage;
-}
-
-function returnOperation(string) {
-  var operation;
-  if (string === "equal_to") {
-    operation = "===";
-  } else if (string === "not_equal_to") {
-    operation = "!==";
-  } else if (string === "less_than") {
-    operation = "<";
-  } else if (string === "not_null") {
-    operation = "+";
-  } else {
-    operation = ">";
-  }
-  return operation;
-}
-
-function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
-
-  if (typeof leftVal === "string") {
-    if (returnOperation(operation) === "+") {
-      document.body.style.backgroundColor = BG;
-      return _react2.default.createElement(
-        "span",
-        {
-          style: {
-            color: "" + fontCol
-          }
-        },
-        "" + leftVal
-      );
-    } else {
-      document.body.style.backgroundColor = bodyColor;
-      return leftVal;
-    }
-  } else if (returnOperation(operation) === "+") {
-    document.body.style.backgroundColor = BG;
-    return _react2.default.createElement(
-      "span",
-      {
-        style: {
-          color: "" + fontCol
-        }
-      },
-      "" + leftVal
-    );
-  } else if (!comparedVal) {
-    document.body.style.backgroundColor = bodyColor;
-    return leftVal;
-  } else if (eval(leftVal + " " + returnOperation(operation) + " " + comparedVal)) {
-    document.body.style.backgroundColor = BG;
-    return _react2.default.createElement(
-      "span",
-      {
-        style: {
-
-          color: "" + fontCol
-        }
-      },
-      "" + leftVal
-    );
-  } else {
-    document.body.style.backgroundColor = bodyColor;
-    return leftVal;
-  }
-}
-
-var parseData = exports.parseData = function parseData(data, queryResponse, config) {
-  var leftMostField = getLeftMostField(queryResponse.fields);
-  var secondLeftMostField = getSecondLeftMostField(queryResponse.fields);
-  var leftMostValue = getComparisonValue(data, leftMostField);
-  var leftMostLinks = getComparisonDrillLinks(data, leftMostField);
-
-  var secondLeftMostLinks = config.show_comparison ? getComparisonDrillLinks(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : [];
-
-  var secondLeftMostValue = config.show_comparison ? getComparisonValue(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : "";
-
-  if (config.compareType === "show_as_change" && (typeof secondLeftMostValue === "undefined" ? "undefined" : _typeof(secondLeftMostValue)) === "object") {
-    secondLeftMostValue.value = showAsChange(secondLeftMostValue.value, config.pos_bad);
-  }
-
-  var percentage = calcPercentage(leftMostValue.value, secondLeftMostValue.value);
-
-  var label = makeLabel(config, secondLeftMostField);
-  var title = makeTitle(config);
-  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object") {
-    leftMostValue.value = conditionallyFormat(leftMostValue.value, config.format, config.formatVal, config.formatFontColor, config.formatBGColor);
-  }
-
-  return {
-    leftMostValue: leftMostValue,
-    secondLeftMostValue: secondLeftMostValue,
-    label: label,
-    title: title,
-    percentage: percentage,
-    leftMostLinks: leftMostLinks,
-    secondLeftMostLinks: secondLeftMostLinks,
-    bodyColor: bodyColor
-  };
-};
-
-/***/ }),
-
-/***/ 2083:
-/***/ (function(module, exports, __webpack_require__) {
-
-
-        var result = __webpack_require__(2084);
-
-        if (typeof result === "string") {
-            module.exports = result;
-        } else {
-            module.exports = result.toString();
-        }
-    
-
-/***/ }),
-
-/***/ 2084:
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(99)(false);
-// imports
-
-
-// module
-exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}", ""]);
-
-// exports
-
-
-/***/ }),
-
-/***/ 40:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(80);
-} else {
-  module.exports = __webpack_require__(81);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-
-/***/ 74:
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2217,7 +620,7 @@ if (process.env.NODE_ENV === 'production') {
  * LICENSE file in the root directory of this source tree.
  */
 
-var l=__webpack_require__(15),n="function"===typeof Symbol&&Symbol.for,p=n?Symbol.for("react.element"):60103,q=n?Symbol.for("react.portal"):60106,r=n?Symbol.for("react.fragment"):60107,t=n?Symbol.for("react.strict_mode"):60108,u=n?Symbol.for("react.profiler"):60114,v=n?Symbol.for("react.provider"):60109,w=n?Symbol.for("react.context"):60110,x=n?Symbol.for("react.forward_ref"):60112,y=n?Symbol.for("react.suspense"):60113,z=n?Symbol.for("react.memo"):60115,A=n?Symbol.for("react.lazy"):
+var l=__webpack_require__(2),n="function"===typeof Symbol&&Symbol.for,p=n?Symbol.for("react.element"):60103,q=n?Symbol.for("react.portal"):60106,r=n?Symbol.for("react.fragment"):60107,t=n?Symbol.for("react.strict_mode"):60108,u=n?Symbol.for("react.profiler"):60114,v=n?Symbol.for("react.provider"):60109,w=n?Symbol.for("react.context"):60110,x=n?Symbol.for("react.forward_ref"):60112,y=n?Symbol.for("react.suspense"):60113,z=n?Symbol.for("react.memo"):60115,A=n?Symbol.for("react.lazy"):
 60116,B="function"===typeof Symbol&&Symbol.iterator;function C(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}
 var D={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}},E={};function F(a,b,c){this.props=a;this.context=b;this.refs=E;this.updater=c||D}F.prototype.isReactComponent={};F.prototype.setState=function(a,b){if("object"!==typeof a&&"function"!==typeof a&&null!=a)throw Error(C(85));this.updater.enqueueSetState(this,a,b,"setState")};F.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};
 function G(){}G.prototype=F.prototype;function H(a,b,c){this.props=a;this.context=b;this.refs=E;this.updater=c||D}var I=H.prototype=new G;I.constructor=H;l(I,F.prototype);I.isPureReactComponent=!0;var J={current:null},K=Object.prototype.hasOwnProperty,L={key:!0,ref:!0,__self:!0,__source:!0};
@@ -2236,8 +639,7 @@ exports.useLayoutEffect=function(a,b){return Z().useLayoutEffect(a,b)};exports.u
 
 
 /***/ }),
-
-/***/ 75:
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2258,8 +660,8 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var _assign = __webpack_require__(15);
-var checkPropTypes = __webpack_require__(76);
+var _assign = __webpack_require__(2);
+var checkPropTypes = __webpack_require__(8);
 
 var ReactVersion = '16.13.1';
 
@@ -4157,8 +2559,7 @@ exports.version = ReactVersion;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 76:
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4174,7 +2575,7 @@ exports.version = ReactVersion;
 var printWarning = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
-  var ReactPropTypesSecret = __webpack_require__(77);
+  var ReactPropTypesSecret = __webpack_require__(9);
   var loggedTypeFailures = {};
 
   printWarning = function(text) {
@@ -4257,8 +2658,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 77:
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4277,8 +2677,1076 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 79:
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! @preserve
+ * numeral.js
+ * version : 2.0.6
+ * author : Adam Draper
+ * license : MIT
+ * http://adamwdraper.github.com/Numeral-js/
+ */
+
+(function (global, factory) {
+    if (true) {
+        !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        global.numeral = factory();
+    }
+}(this, function () {
+    /************************************
+        Variables
+    ************************************/
+
+    var numeral,
+        _,
+        VERSION = '2.0.6',
+        formats = {},
+        locales = {},
+        defaults = {
+            currentLocale: 'en',
+            zeroFormat: null,
+            nullFormat: null,
+            defaultFormat: '0,0',
+            scalePercentBy100: true
+        },
+        options = {
+            currentLocale: defaults.currentLocale,
+            zeroFormat: defaults.zeroFormat,
+            nullFormat: defaults.nullFormat,
+            defaultFormat: defaults.defaultFormat,
+            scalePercentBy100: defaults.scalePercentBy100
+        };
+
+
+    /************************************
+        Constructors
+    ************************************/
+
+    // Numeral prototype object
+    function Numeral(input, number) {
+        this._input = input;
+
+        this._value = number;
+    }
+
+    numeral = function(input) {
+        var value,
+            kind,
+            unformatFunction,
+            regexp;
+
+        if (numeral.isNumeral(input)) {
+            value = input.value();
+        } else if (input === 0 || typeof input === 'undefined') {
+            value = 0;
+        } else if (input === null || _.isNaN(input)) {
+            value = null;
+        } else if (typeof input === 'string') {
+            if (options.zeroFormat && input === options.zeroFormat) {
+                value = 0;
+            } else if (options.nullFormat && input === options.nullFormat || !input.replace(/[^0-9]+/g, '').length) {
+                value = null;
+            } else {
+                for (kind in formats) {
+                    regexp = typeof formats[kind].regexps.unformat === 'function' ? formats[kind].regexps.unformat() : formats[kind].regexps.unformat;
+
+                    if (regexp && input.match(regexp)) {
+                        unformatFunction = formats[kind].unformat;
+
+                        break;
+                    }
+                }
+
+                unformatFunction = unformatFunction || numeral._.stringToNumber;
+
+                value = unformatFunction(input);
+            }
+        } else {
+            value = Number(input)|| null;
+        }
+
+        return new Numeral(input, value);
+    };
+
+    // version number
+    numeral.version = VERSION;
+
+    // compare numeral object
+    numeral.isNumeral = function(obj) {
+        return obj instanceof Numeral;
+    };
+
+    // helper functions
+    numeral._ = _ = {
+        // formats numbers separators, decimals places, signs, abbreviations
+        numberToFormat: function(value, format, roundingFunction) {
+            var locale = locales[numeral.options.currentLocale],
+                negP = false,
+                optDec = false,
+                leadingCount = 0,
+                abbr = '',
+                trillion = 1000000000000,
+                billion = 1000000000,
+                million = 1000000,
+                thousand = 1000,
+                decimal = '',
+                neg = false,
+                abbrForce, // force abbreviation
+                abs,
+                min,
+                max,
+                power,
+                int,
+                precision,
+                signed,
+                thousands,
+                output;
+
+            // make sure we never format a null value
+            value = value || 0;
+
+            abs = Math.abs(value);
+
+            // see if we should use parentheses for negative number or if we should prefix with a sign
+            // if both are present we default to parentheses
+            if (numeral._.includes(format, '(')) {
+                negP = true;
+                format = format.replace(/[\(|\)]/g, '');
+            } else if (numeral._.includes(format, '+') || numeral._.includes(format, '-')) {
+                signed = numeral._.includes(format, '+') ? format.indexOf('+') : value < 0 ? format.indexOf('-') : -1;
+                format = format.replace(/[\+|\-]/g, '');
+            }
+
+            // see if abbreviation is wanted
+            if (numeral._.includes(format, 'a')) {
+                abbrForce = format.match(/a(k|m|b|t)?/);
+
+                abbrForce = abbrForce ? abbrForce[1] : false;
+
+                // check for space before abbreviation
+                if (numeral._.includes(format, ' a')) {
+                    abbr = ' ';
+                }
+
+                format = format.replace(new RegExp(abbr + 'a[kmbt]?'), '');
+
+                if (abs >= trillion && !abbrForce || abbrForce === 't') {
+                    // trillion
+                    abbr += locale.abbreviations.trillion;
+                    value = value / trillion;
+                } else if (abs < trillion && abs >= billion && !abbrForce || abbrForce === 'b') {
+                    // billion
+                    abbr += locale.abbreviations.billion;
+                    value = value / billion;
+                } else if (abs < billion && abs >= million && !abbrForce || abbrForce === 'm') {
+                    // million
+                    abbr += locale.abbreviations.million;
+                    value = value / million;
+                } else if (abs < million && abs >= thousand && !abbrForce || abbrForce === 'k') {
+                    // thousand
+                    abbr += locale.abbreviations.thousand;
+                    value = value / thousand;
+                }
+            }
+
+            // check for optional decimals
+            if (numeral._.includes(format, '[.]')) {
+                optDec = true;
+                format = format.replace('[.]', '.');
+            }
+
+            // break number and format
+            int = value.toString().split('.')[0];
+            precision = format.split('.')[1];
+            thousands = format.indexOf(',');
+            leadingCount = (format.split('.')[0].split(',')[0].match(/0/g) || []).length;
+
+            if (precision) {
+                if (numeral._.includes(precision, '[')) {
+                    precision = precision.replace(']', '');
+                    precision = precision.split('[');
+                    decimal = numeral._.toFixed(value, (precision[0].length + precision[1].length), roundingFunction, precision[1].length);
+                } else {
+                    decimal = numeral._.toFixed(value, precision.length, roundingFunction);
+                }
+
+                int = decimal.split('.')[0];
+
+                if (numeral._.includes(decimal, '.')) {
+                    decimal = locale.delimiters.decimal + decimal.split('.')[1];
+                } else {
+                    decimal = '';
+                }
+
+                if (optDec && Number(decimal.slice(1)) === 0) {
+                    decimal = '';
+                }
+            } else {
+                int = numeral._.toFixed(value, 0, roundingFunction);
+            }
+
+            // check abbreviation again after rounding
+            if (abbr && !abbrForce && Number(int) >= 1000 && abbr !== locale.abbreviations.trillion) {
+                int = String(Number(int) / 1000);
+
+                switch (abbr) {
+                    case locale.abbreviations.thousand:
+                        abbr = locale.abbreviations.million;
+                        break;
+                    case locale.abbreviations.million:
+                        abbr = locale.abbreviations.billion;
+                        break;
+                    case locale.abbreviations.billion:
+                        abbr = locale.abbreviations.trillion;
+                        break;
+                }
+            }
+
+
+            // format number
+            if (numeral._.includes(int, '-')) {
+                int = int.slice(1);
+                neg = true;
+            }
+
+            if (int.length < leadingCount) {
+                for (var i = leadingCount - int.length; i > 0; i--) {
+                    int = '0' + int;
+                }
+            }
+
+            if (thousands > -1) {
+                int = int.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + locale.delimiters.thousands);
+            }
+
+            if (format.indexOf('.') === 0) {
+                int = '';
+            }
+
+            output = int + decimal + (abbr ? abbr : '');
+
+            if (negP) {
+                output = (negP && neg ? '(' : '') + output + (negP && neg ? ')' : '');
+            } else {
+                if (signed >= 0) {
+                    output = signed === 0 ? (neg ? '-' : '+') + output : output + (neg ? '-' : '+');
+                } else if (neg) {
+                    output = '-' + output;
+                }
+            }
+
+            return output;
+        },
+        // unformats numbers separators, decimals places, signs, abbreviations
+        stringToNumber: function(string) {
+            var locale = locales[options.currentLocale],
+                stringOriginal = string,
+                abbreviations = {
+                    thousand: 3,
+                    million: 6,
+                    billion: 9,
+                    trillion: 12
+                },
+                abbreviation,
+                value,
+                i,
+                regexp;
+
+            if (options.zeroFormat && string === options.zeroFormat) {
+                value = 0;
+            } else if (options.nullFormat && string === options.nullFormat || !string.replace(/[^0-9]+/g, '').length) {
+                value = null;
+            } else {
+                value = 1;
+
+                if (locale.delimiters.decimal !== '.') {
+                    string = string.replace(/\./g, '').replace(locale.delimiters.decimal, '.');
+                }
+
+                for (abbreviation in abbreviations) {
+                    regexp = new RegExp('[^a-zA-Z]' + locale.abbreviations[abbreviation] + '(?:\\)|(\\' + locale.currency.symbol + ')?(?:\\))?)?$');
+
+                    if (stringOriginal.match(regexp)) {
+                        value *= Math.pow(10, abbreviations[abbreviation]);
+                        break;
+                    }
+                }
+
+                // check for negative number
+                value *= (string.split('-').length + Math.min(string.split('(').length - 1, string.split(')').length - 1)) % 2 ? 1 : -1;
+
+                // remove non numbers
+                string = string.replace(/[^0-9\.]+/g, '');
+
+                value *= Number(string);
+            }
+
+            return value;
+        },
+        isNaN: function(value) {
+            return typeof value === 'number' && isNaN(value);
+        },
+        includes: function(string, search) {
+            return string.indexOf(search) !== -1;
+        },
+        insert: function(string, subString, start) {
+            return string.slice(0, start) + subString + string.slice(start);
+        },
+        reduce: function(array, callback /*, initialValue*/) {
+            if (this === null) {
+                throw new TypeError('Array.prototype.reduce called on null or undefined');
+            }
+
+            if (typeof callback !== 'function') {
+                throw new TypeError(callback + ' is not a function');
+            }
+
+            var t = Object(array),
+                len = t.length >>> 0,
+                k = 0,
+                value;
+
+            if (arguments.length === 3) {
+                value = arguments[2];
+            } else {
+                while (k < len && !(k in t)) {
+                    k++;
+                }
+
+                if (k >= len) {
+                    throw new TypeError('Reduce of empty array with no initial value');
+                }
+
+                value = t[k++];
+            }
+            for (; k < len; k++) {
+                if (k in t) {
+                    value = callback(value, t[k], k, t);
+                }
+            }
+            return value;
+        },
+        /**
+         * Computes the multiplier necessary to make x >= 1,
+         * effectively eliminating miscalculations caused by
+         * finite precision.
+         */
+        multiplier: function (x) {
+            var parts = x.toString().split('.');
+
+            return parts.length < 2 ? 1 : Math.pow(10, parts[1].length);
+        },
+        /**
+         * Given a variable number of arguments, returns the maximum
+         * multiplier that must be used to normalize an operation involving
+         * all of them.
+         */
+        correctionFactor: function () {
+            var args = Array.prototype.slice.call(arguments);
+
+            return args.reduce(function(accum, next) {
+                var mn = _.multiplier(next);
+                return accum > mn ? accum : mn;
+            }, 1);
+        },
+        /**
+         * Implementation of toFixed() that treats floats more like decimals
+         *
+         * Fixes binary rounding issues (eg. (0.615).toFixed(2) === '0.61') that present
+         * problems for accounting- and finance-related software.
+         */
+        toFixed: function(value, maxDecimals, roundingFunction, optionals) {
+            var splitValue = value.toString().split('.'),
+                minDecimals = maxDecimals - (optionals || 0),
+                boundedPrecision,
+                optionalsRegExp,
+                power,
+                output;
+
+            // Use the smallest precision value possible to avoid errors from floating point representation
+            if (splitValue.length === 2) {
+              boundedPrecision = Math.min(Math.max(splitValue[1].length, minDecimals), maxDecimals);
+            } else {
+              boundedPrecision = minDecimals;
+            }
+
+            power = Math.pow(10, boundedPrecision);
+
+            // Multiply up by precision, round accurately, then divide and use native toFixed():
+            output = (roundingFunction(value + 'e+' + boundedPrecision) / power).toFixed(boundedPrecision);
+
+            if (optionals > maxDecimals - boundedPrecision) {
+                optionalsRegExp = new RegExp('\\.?0{1,' + (optionals - (maxDecimals - boundedPrecision)) + '}$');
+                output = output.replace(optionalsRegExp, '');
+            }
+
+            return output;
+        }
+    };
+
+    // avaliable options
+    numeral.options = options;
+
+    // avaliable formats
+    numeral.formats = formats;
+
+    // avaliable formats
+    numeral.locales = locales;
+
+    // This function sets the current locale.  If
+    // no arguments are passed in, it will simply return the current global
+    // locale key.
+    numeral.locale = function(key) {
+        if (key) {
+            options.currentLocale = key.toLowerCase();
+        }
+
+        return options.currentLocale;
+    };
+
+    // This function provides access to the loaded locale data.  If
+    // no arguments are passed in, it will simply return the current
+    // global locale object.
+    numeral.localeData = function(key) {
+        if (!key) {
+            return locales[options.currentLocale];
+        }
+
+        key = key.toLowerCase();
+
+        if (!locales[key]) {
+            throw new Error('Unknown locale : ' + key);
+        }
+
+        return locales[key];
+    };
+
+    numeral.reset = function() {
+        for (var property in defaults) {
+            options[property] = defaults[property];
+        }
+    };
+
+    numeral.zeroFormat = function(format) {
+        options.zeroFormat = typeof(format) === 'string' ? format : null;
+    };
+
+    numeral.nullFormat = function (format) {
+        options.nullFormat = typeof(format) === 'string' ? format : null;
+    };
+
+    numeral.defaultFormat = function(format) {
+        options.defaultFormat = typeof(format) === 'string' ? format : '0.0';
+    };
+
+    numeral.register = function(type, name, format) {
+        name = name.toLowerCase();
+
+        if (this[type + 's'][name]) {
+            throw new TypeError(name + ' ' + type + ' already registered.');
+        }
+
+        this[type + 's'][name] = format;
+
+        return format;
+    };
+
+
+    numeral.validate = function(val, culture) {
+        var _decimalSep,
+            _thousandSep,
+            _currSymbol,
+            _valArray,
+            _abbrObj,
+            _thousandRegEx,
+            localeData,
+            temp;
+
+        //coerce val to string
+        if (typeof val !== 'string') {
+            val += '';
+
+            if (console.warn) {
+                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+            }
+        }
+
+        //trim whitespaces from either sides
+        val = val.trim();
+
+        //if val is just digits return true
+        if (!!val.match(/^\d+$/)) {
+            return true;
+        }
+
+        //if val is empty return false
+        if (val === '') {
+            return false;
+        }
+
+        //get the decimal and thousands separator from numeral.localeData
+        try {
+            //check if the culture is understood by numeral. if not, default it to current locale
+            localeData = numeral.localeData(culture);
+        } catch (e) {
+            localeData = numeral.localeData(numeral.locale());
+        }
+
+        //setup the delimiters and currency symbol based on culture/locale
+        _currSymbol = localeData.currency.symbol;
+        _abbrObj = localeData.abbreviations;
+        _decimalSep = localeData.delimiters.decimal;
+        if (localeData.delimiters.thousands === '.') {
+            _thousandSep = '\\.';
+        } else {
+            _thousandSep = localeData.delimiters.thousands;
+        }
+
+        // validating currency symbol
+        temp = val.match(/^[^\d]+/);
+        if (temp !== null) {
+            val = val.substr(1);
+            if (temp[0] !== _currSymbol) {
+                return false;
+            }
+        }
+
+        //validating abbreviation symbol
+        temp = val.match(/[^\d]+$/);
+        if (temp !== null) {
+            val = val.slice(0, -1);
+            if (temp[0] !== _abbrObj.thousand && temp[0] !== _abbrObj.million && temp[0] !== _abbrObj.billion && temp[0] !== _abbrObj.trillion) {
+                return false;
+            }
+        }
+
+        _thousandRegEx = new RegExp(_thousandSep + '{2}');
+
+        if (!val.match(/[^\d.,]/g)) {
+            _valArray = val.split(_decimalSep);
+            if (_valArray.length > 2) {
+                return false;
+            } else {
+                if (_valArray.length < 2) {
+                    return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx));
+                } else {
+                    if (_valArray[0].length === 1) {
+                        return ( !! _valArray[0].match(/^\d+$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+                    } else {
+                        return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+                    }
+                }
+            }
+        }
+
+        return false;
+    };
+
+
+    /************************************
+        Numeral Prototype
+    ************************************/
+
+    numeral.fn = Numeral.prototype = {
+        clone: function() {
+            return numeral(this);
+        },
+        format: function(inputString, roundingFunction) {
+            var value = this._value,
+                format = inputString || options.defaultFormat,
+                kind,
+                output,
+                formatFunction;
+
+            // make sure we have a roundingFunction
+            roundingFunction = roundingFunction || Math.round;
+
+            // format based on value
+            if (value === 0 && options.zeroFormat !== null) {
+                output = options.zeroFormat;
+            } else if (value === null && options.nullFormat !== null) {
+                output = options.nullFormat;
+            } else {
+                for (kind in formats) {
+                    if (format.match(formats[kind].regexps.format)) {
+                        formatFunction = formats[kind].format;
+
+                        break;
+                    }
+                }
+
+                formatFunction = formatFunction || numeral._.numberToFormat;
+
+                output = formatFunction(value, format, roundingFunction);
+            }
+
+            return output;
+        },
+        value: function() {
+            return this._value;
+        },
+        input: function() {
+            return this._input;
+        },
+        set: function(value) {
+            this._value = Number(value);
+
+            return this;
+        },
+        add: function(value) {
+            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+            function cback(accum, curr, currI, O) {
+                return accum + Math.round(corrFactor * curr);
+            }
+
+            this._value = _.reduce([this._value, value], cback, 0) / corrFactor;
+
+            return this;
+        },
+        subtract: function(value) {
+            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+            function cback(accum, curr, currI, O) {
+                return accum - Math.round(corrFactor * curr);
+            }
+
+            this._value = _.reduce([value], cback, Math.round(this._value * corrFactor)) / corrFactor;
+
+            return this;
+        },
+        multiply: function(value) {
+            function cback(accum, curr, currI, O) {
+                var corrFactor = _.correctionFactor(accum, curr);
+                return Math.round(accum * corrFactor) * Math.round(curr * corrFactor) / Math.round(corrFactor * corrFactor);
+            }
+
+            this._value = _.reduce([this._value, value], cback, 1);
+
+            return this;
+        },
+        divide: function(value) {
+            function cback(accum, curr, currI, O) {
+                var corrFactor = _.correctionFactor(accum, curr);
+                return Math.round(accum * corrFactor) / Math.round(curr * corrFactor);
+            }
+
+            this._value = _.reduce([this._value, value], cback);
+
+            return this;
+        },
+        difference: function(value) {
+            return Math.abs(numeral(this._value).subtract(value).value());
+        }
+    };
+
+    /************************************
+        Default Locale && Format
+    ************************************/
+
+    numeral.register('locale', 'en', {
+        delimiters: {
+            thousands: ',',
+            decimal: '.'
+        },
+        abbreviations: {
+            thousand: 'k',
+            million: 'm',
+            billion: 'b',
+            trillion: 't'
+        },
+        ordinal: function(number) {
+            var b = number % 10;
+            return (~~(number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+        },
+        currency: {
+            symbol: '$'
+        }
+    });
+
+    
+
+(function() {
+        numeral.register('format', 'bps', {
+            regexps: {
+                format: /(BPS)/,
+                unformat: /(BPS)/
+            },
+            format: function(value, format, roundingFunction) {
+                var space = numeral._.includes(format, ' BPS') ? ' ' : '',
+                    output;
+
+                value = value * 10000;
+
+                // check for space before BPS
+                format = format.replace(/\s?BPS/, '');
+
+                output = numeral._.numberToFormat(value, format, roundingFunction);
+
+                if (numeral._.includes(output, ')')) {
+                    output = output.split('');
+
+                    output.splice(-1, 0, space + 'BPS');
+
+                    output = output.join('');
+                } else {
+                    output = output + space + 'BPS';
+                }
+
+                return output;
+            },
+            unformat: function(string) {
+                return +(numeral._.stringToNumber(string) * 0.0001).toFixed(15);
+            }
+        });
+})();
+
+
+(function() {
+        var decimal = {
+            base: 1000,
+            suffixes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        },
+        binary = {
+            base: 1024,
+            suffixes: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+        };
+
+    var allSuffixes =  decimal.suffixes.concat(binary.suffixes.filter(function (item) {
+            return decimal.suffixes.indexOf(item) < 0;
+        }));
+        var unformatRegex = allSuffixes.join('|');
+        // Allow support for BPS (http://www.investopedia.com/terms/b/basispoint.asp)
+        unformatRegex = '(' + unformatRegex.replace('B', 'B(?!PS)') + ')';
+
+    numeral.register('format', 'bytes', {
+        regexps: {
+            format: /([0\s]i?b)/,
+            unformat: new RegExp(unformatRegex)
+        },
+        format: function(value, format, roundingFunction) {
+            var output,
+                bytes = numeral._.includes(format, 'ib') ? binary : decimal,
+                suffix = numeral._.includes(format, ' b') || numeral._.includes(format, ' ib') ? ' ' : '',
+                power,
+                min,
+                max;
+
+            // check for space before
+            format = format.replace(/\s?i?b/, '');
+
+            for (power = 0; power <= bytes.suffixes.length; power++) {
+                min = Math.pow(bytes.base, power);
+                max = Math.pow(bytes.base, power + 1);
+
+                if (value === null || value === 0 || value >= min && value < max) {
+                    suffix += bytes.suffixes[power];
+
+                    if (min > 0) {
+                        value = value / min;
+                    }
+
+                    break;
+                }
+            }
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            return output + suffix;
+        },
+        unformat: function(string) {
+            var value = numeral._.stringToNumber(string),
+                power,
+                bytesMultiplier;
+
+            if (value) {
+                for (power = decimal.suffixes.length - 1; power >= 0; power--) {
+                    if (numeral._.includes(string, decimal.suffixes[power])) {
+                        bytesMultiplier = Math.pow(decimal.base, power);
+
+                        break;
+                    }
+
+                    if (numeral._.includes(string, binary.suffixes[power])) {
+                        bytesMultiplier = Math.pow(binary.base, power);
+
+                        break;
+                    }
+                }
+
+                value *= (bytesMultiplier || 1);
+            }
+
+            return value;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'currency', {
+        regexps: {
+            format: /(\$)/
+        },
+        format: function(value, format, roundingFunction) {
+            var locale = numeral.locales[numeral.options.currentLocale],
+                symbols = {
+                    before: format.match(/^([\+|\-|\(|\s|\$]*)/)[0],
+                    after: format.match(/([\+|\-|\)|\s|\$]*)$/)[0]
+                },
+                output,
+                symbol,
+                i;
+
+            // strip format of spaces and $
+            format = format.replace(/\s?\$\s?/, '');
+
+            // format the number
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            // update the before and after based on value
+            if (value >= 0) {
+                symbols.before = symbols.before.replace(/[\-\(]/, '');
+                symbols.after = symbols.after.replace(/[\-\)]/, '');
+            } else if (value < 0 && (!numeral._.includes(symbols.before, '-') && !numeral._.includes(symbols.before, '('))) {
+                symbols.before = '-' + symbols.before;
+            }
+
+            // loop through each before symbol
+            for (i = 0; i < symbols.before.length; i++) {
+                symbol = symbols.before[i];
+
+                switch (symbol) {
+                    case '$':
+                        output = numeral._.insert(output, locale.currency.symbol, i);
+                        break;
+                    case ' ':
+                        output = numeral._.insert(output, ' ', i + locale.currency.symbol.length - 1);
+                        break;
+                }
+            }
+
+            // loop through each after symbol
+            for (i = symbols.after.length - 1; i >= 0; i--) {
+                symbol = symbols.after[i];
+
+                switch (symbol) {
+                    case '$':
+                        output = i === symbols.after.length - 1 ? output + locale.currency.symbol : numeral._.insert(output, locale.currency.symbol, -(symbols.after.length - (1 + i)));
+                        break;
+                    case ' ':
+                        output = i === symbols.after.length - 1 ? output + ' ' : numeral._.insert(output, ' ', -(symbols.after.length - (1 + i) + locale.currency.symbol.length - 1));
+                        break;
+                }
+            }
+
+
+            return output;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'exponential', {
+        regexps: {
+            format: /(e\+|e-)/,
+            unformat: /(e\+|e-)/
+        },
+        format: function(value, format, roundingFunction) {
+            var output,
+                exponential = typeof value === 'number' && !numeral._.isNaN(value) ? value.toExponential() : '0e+0',
+                parts = exponential.split('e');
+
+            format = format.replace(/e[\+|\-]{1}0/, '');
+
+            output = numeral._.numberToFormat(Number(parts[0]), format, roundingFunction);
+
+            return output + 'e' + parts[1];
+        },
+        unformat: function(string) {
+            var parts = numeral._.includes(string, 'e+') ? string.split('e+') : string.split('e-'),
+                value = Number(parts[0]),
+                power = Number(parts[1]);
+
+            power = numeral._.includes(string, 'e-') ? power *= -1 : power;
+
+            function cback(accum, curr, currI, O) {
+                var corrFactor = numeral._.correctionFactor(accum, curr),
+                    num = (accum * corrFactor) * (curr * corrFactor) / (corrFactor * corrFactor);
+                return num;
+            }
+
+            return numeral._.reduce([value, Math.pow(10, power)], cback, 1);
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'ordinal', {
+        regexps: {
+            format: /(o)/
+        },
+        format: function(value, format, roundingFunction) {
+            var locale = numeral.locales[numeral.options.currentLocale],
+                output,
+                ordinal = numeral._.includes(format, ' o') ? ' ' : '';
+
+            // check for space before
+            format = format.replace(/\s?o/, '');
+
+            ordinal += locale.ordinal(value);
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            return output + ordinal;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'percentage', {
+        regexps: {
+            format: /(%)/,
+            unformat: /(%)/
+        },
+        format: function(value, format, roundingFunction) {
+            var space = numeral._.includes(format, ' %') ? ' ' : '',
+                output;
+
+            if (numeral.options.scalePercentBy100) {
+                value = value * 100;
+            }
+
+            // check for space before %
+            format = format.replace(/\s?\%/, '');
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            if (numeral._.includes(output, ')')) {
+                output = output.split('');
+
+                output.splice(-1, 0, space + '%');
+
+                output = output.join('');
+            } else {
+                output = output + space + '%';
+            }
+
+            return output;
+        },
+        unformat: function(string) {
+            var number = numeral._.stringToNumber(string);
+            if (numeral.options.scalePercentBy100) {
+                return number * 0.01;
+            }
+            return number;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'time', {
+        regexps: {
+            format: /(:)/,
+            unformat: /(:)/
+        },
+        format: function(value, format, roundingFunction) {
+            var hours = Math.floor(value / 60 / 60),
+                minutes = Math.floor((value - (hours * 60 * 60)) / 60),
+                seconds = Math.round(value - (hours * 60 * 60) - (minutes * 60));
+
+            return hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+        },
+        unformat: function(string) {
+            var timeArray = string.split(':'),
+                seconds = 0;
+
+            // turn hours and minutes into seconds and add them all up
+            if (timeArray.length === 3) {
+                // hours
+                seconds = seconds + (Number(timeArray[0]) * 60 * 60);
+                // minutes
+                seconds = seconds + (Number(timeArray[1]) * 60);
+                // seconds
+                seconds = seconds + Number(timeArray[2]);
+            } else if (timeArray.length === 2) {
+                // minutes
+                seconds = seconds + (Number(timeArray[0]) * 60);
+                // seconds
+                seconds = seconds + Number(timeArray[1]);
+            }
+            return Number(seconds);
+        }
+    });
+})();
+
+return numeral;
+}));
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+function checkDCE() {
+  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+  if (
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
+  ) {
+    return;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    // This branch is unreachable because this function is only called
+    // in production, but the condition is true only in development.
+    // Therefore if the branch is still here, dead code elimination wasn't
+    // properly applied.
+    // Don't change the message. React DevTools relies on it. Also make sure
+    // this message doesn't occur elsewhere in this function, or it will cause
+    // a false positive.
+    throw new Error('^_^');
+  }
+  try {
+    // Verify that the code above has been dead code eliminated (DCE'd).
+    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
+  } catch (err) {
+    // DevTools shouldn't crash React, no matter what.
+    // We should still report in case we break this code.
+    console.error(err);
+  }
+}
+
+if (process.env.NODE_ENV === 'production') {
+  // DCE check should happen before ReactDOM bundle executes so that
+  // DevTools can report bad minification during injection.
+  checkDCE();
+  module.exports = __webpack_require__(12);
+} else {
+  module.exports = __webpack_require__(15);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4294,7 +3762,7 @@ module.exports = ReactPropTypesSecret;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(1),n=__webpack_require__(15),r=__webpack_require__(40);function u(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(u(227));
+var aa=__webpack_require__(1),n=__webpack_require__(2),r=__webpack_require__(3);function u(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(u(227));
 function ba(a,b,c,d,e,f,g,h,k){var l=Array.prototype.slice.call(arguments,3);try{b.apply(c,l)}catch(m){this.onError(m)}}var da=!1,ea=null,fa=!1,ha=null,ia={onError:function(a){da=!0;ea=a}};function ja(a,b,c,d,e,f,g,h,k){da=!1;ea=null;ba.apply(ia,arguments)}function ka(a,b,c,d,e,f,g,h,k){ja.apply(this,arguments);if(da){if(da){var l=ea;da=!1;ea=null}else throw Error(u(198));fa||(fa=!0,ha=l)}}var la=null,ma=null,na=null;
 function oa(a,b,c){var d=a.type||"unknown-event";a.currentTarget=na(c);ka(d,b,void 0,a);a.currentTarget=null}var pa=null,qa={};
 function ra(){if(pa)for(var a in qa){var b=qa[a],c=pa.indexOf(a);if(!(-1<c))throw Error(u(96,a));if(!sa[c]){if(!b.extractEvents)throw Error(u(97,a));sa[c]=b;c=b.eventTypes;for(var d in c){var e=void 0;var f=c[d],g=b,h=d;if(ta.hasOwnProperty(h))throw Error(u(99,h));ta[h]=f;var k=f.phasedRegistrationNames;if(k){for(e in k)k.hasOwnProperty(e)&&ua(k[e],g,h);e=!0}else f.registrationName?(ua(f.registrationName,g,h),e=!0):e=!1;if(!e)throw Error(u(98,d,a));}}}}
@@ -4577,8 +4045,7 @@ exports.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!gk(c))throw Er
 
 
 /***/ }),
-
-/***/ 80:
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4606,8 +4073,7 @@ exports.unstable_shouldYield=function(){var a=exports.unstable_now();V(a);var b=
 
 
 /***/ }),
-
-/***/ 81:
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5473,8 +4939,7 @@ exports.unstable_wrapCallback = unstable_wrapCallback;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 82:
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5496,10 +4961,10 @@ if (process.env.NODE_ENV !== "production") {
 'use strict';
 
 var React = __webpack_require__(1);
-var _assign = __webpack_require__(15);
-var Scheduler = __webpack_require__(40);
-var checkPropTypes = __webpack_require__(83);
-var tracing = __webpack_require__(85);
+var _assign = __webpack_require__(2);
+var Scheduler = __webpack_require__(3);
+var checkPropTypes = __webpack_require__(16);
+var tracing = __webpack_require__(18);
 
 var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED; // Prevent newer renderers from RTE when used with older react package versions.
 // Current owner and dispatcher used to share the same ref,
@@ -30494,8 +29959,7 @@ exports.version = ReactVersion;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 83:
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30511,7 +29975,7 @@ exports.version = ReactVersion;
 var printWarning = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
-  var ReactPropTypesSecret = __webpack_require__(84);
+  var ReactPropTypesSecret = __webpack_require__(17);
   var loggedTypeFailures = {};
 
   printWarning = function(text) {
@@ -30594,8 +30058,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 84:
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30614,24 +30077,22 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-
-/***/ 85:
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(86);
+  module.exports = __webpack_require__(19);
 } else {
-  module.exports = __webpack_require__(87);
+  module.exports = __webpack_require__(20);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-
-/***/ 86:
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30648,8 +30109,7 @@ var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unst
 
 
 /***/ }),
-
-/***/ 87:
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31006,8 +30466,571 @@ exports.unstable_wrap = unstable_wrap;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 99:
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var modifyOptions = function modifyOptions(vis, config, qr) {
+  var options = {};
+
+  options.valueColor = {
+    order: 0,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Value Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.secondValueColor = {
+    order: 1,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Second Value Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.titleColor = {
+    order: 2,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Title Color",
+    section: "Style",
+    type: "string"
+  };
+  options.labelColor = {
+    order: 3,
+    default: "rgb(39, 39, 39)",
+    display: "color",
+    display_size: "half",
+    label: "Label Color",
+    section: "Style",
+    type: "string"
+  };
+
+  options.valueSize = {
+    order: 4,
+    default: 72,
+    display_size: 'third',
+    label: "Value Size",
+    section: "Style",
+    type: 'number'
+  }, options.labelSize = {
+    order: 5,
+    default: 16,
+    display_size: "third",
+    label: "Label Size",
+    section: "Style",
+    type: "number"
+  };
+
+  options.secondValueSize = {
+    order: 6,
+    default: 16,
+    display_size: "third",
+    label: "Value 2 Size",
+    section: "Style",
+    type: "number"
+  };
+  options.labelStyle = {
+    order: 7,
+    default: "choose",
+    display: "select",
+    label: "Select Label Style",
+    section: "Style",
+    type: "string",
+    values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
+
+  options.show_title = {
+    order: 8,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show Title",
+    default: false,
+    section: "Style"
+  };
+
+  if (config.show_title) {
+    options.valueTitle = {
+      order: 9,
+      display_size: "whole",
+      type: "string",
+      label: "Title",
+      placeholder: "Title overide",
+      section: "Style",
+      default: ""
+    };
+
+    options.titleSize = {
+      order: 10,
+      default: 20,
+      display_size: "whole",
+      label: "Title Font Size",
+      section: "Style",
+      type: "number"
+    };
+  }
+  options.show_link = {
+    order: 11,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show Link",
+    default: false,
+    section: "Style"
+  };
+
+  if (config.show_link) {
+    options.valueLink = {
+      order: 12,
+      display_size: "whole",
+      type: "string",
+      label: "Link Text",
+      placeholder: "Link Text",
+      section: "Style",
+      default: ""
+    };
+    options.HREFLink = {
+      order: 13,
+      display_size: "whole",
+      type: "string",
+      label: "Link HREF",
+      placeholder: "Link Destination",
+      section: "Style",
+      default: ""
+    };
+  }
+
+  options.show_comparison = {
+    order: 0,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show Comparison",
+    default: false,
+    section: "Comparison"
+  };
+
+  if (config.show_comparison) {
+
+    options.compareType = {
+      default: "show_as_value",
+      display: "select",
+      label: "Value Label",
+      order: 0.5,
+      section: "Comparison",
+      type: "string",
+      values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }]
+    };
+    if (config.compareType === "show_as_change") {
+      options.pos_bad = {
+        order: 1,
+        display_size: "whole",
+        type: "boolean",
+        label: "Positive Values Are bad",
+        default: false,
+        section: "Comparison"
+      };
+    }
+
+    options.show_label = {
+      order: 2,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show Label",
+      default: false,
+      section: "Comparison"
+    };
+    if (config.show_label) {
+      options.label = {
+        order: 3,
+        display_size: "whole",
+        type: "string",
+        label: "Label",
+        placeholder: "Leave blank to use field label",
+        section: "Comparison",
+        default: ""
+      };
+    }
+  }
+
+  options.format = {
+    default: "select",
+    display: "select",
+    label: "Format Filter",
+    order: 0,
+    section: "Formatting",
+    type: "string",
+    values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }, { "not null": "not_null" }]
+  };
+
+  if (config.format !== "select") {
+    options.formatVal = {
+      order: 1,
+      display_size: "whole",
+      type: "string",
+      label: "Value",
+      placeholder: "value to format against",
+      section: "Formatting",
+      default: ""
+    };
+
+    options.formatBGColor = {
+      order: 2,
+      default: "#592EC2",
+      display: "color",
+      display_size: "half",
+      label: "Background Color",
+      section: "Formatting",
+      type: "string"
+    };
+
+    options.formatFontColor = {
+      order: 3,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Font Color",
+      section: "Formatting",
+      type: "string"
+    };
+    // options.hidden = {
+    //   order: 21,
+    //     display_size: "whole",
+    //     type: "boolean",
+    //     label: "kudsryfgc",
+    //     default: true,
+    //     hidden: true
+    // };
+  }
+
+  vis.trigger("registerOptions", options);
+};
+
+exports.default = modifyOptions;
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var ELEMENT_ID = exports.ELEMENT_ID = 'new_vis';
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parseData = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var bodyColor = "#ffffff00";
+
+function getLeftMostField(fieldsObj) {
+  var name = "";
+  var label = "";
+  if (fieldsObj.measures.length) {
+    var measure = fieldsObj.measures[0];
+    name = measure.name;
+    label = measure.label;
+  } else if (fieldsObj.dimensions.length) {
+    var dimension = fieldsObj.dimensions[0];
+    name = dimension.name;
+    label = dimension.label;
+  }
+  return { name: name, label: label };
+}
+
+function getSecondLeftMostField(fieldsObj) {
+  var measureLength = fieldsObj.measures.length;
+  var dimensionLength = fieldsObj.dimensions.length;
+  var name = "";
+  var label = "";
+
+  function assignNameLabel(fieldParam) {
+    name = fieldParam.name;
+    label = fieldParam.label;
+  }
+
+  if (measureLength > 1) {
+    assignNameLabel(fieldsObj.measures[1]);
+  } else if (measureLength === 1 && dimensionLength) {
+    assignNameLabel(fieldsObj.dimensions[0]);
+  } else if (!measureLength && dimensionLength > 1) {
+    assignNameLabel(fieldsObj.dimensions[1]);
+  } else {
+    var fieldObj = getLeftMostField(fieldsObj);
+    assignNameLabel(fieldObj);
+  }
+  return { name: name, label: label };
+}
+
+function getComparisonValue(data, field) {
+  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var value = "";
+  if (isLeftMostAlsoSecondLeftMost) {
+    value = data[1][field.name];
+  } else {
+    !data.length ? value = "No Data" : value = data[0][field.name];
+  }
+  return value;
+}
+
+function getComparisonDrillLinks(data, field) {
+  var isLeftMostAlsoSecondLeftMost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var links = [];
+  if (isLeftMostAlsoSecondLeftMost) {
+    links = data[1][field.name].links;
+  } else {
+    !data.length ? links = "No Data" : links = data[0][field.name].links;
+  }
+  return links;
+}
+
+function makeLabel(config, secondLeftMostField) {
+  var label = "";
+  if (config.show_comparison && config.show_label) {
+    config.label ? label = config.label : label = secondLeftMostField.label;
+  }
+
+  if (config.labelStyle !== "choose") {
+    if (config.labelStyle === "italic") {
+      label = _react2.default.createElement(
+        "i",
+        null,
+        "l",
+        abel
+      );
+    } else {
+      label = _react2.default.createElement(
+        "b",
+        null,
+        label
+      );
+    }
+  }
+  return label;
+}
+
+function makeTitle(config) {
+  var title = "";
+  if (config.show_title) {
+    title = config.valueTitle;
+  }
+  return title;
+}
+
+function makeLink(config) {
+  var link = "";
+  if (config.show_link) {
+    link = _react2.default.createElement(
+      "a",
+      { href: config.HREFLink },
+      config.valueLink
+    );
+  }
+  return link;
+}
+
+function showAsChange(val, pos_bad) {
+  var formattedValue = val;
+  var posSpan = _react2.default.createElement(
+    "span",
+    { style: { color: "#5f9524" } },
+    "\u25B2 " + val
+  );
+  var badSpan = _react2.default.createElement(
+    "span",
+    { style: { color: "#cc1F37" } },
+    "\u25BC " + val
+  );
+  var pos = pos_bad ? badSpan : posSpan;
+  var bad = pos_bad ? posSpan : badSpan;
+  if (typeof val === "number") {
+    if (Math.sign(val) === 1) {
+      formattedValue = pos;
+    } else if (Math.sign(val) === -1) {
+      formattedValue = bad;
+    } else {
+      formattedValue = _react2.default.createElement(
+        "span",
+        null,
+        "" + val
+      );
+    }
+  }
+  return formattedValue;
+}
+
+function calcPercentage(val1, val2) {
+  var percentage = { value: 0, rendered: "" };
+  if (typeof val1 !== "number" || typeof val2 !== "number") {
+    percentage.rendered = "∅";
+  } else {
+    percentage.value = val1 / val2 * 100;
+    percentage.rendered = Math.floor(percentage.value) + "%";
+  }
+  return percentage;
+}
+
+function returnOperation(string) {
+  var operation;
+  if (string === "equal_to") {
+    operation = "===";
+  } else if (string === "not_equal_to") {
+    operation = "!==";
+  } else if (string === "less_than") {
+    operation = "<";
+  } else if (string === "not_null") {
+    operation = "+";
+  } else {
+    operation = ">";
+  }
+  return operation;
+}
+
+function conditionallyFormat(leftVal, operation, comparedVal, fontCol, BG) {
+
+  if (typeof leftVal === "string") {
+    if (returnOperation(operation) === "+") {
+      document.body.style.backgroundColor = BG;
+      return _react2.default.createElement(
+        "span",
+        {
+          style: {
+            color: "" + fontCol
+          }
+        },
+        "" + leftVal
+      );
+    } else {
+      document.body.style.backgroundColor = bodyColor;
+      return leftVal;
+    }
+  } else if (returnOperation(operation) === "+") {
+    document.body.style.backgroundColor = BG;
+    return _react2.default.createElement(
+      "span",
+      {
+        style: {
+          color: "" + fontCol
+        }
+      },
+      "" + leftVal
+    );
+  } else if (!comparedVal) {
+    document.body.style.backgroundColor = bodyColor;
+    return leftVal;
+  } else if (eval(leftVal + " " + returnOperation(operation) + " " + comparedVal)) {
+    document.body.style.backgroundColor = BG;
+    return _react2.default.createElement(
+      "span",
+      {
+        style: {
+
+          color: "" + fontCol
+        }
+      },
+      "" + leftVal
+    );
+  } else {
+    document.body.style.backgroundColor = bodyColor;
+    return leftVal;
+  }
+}
+
+var parseData = exports.parseData = function parseData(data, queryResponse, config) {
+  var leftMostField = getLeftMostField(queryResponse.fields);
+  var secondLeftMostField = getSecondLeftMostField(queryResponse.fields);
+  var leftMostValue = getComparisonValue(data, leftMostField);
+  var leftMostLinks = getComparisonDrillLinks(data, leftMostField);
+
+  var secondLeftMostLinks = config.show_comparison ? getComparisonDrillLinks(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : [];
+
+  var secondLeftMostValue = config.show_comparison ? getComparisonValue(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : "";
+
+  if (config.compareType === "show_as_change" && (typeof secondLeftMostValue === "undefined" ? "undefined" : _typeof(secondLeftMostValue)) === "object") {
+    secondLeftMostValue.value = showAsChange(secondLeftMostValue.value, config.pos_bad);
+  }
+
+  var percentage = calcPercentage(leftMostValue.value, secondLeftMostValue.value);
+
+  var label = makeLabel(config, secondLeftMostField);
+  var title = makeTitle(config);
+  var link = makeLink(config);
+  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object") {
+    leftMostValue.value = conditionallyFormat(leftMostValue.value, config.format, config.formatVal, config.formatFontColor, config.formatBGColor);
+  }
+
+  return {
+    leftMostValue: leftMostValue,
+    secondLeftMostValue: secondLeftMostValue,
+    label: label,
+    title: title,
+    link: link,
+    percentage: percentage,
+    leftMostLinks: leftMostLinks,
+    secondLeftMostLinks: secondLeftMostLinks,
+    bodyColor: bodyColor
+  };
+};
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+        var result = __webpack_require__(25);
+
+        if (typeof result === "string") {
+            module.exports = result;
+        } else {
+            module.exports = result.toString();
+        }
+    
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(26)(false);
+// imports
+
+
+// module
+exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+/* 26 */
 /***/ (function(module, exports) {
 
 /*
@@ -31089,6 +31112,5 @@ function toComment(sourceMap) {
 
 
 /***/ })
-
-/******/ });
+/******/ ]);
 });
