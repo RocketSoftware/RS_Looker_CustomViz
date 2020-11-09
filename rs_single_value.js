@@ -1457,10 +1457,6 @@ if (process.env.NODE_ENV === 'production') {
 "use strict";
 
 
-var _My_Vis = __webpack_require__(2079);
-
-var _My_Vis2 = _interopRequireDefault(_My_Vis);
-
 var _reactDom = __webpack_require__(17);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -1469,17 +1465,25 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _modifyOptions = __webpack_require__(2080);
+var _modifyOptions = __webpack_require__(2079);
 
 var _modifyOptions2 = _interopRequireDefault(_modifyOptions);
 
-var _constants = __webpack_require__(2081);
+var _constants = __webpack_require__(2080);
 
-var _parser = __webpack_require__(2082);
+var _parser = __webpack_require__(2081);
+
+var _My_Vis = __webpack_require__(2082);
+
+var _My_Vis2 = _interopRequireDefault(_My_Vis);
+
+var _title = __webpack_require__(2083);
+
+var _title2 = _interopRequireDefault(_title);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var style = __webpack_require__(2083);
+var style = __webpack_require__(2084);
 
 looker.plugins.visualizations.add({
   id: "new_vis",
@@ -1512,38 +1516,50 @@ looker.plugins.visualizations.add({
         leftMostFormat = _parseData.leftMostFormat,
         secondLeftMostFormat = _parseData.secondLeftMostFormat;
 
-    if (config.valueColor) {
-      this.chart = _reactDom2.default.render(_react2.default.createElement(_My_Vis2.default, { links: [leftMostLinks, secondLeftMostLinks], config: config, title: title, link: link, format: { leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat }, label: label, values: { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, percentage: percentage } }), this.vis);
+    // if(config.show_title){
+    //   this.chart = ReactDOM.render(<Title title={leftMostValue}/>, this.vis);
+    // }
 
-      document.querySelector(".val-1").style.color = config.valueColor;
-      document.querySelector(".label").style.color = config.labelColor;
 
-      document.getElementById("title").style.color = config.titleColor;
-      document.getElementById("second-val").style.color = config.secondValueColor;
+    if (config.show_as_title) {
 
-      document.querySelector(".val-1").style.fontSize = config.valueSize + "px";
-      document.querySelector(".label").style.fontSize = config.labelSize + "px";
+      this.chart = _reactDom2.default.render(_react2.default.createElement(_title2.default, { title: leftMostValue.realVal, size: config.title_size, color: config.title_color, weight: config.title_style }), this.vis);
+      document.body.style.backgroundColor = config.chart_color;
+    } else {
+      if (config.valueColor) {
 
-      document.getElementById("title").style.fontSize = config.titleSize + "px";
-      document.getElementById("second-val").style.fontSize = config.secondValueSize + "px";
-      document.getElementById("percent-val").style.fontSize = config.valueSize + "px";
+        this.chart = _reactDom2.default.render(_react2.default.createElement(_My_Vis2.default, { links: [leftMostLinks, secondLeftMostLinks], config: config, title: title, link: link, format: { leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat }, label: label, values: { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, percentage: percentage } }), this.vis);
 
-      if (config.compareType === "calculate_progress_with_percentage" || "calculate_progress_with_percentage_gray") {
-        document.getElementById("of-text").style.color = config.labelColor;
-        document.getElementById("of-text").style.fontSize = config.labelSize + "px";
-        document.getElementById("percent-val").style.color = config.secondValueColor;
-        document.getElementById("percent-val").style.fontSize = config.secondValueSize + "px";
+        document.querySelector(".val-1").style.color = config.valueColor;
+        document.querySelector(".label").style.color = config.labelColor;
+
+        document.getElementById("title").style.color = config.titleColor;
+        document.getElementById("second-val").style.color = config.secondValueColor;
+
+        document.querySelector(".val-1").style.fontSize = config.valueSize + "px";
+        document.querySelector(".label").style.fontSize = config.labelSize + "px";
+
+        document.getElementById("title").style.fontSize = config.titleSize + "px";
+        document.getElementById("second-val").style.fontSize = config.secondValueSize + "px";
+        document.getElementById("percent-val").style.fontSize = config.valueSize + "px";
+
+        if (config.compareType === "calculate_progress_with_percentage" || "calculate_progress_with_percentage_gray") {
+          document.getElementById("of-text").style.color = config.labelColor;
+          document.getElementById("of-text").style.fontSize = config.labelSize + "px";
+          document.getElementById("percent-val").style.color = config.secondValueColor;
+          document.getElementById("percent-val").style.fontSize = config.secondValueSize + "px";
+        }
+
+        // document.body.style.backgroundColor = bodyColor
       }
-
-      // document.body.style.backgroundColor = bodyColor
-    }
-    if (config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress") {
-      document.querySelector(".overlay").style.backgroundColor = config.barColor;
-      document.querySelector(".underlay-BG").style.backgroundColor = config.barUnderColor;
-    }
-    if (config.compareType === "calculate_progress_with_percentage_gray" || config.compareType === "calculate_progress_gray") {
-      document.querySelector(".overlay").style.backgroundColor = "#E2E3E4";
-      document.querySelector(".underlay-BG").style.backgroundColor = "#F5F5F6";
+      if (config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress") {
+        document.querySelector(".overlay").style.backgroundColor = config.barColor;
+        document.querySelector(".underlay-BG").style.backgroundColor = config.barUnderColor;
+      }
+      if (config.compareType === "calculate_progress_with_percentage_gray" || config.compareType === "calculate_progress_gray") {
+        document.querySelector(".overlay").style.backgroundColor = "#E2E3E4";
+        document.querySelector(".underlay-BG").style.backgroundColor = "#F5F5F6";
+      }
     }
 
     done();
@@ -1561,119 +1577,318 @@ looker.plugins.visualizations.add({
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = MyVis;
+var modifyOptions = function modifyOptions(vis, config, qr) {
+  var options = {};
 
-var _react = __webpack_require__(1);
+  options.show_as_title = {
+    order: 0,
+    display_size: "whole",
+    type: "boolean",
+    label: "Show As Title",
+    default: false,
+    section: "Title"
+  };
 
-var _react2 = _interopRequireDefault(_react);
+  if (config.show_as_title) {
+    options.title_size = {
+      order: 1,
+      default: 20,
+      display_size: "half",
+      label: "Title Font Size",
+      section: "Title",
+      type: "number"
+    };
+    options.title_style = {
+      order: 1.2,
+      default: "normal",
+      display_size: "half",
+      display: "select",
+      label: "Select Title Style",
+      section: "Title",
+      type: "string",
+      values: [{ "Normal": "normal" }, { "Lighter": "lighter" }, { "Bold": "bold" }] };
 
-var _numeral = __webpack_require__(1008);
-
-var _numeral2 = _interopRequireDefault(_numeral);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// import "./css/my_vis.css"
-
-function MyVis(_ref) {
-  var values = _ref.values,
-      label = _ref.label,
-      title = _ref.title,
-      config = _ref.config,
-      links = _ref.links,
-      format = _ref.format,
-      link = _ref.link;
-
-  // const displayFirstValue = values.leftMostValue.value;
-  // const displaySecondValue = values.secondLeftMostValue.value;
-
-  var leftMostFormatted = typeof values.leftMostValue.value === "number" ? (0, _numeral2.default)(values.leftMostValue.value).format(format.leftMostFormat) : values.leftMostValue.value;
-  var secondLeftMostFormatted = typeof values.secondLeftMostValue.value === "number" ? (0, _numeral2.default)(values.secondLeftMostValue.value).format(format.secondLeftMostFormat) : values.secondLeftMostValue.value;
-
-  var displayFirstValue = !values.leftMostValue ? "" : values.leftMostValue.rendered || leftMostFormatted;
-  var displaySecondValue = !values.secondLeftMostValue ? "" : values.secondLeftMostValue.rendered || secondLeftMostFormatted;
-  var width = values.percentage.value === 0 ? 0 : values.percentage.value + "%";
-  var overlayStyle = width ? { width: width } : { visibilty: "hidden" };
-  var overlayWithPercent = config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress_with_percentage_gray";
-  var overlay = config.compareType === "calculate_progress" || config.compareType === "calculate_progress_gray" || overlayWithPercent;
-  var percentageSpanClass = overlayWithPercent ? "" : "none";
-  var leftMostLinks = links[0];
-  var secondLeftMostLinks = links[1];
-
-  var overlayBlock = _react2.default.createElement(
-    _react2.default.Fragment,
-    null,
-    _react2.default.createElement(
-      "div",
-      { className: "val-2 underlay-BG" },
-      _react2.default.createElement("span", null),
-      " ",
-      _react2.default.createElement("span", null)
-    ),
-    _react2.default.createElement("div", { className: "overlay", style: overlayStyle })
-  );
-
-  function clickHandler(event, linkArr) {
-    LookerCharts.Utils.openDrillMenu({
-      links: linkArr,
-      event: event
-    });
+    options.chart_color = {
+      order: 1.3,
+      default: "white",
+      display: "color",
+      display_size: "half",
+      label: "Chart Color",
+      section: "Title",
+      type: "string"
+    };
+    options.title_color = {
+      order: 1.4,
+      default: "black",
+      display: "color",
+      display_size: "half",
+      label: "Title Color",
+      section: "Title",
+      type: "string"
+    };
   }
 
-  return _react2.default.createElement(
-    "div",
-    { className: "vis-container" },
-    _react2.default.createElement(
-      "div",
-      { className: "val-1", onClick: function onClick(event) {
-          return clickHandler(event, leftMostLinks);
-        } },
-      displayFirstValue
-    ),
-    _react2.default.createElement(
-      "div",
-      { id: "title", className: "title" },
-      title
-    ),
-    _react2.default.createElement(
-      "div",
-      null,
-      link && link
-    ),
-    overlay && overlayBlock,
-    _react2.default.createElement(
-      "div",
-      { className: "val-2 format-val-2" },
-      _react2.default.createElement(
-        "span",
-        { className: "label" },
-        label,
-        " "
-      ),
-      _react2.default.createElement(
-        "span",
-        { className: percentageSpanClass, id: "percent-val" },
-        values.percentage.rendered,
-        " ",
-        _react2.default.createElement(
-          "span",
-          { id: "of-text" },
-          "of"
-        ),
-        " "
-      ),
-      _react2.default.createElement(
-        "span",
-        { id: "second-val", onClick: function onClick(event) {
-            return clickHandler(event, secondLeftMostLinks);
-          } },
-        displaySecondValue,
-        " "
-      ),
-      " "
-    )
-  );
-}
+  if (!config.show_as_title) {
+
+    options.valueColor = {
+      order: 0,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Value Color",
+      section: "Style",
+      type: "string"
+    };
+
+    options.secondValueColor = {
+      order: 1,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Second Value Color",
+      section: "Style",
+      type: "string"
+    };
+
+    options.titleColor = {
+      order: 2,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Title Color",
+      section: "Style",
+      type: "string"
+    };
+    options.labelColor = {
+      order: 3,
+      default: "rgb(39, 39, 39)",
+      display: "color",
+      display_size: "half",
+      label: "Label Color",
+      section: "Style",
+      type: "string"
+    };
+
+    options.valueSize = {
+      order: 4,
+      default: 72,
+      display_size: 'third',
+      label: "Value Size",
+      section: "Style",
+      type: 'number'
+    }, options.labelSize = {
+      order: 5,
+      default: 16,
+      display_size: "third",
+      label: "Label Size",
+      section: "Style",
+      type: "number"
+    };
+
+    options.secondValueSize = {
+      order: 6,
+      default: 16,
+      display_size: "third",
+      label: "Value 2 Size",
+      section: "Style",
+      type: "number"
+    };
+    options.labelStyle = {
+      order: 7,
+      default: "choose",
+      display: "select",
+      label: "Select Label Style",
+      section: "Style",
+      type: "string",
+      values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
+
+    options.show_title = {
+      order: 8,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show Title",
+      default: false,
+      section: "Style"
+    };
+
+    if (config.show_title) {
+      options.valueTitle = {
+        order: 9,
+        display_size: "whole",
+        type: "string",
+        label: "Title",
+        placeholder: "Title overide",
+        section: "Style",
+        default: ""
+      };
+
+      options.titleSize = {
+        order: 10,
+        default: 20,
+        display_size: "whole",
+        label: "Title Font Size",
+        section: "Style",
+        type: "number"
+      };
+    }
+    options.show_link = {
+      order: 11,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show Link",
+      default: false,
+      section: "Style"
+    };
+
+    if (config.show_link) {
+      options.valueLink = {
+        order: 12,
+        display_size: "whole",
+        type: "string",
+        label: "Link Text",
+        placeholder: "Link Text",
+        section: "Style",
+        default: ""
+      };
+      options.HREFLink = {
+        order: 13,
+        display_size: "whole",
+        type: "string",
+        label: "Link HREF",
+        placeholder: "Link Destination",
+        section: "Style",
+        default: ""
+      };
+    }
+
+    options.show_comparison = {
+      order: 0,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show Comparison",
+      default: false,
+      section: "Comparison"
+    };
+
+    if (config.show_comparison) {
+
+      options.compareType = {
+        default: "show_as_value",
+        display: "select",
+        label: "Value Label",
+        order: 0.5,
+        section: "Comparison",
+        type: "string",
+        values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }, { "Calculate Progress (Gray)": "calculate_progress_gray" }, { "Calculate Progress With Precentage (Gray)": "calculate_progress_with_percentage_gray" }]
+      };
+      if (config.compareType === "show_as_change") {
+        options.pos_bad = {
+          order: 1,
+          display_size: "whole",
+          type: "boolean",
+          label: "Positive Values Are bad",
+          default: false,
+          section: "Comparison"
+        };
+      }
+
+      if (config.compareType === "calculate_progress" || config.compareType === "calculate_progress_with_percentage") {
+        options.barColor = {
+          order: 1,
+          default: "#E2E3E4",
+          display: "color",
+          display_size: "half",
+          label: "Bar Fill Color",
+          section: "Comparison",
+          type: "string"
+        };
+        options.barUnderColor = {
+          order: 1,
+          default: "#F5F5F6",
+          display: "color",
+          display_size: "half",
+          label: "Bar Color",
+          section: "Comparison",
+          type: "string"
+        };
+      }
+
+      options.show_label = {
+        order: 2,
+        display_size: "whole",
+        type: "boolean",
+        label: "Show Label",
+        default: false,
+        section: "Comparison"
+      };
+      if (config.show_label) {
+        options.label = {
+          order: 3,
+          display_size: "whole",
+          type: "string",
+          label: "Label",
+          placeholder: "Leave blank to use field label",
+          section: "Comparison",
+          default: ""
+        };
+      }
+    }
+
+    options.format = {
+      default: "select",
+      display: "select",
+      label: "Format Filter",
+      order: 0,
+      section: "Formatting",
+      type: "string",
+      values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }, { "not null": "not_null" }]
+    };
+
+    if (config.format !== "select") {
+      options.formatVal = {
+        order: 1,
+        display_size: "whole",
+        type: "string",
+        label: "Value",
+        placeholder: "value to format against",
+        section: "Formatting",
+        default: ""
+      };
+
+      options.formatBGColor = {
+        order: 2,
+        default: "#592EC2",
+        display: "color",
+        display_size: "half",
+        label: "Background Color",
+        section: "Formatting",
+        type: "string"
+      };
+
+      options.formatFontColor = {
+        order: 3,
+        default: "rgb(39, 39, 39)",
+        display: "color",
+        display_size: "half",
+        label: "Font Color",
+        section: "Formatting",
+        type: "string"
+      };
+      // options.hidden = {
+      //   order: 21,
+      //     display_size: "whole",
+      //     type: "boolean",
+      //     label: "kudsryfgc",
+      //     default: true,
+      //     hidden: true
+      // };
+    }
+  }
+
+  vis.trigger("registerOptions", options);
+};
+
+exports.default = modifyOptions;
 
 /***/ }),
 
@@ -1686,284 +1901,11 @@ function MyVis(_ref) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var modifyOptions = function modifyOptions(vis, config, qr) {
-  var options = {};
-
-  options.valueColor = {
-    order: 0,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.secondValueColor = {
-    order: 1,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Second Value Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.titleColor = {
-    order: 2,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Title Color",
-    section: "Style",
-    type: "string"
-  };
-  options.labelColor = {
-    order: 3,
-    default: "rgb(39, 39, 39)",
-    display: "color",
-    display_size: "half",
-    label: "Label Color",
-    section: "Style",
-    type: "string"
-  };
-
-  options.valueSize = {
-    order: 4,
-    default: 72,
-    display_size: 'third',
-    label: "Value Size",
-    section: "Style",
-    type: 'number'
-  }, options.labelSize = {
-    order: 5,
-    default: 16,
-    display_size: "third",
-    label: "Label Size",
-    section: "Style",
-    type: "number"
-  };
-
-  options.secondValueSize = {
-    order: 6,
-    default: 16,
-    display_size: "third",
-    label: "Value 2 Size",
-    section: "Style",
-    type: "number"
-  };
-  options.labelStyle = {
-    order: 7,
-    default: "choose",
-    display: "select",
-    label: "Select Label Style",
-    section: "Style",
-    type: "string",
-    values: [{ "Choose Font Style": "choose" }, { "Italic": "italic" }, { "Bold": "bold" }] };
-
-  options.show_title = {
-    order: 8,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Title",
-    default: false,
-    section: "Style"
-  };
-
-  if (config.show_title) {
-    options.valueTitle = {
-      order: 9,
-      display_size: "whole",
-      type: "string",
-      label: "Title",
-      placeholder: "Title overide",
-      section: "Style",
-      default: ""
-    };
-
-    options.titleSize = {
-      order: 10,
-      default: 20,
-      display_size: "whole",
-      label: "Title Font Size",
-      section: "Style",
-      type: "number"
-    };
-  }
-  options.show_link = {
-    order: 11,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Link",
-    default: false,
-    section: "Style"
-  };
-
-  if (config.show_link) {
-    options.valueLink = {
-      order: 12,
-      display_size: "whole",
-      type: "string",
-      label: "Link Text",
-      placeholder: "Link Text",
-      section: "Style",
-      default: ""
-    };
-    options.HREFLink = {
-      order: 13,
-      display_size: "whole",
-      type: "string",
-      label: "Link HREF",
-      placeholder: "Link Destination",
-      section: "Style",
-      default: ""
-    };
-  }
-
-  options.show_comparison = {
-    order: 0,
-    display_size: "whole",
-    type: "boolean",
-    label: "Show Comparison",
-    default: false,
-    section: "Comparison"
-  };
-
-  if (config.show_comparison) {
-
-    options.compareType = {
-      default: "show_as_value",
-      display: "select",
-      label: "Value Label",
-      order: 0.5,
-      section: "Comparison",
-      type: "string",
-      values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }, { "Calculate Progress (Gray)": "calculate_progress_gray" }, { "Calculate Progress With Precentage (Gray)": "calculate_progress_with_percentage_gray" }]
-    };
-    if (config.compareType === "show_as_change") {
-      options.pos_bad = {
-        order: 1,
-        display_size: "whole",
-        type: "boolean",
-        label: "Positive Values Are bad",
-        default: false,
-        section: "Comparison"
-      };
-    }
-
-    if (config.compareType === "calculate_progress" || config.compareType === "calculate_progress_with_percentage") {
-      options.barColor = {
-        order: 1,
-        default: "#E2E3E4",
-        display: "color",
-        display_size: "half",
-        label: "Bar Fill Color",
-        section: "Comparison",
-        type: "string"
-      };
-      options.barUnderColor = {
-        order: 1,
-        default: "#F5F5F6",
-        display: "color",
-        display_size: "half",
-        label: "Bar Color",
-        section: "Comparison",
-        type: "string"
-      };
-    }
-
-    options.show_label = {
-      order: 2,
-      display_size: "whole",
-      type: "boolean",
-      label: "Show Label",
-      default: false,
-      section: "Comparison"
-    };
-    if (config.show_label) {
-      options.label = {
-        order: 3,
-        display_size: "whole",
-        type: "string",
-        label: "Label",
-        placeholder: "Leave blank to use field label",
-        section: "Comparison",
-        default: ""
-      };
-    }
-  }
-
-  options.format = {
-    default: "select",
-    display: "select",
-    label: "Format Filter",
-    order: 0,
-    section: "Formatting",
-    type: "string",
-    values: [{ "select formatting filter": "select" }, { "equal to": "equal_to" }, { "not equal to": "not_equal_to" }, { "less than": "less_than" }, { "greater than": "greater_than" }, { "not null": "not_null" }]
-  };
-
-  if (config.format !== "select") {
-    options.formatVal = {
-      order: 1,
-      display_size: "whole",
-      type: "string",
-      label: "Value",
-      placeholder: "value to format against",
-      section: "Formatting",
-      default: ""
-    };
-
-    options.formatBGColor = {
-      order: 2,
-      default: "#592EC2",
-      display: "color",
-      display_size: "half",
-      label: "Background Color",
-      section: "Formatting",
-      type: "string"
-    };
-
-    options.formatFontColor = {
-      order: 3,
-      default: "rgb(39, 39, 39)",
-      display: "color",
-      display_size: "half",
-      label: "Font Color",
-      section: "Formatting",
-      type: "string"
-    };
-    // options.hidden = {
-    //   order: 21,
-    //     display_size: "whole",
-    //     type: "boolean",
-    //     label: "kudsryfgc",
-    //     default: true,
-    //     hidden: true
-    // };
-  }
-
-  vis.trigger("registerOptions", options);
-};
-
-exports.default = modifyOptions;
-
-/***/ }),
-
-/***/ 2081:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 var ELEMENT_ID = exports.ELEMENT_ID = 'new_vis';
 
 /***/ }),
 
-/***/ 2082:
+/***/ 2081:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2204,7 +2146,7 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
   var secondLeftMostField = getSecondLeftMostField(queryResponse.fields);
   var leftMostValue = getComparisonValue(data, leftMostField);
   var leftMostLinks = getComparisonDrillLinks(data, leftMostField);
-
+  leftMostValue.realVal = leftMostValue.value;
   var secondLeftMostLinks = config.show_comparison ? getComparisonDrillLinks(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : [];
 
   var secondLeftMostValue = config.show_comparison ? getComparisonValue(data, secondLeftMostField, leftMostField.name === secondLeftMostField.name) : "";
@@ -2218,7 +2160,10 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
   var label = makeLabel(config, secondLeftMostField);
   var title = makeTitle(config);
   var link = makeLink(config);
-  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object") {
+  // if(!config.show_as_title){
+
+  // }
+  if (config.format !== "select" && (typeof leftMostValue === "undefined" ? "undefined" : _typeof(leftMostValue)) === "object" && !config.show_as_title) {
     leftMostValue.value = conditionallyFormat(leftMostValue.value, config.format, config.formatVal, config.formatFontColor, config.formatBGColor);
   }
 
@@ -2237,11 +2182,173 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
 
 /***/ }),
 
+/***/ 2082:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MyVis;
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _numeral = __webpack_require__(1008);
+
+var _numeral2 = _interopRequireDefault(_numeral);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import "./css/my_vis.css"
+
+function MyVis(_ref) {
+  var values = _ref.values,
+      label = _ref.label,
+      title = _ref.title,
+      config = _ref.config,
+      links = _ref.links,
+      format = _ref.format,
+      link = _ref.link;
+
+  // const displayFirstValue = values.leftMostValue.value;
+  // const displaySecondValue = values.secondLeftMostValue.value;
+
+  var leftMostFormatted = typeof values.leftMostValue.value === "number" ? (0, _numeral2.default)(values.leftMostValue.value).format(format.leftMostFormat) : values.leftMostValue.value;
+  var secondLeftMostFormatted = typeof values.secondLeftMostValue.value === "number" ? (0, _numeral2.default)(values.secondLeftMostValue.value).format(format.secondLeftMostFormat) : values.secondLeftMostValue.value;
+
+  var displayFirstValue = !values.leftMostValue ? "" : values.leftMostValue.rendered || leftMostFormatted;
+  var displaySecondValue = !values.secondLeftMostValue ? "" : values.secondLeftMostValue.rendered || secondLeftMostFormatted;
+  var width = values.percentage.value === 0 ? 0 : values.percentage.value + "%";
+  var overlayStyle = width ? { width: width } : { visibilty: "hidden" };
+  var overlayWithPercent = config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress_with_percentage_gray";
+  var overlay = config.compareType === "calculate_progress" || config.compareType === "calculate_progress_gray" || overlayWithPercent;
+  var percentageSpanClass = overlayWithPercent ? "" : "none";
+  var leftMostLinks = links[0];
+  var secondLeftMostLinks = links[1];
+
+  var overlayBlock = _react2.default.createElement(
+    _react2.default.Fragment,
+    null,
+    _react2.default.createElement(
+      "div",
+      { className: "val-2 underlay-BG" },
+      _react2.default.createElement("span", null),
+      " ",
+      _react2.default.createElement("span", null)
+    ),
+    _react2.default.createElement("div", { className: "overlay", style: overlayStyle })
+  );
+
+  function clickHandler(event, linkArr) {
+    LookerCharts.Utils.openDrillMenu({
+      links: linkArr,
+      event: event
+    });
+  }
+
+  return _react2.default.createElement(
+    "div",
+    { className: "vis-container" },
+    _react2.default.createElement(
+      "div",
+      { className: "val-1", onClick: function onClick(event) {
+          return clickHandler(event, leftMostLinks);
+        } },
+      displayFirstValue
+    ),
+    _react2.default.createElement(
+      "div",
+      { id: "title", className: "title" },
+      title
+    ),
+    _react2.default.createElement(
+      "div",
+      null,
+      link && link
+    ),
+    overlay && overlayBlock,
+    _react2.default.createElement(
+      "div",
+      { className: "val-2 format-val-2" },
+      _react2.default.createElement(
+        "span",
+        { className: "label" },
+        label,
+        " "
+      ),
+      _react2.default.createElement(
+        "span",
+        { className: percentageSpanClass, id: "percent-val" },
+        values.percentage.rendered,
+        " ",
+        _react2.default.createElement(
+          "span",
+          { id: "of-text" },
+          "of"
+        ),
+        " "
+      ),
+      _react2.default.createElement(
+        "span",
+        { id: "second-val", onClick: function onClick(event) {
+            return clickHandler(event, secondLeftMostLinks);
+          } },
+        displaySecondValue,
+        " "
+      ),
+      " "
+    )
+  );
+}
+
+/***/ }),
+
 /***/ 2083:
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
 
-        var result = __webpack_require__(2084);
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Title;
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import numeral from "numeral"
+// import "./css/my_vis.css"
+
+function Title(_ref) {
+  var title = _ref.title,
+      size = _ref.size,
+      color = _ref.color,
+      weight = _ref.weight;
+
+
+  console.log(title);
+  return _react2.default.createElement(
+    "div",
+    { className: "title__vis", style: { fontSize: size + "px", color: color, fontWeight: weight } },
+    title
+  );
+}
+
+/***/ }),
+
+/***/ 2084:
+/***/ (function(module, exports, __webpack_require__) {
+
+
+        var result = __webpack_require__(2085);
 
         if (typeof result === "string") {
             module.exports = result;
@@ -2252,7 +2359,7 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
 
 /***/ }),
 
-/***/ 2084:
+/***/ 2085:
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(99)(false);
@@ -2260,7 +2367,7 @@ exports = module.exports = __webpack_require__(99)(false);
 
 
 // module
-exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}", ""]);
+exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}\n\n\n.title__vis{\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-align: center;\n  margin-top: 20px;\n  }", ""]);
 
 // exports
 
