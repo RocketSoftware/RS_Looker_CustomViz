@@ -9,6 +9,7 @@
 		root["rs_single_value"] = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
+  
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
