@@ -9,7 +9,6 @@
 		root["rs_single_value"] = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
-  
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1474,17 +1473,19 @@ var _constants = __webpack_require__(2080);
 
 var _parser = __webpack_require__(2081);
 
-var _My_Vis = __webpack_require__(2082);
+var _utils = __webpack_require__(2082);
+
+var _My_Vis = __webpack_require__(2083);
 
 var _My_Vis2 = _interopRequireDefault(_My_Vis);
 
-var _title = __webpack_require__(2083);
+var _title = __webpack_require__(2084);
 
 var _title2 = _interopRequireDefault(_title);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var style = __webpack_require__(2084);
+var style = __webpack_require__(2085);
 
 looker.plugins.visualizations.add({
   id: "new_vis",
@@ -1528,6 +1529,7 @@ looker.plugins.visualizations.add({
       document.body.style.backgroundColor = config.chart_color;
     } else {
       if (config.valueColor) {
+        console.log(percentage);
 
         this.chart = _reactDom2.default.render(_react2.default.createElement(_My_Vis2.default, { links: [leftMostLinks, secondLeftMostLinks], config: config, title: title, link: link, format: { leftMostFormat: leftMostFormat, secondLeftMostFormat: secondLeftMostFormat }, label: label, values: { leftMostValue: leftMostValue, secondLeftMostValue: secondLeftMostValue, percentage: percentage } }), this.vis);
 
@@ -1561,6 +1563,38 @@ looker.plugins.visualizations.add({
         document.querySelector(".overlay").style.backgroundColor = "#E2E3E4";
         document.querySelector(".underlay-BG").style.backgroundColor = "#F5F5F6";
       }
+      if (config.compareType === "calculate_progress_with_percentage_ryg") {
+        document.getElementById("of-text").style.color = config.labelColor;
+        document.getElementById("of-text").style.fontSize = config.labelSize + "px";
+        document.getElementById("percent-val").style.color = config.secondValueColor;
+        document.getElementById("percent-val").style.fontSize = config.secondValueSize + "px";
+
+        document.querySelector(".overlay").style.backgroundColor = getRYG().over;
+        document.querySelector(".underlay-BG").style.backgroundColor = getRYG().under;
+      }
+    }
+
+    function getRYG() {
+      var val = percentage.value;
+      var lowBar = config.ryglow;
+      var highBar = config.ryghigh;
+      var lowC = config.rygLowColor;
+      var medC = config.rygMedColor;
+      var highC = config.rygHighColor;
+      var colorObj = { over: "", under: "" };
+
+      if (val < lowBar) {
+        colorObj.over = lowC;
+        colorObj.under = (0, _utils.shadeColor)(lowC, -40);
+      } else if (val > lowBar && val < highBar) {
+        colorObj.over = medC;
+        colorObj.under = (0, _utils.shadeColor)(medC, -40);
+      } else {
+        colorObj.over = highC;
+        colorObj.under = (0, _utils.shadeColor)(highC, -40);
+      }
+
+      return colorObj;
     }
 
     done();
@@ -1770,6 +1804,27 @@ var modifyOptions = function modifyOptions(vis, config, qr) {
       default: false,
       section: "Comparison"
     };
+    if (!config.show_comparison) {
+      options.show_as_flag = {
+        order: 0.1,
+        display_size: "whole",
+        type: "boolean",
+        label: "Show As Flag",
+        default: false,
+        section: "Comparison"
+      };
+      if (config.show_as_flag) {
+        options.flag_color = {
+          order: 0.2,
+          default: "#7CB242",
+          display: "color",
+          display_size: "third",
+          label: "Flag Color",
+          section: "Comparison",
+          type: "string"
+        };
+      }
+    }
 
     if (config.show_comparison) {
 
@@ -1780,8 +1835,57 @@ var modifyOptions = function modifyOptions(vis, config, qr) {
         order: 0.5,
         section: "Comparison",
         type: "string",
-        values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }, { "Calculate Progress (Gray)": "calculate_progress_gray" }, { "Calculate Progress With Precentage (Gray)": "calculate_progress_with_percentage_gray" }]
+        values: [{ "Show as Value": "show_as_value" }, { "Show as Change": "show_as_change" }, { "Calculate Progress": "calculate_progress" }, { "Calculate Progress With Precentage": "calculate_progress_with_percentage" }, { "Calculate Progress (Gray)": "calculate_progress_gray" }, { "Calculate Progress With Precentage (Gray)": "calculate_progress_with_percentage_gray" }, { "Calculate Progress With Precentage R/Y/G": "calculate_progress_with_percentage_ryg" }]
       };
+
+      if (config.compareType === "calculate_progress_with_percentage_ryg") {
+        options.ryglow = {
+          order: 0.6,
+          display_size: "half",
+          type: "number",
+          label: "Low Barrier %",
+          default: 60,
+          section: "Comparison"
+        };
+        options.ryghigh = {
+          order: 0.7,
+          display_size: "half",
+          type: "number",
+          label: "High Barrier %",
+          default: 90,
+          section: "Comparison"
+        };
+
+        options.rygHighColor = {
+          order: 0.81,
+          default: "#7CB242",
+          display: "color",
+          display_size: "third",
+          label: "High Color",
+          section: "Comparison",
+          type: "string"
+        };
+
+        options.rygMedColor = {
+          order: 0.82,
+          default: "#FAAA00",
+          display: "color",
+          display_size: "third",
+          label: "Middle Color",
+          section: "Comparison",
+          type: "string"
+        };
+        options.rygLowColor = {
+          order: 0.83,
+          default: "#EA4435",
+          display: "color",
+          display_size: "third",
+          label: "Low Color",
+          section: "Comparison",
+          type: "string"
+        };
+      }
+
       if (config.compareType === "show_as_change") {
         options.pos_bad = {
           order: 1,
@@ -2001,8 +2105,7 @@ function makeLabel(config, secondLeftMostField) {
       label = _react2.default.createElement(
         "i",
         null,
-        "l",
-        abel
+        label
       );
     } else {
       label = _react2.default.createElement(
@@ -2192,6 +2295,43 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+//function for lightening or darkening colors
+var shadeColor = exports.shadeColor = function shadeColor(color, percent) {
+  if (!color) return;
+  var R = parseInt(color.substring(1, 3), 16);
+  var G = parseInt(color.substring(3, 5), 16);
+  var B = parseInt(color.substring(5, 7), 16);
+
+  R = parseInt(R * (100 + percent) / 100);
+  G = parseInt(G * (100 + percent) / 100);
+  B = parseInt(B * (100 + percent) / 100);
+
+  R = R < 255 ? R : 255;
+  G = G < 255 ? G : 255;
+  B = B < 255 ? B : 255;
+
+  var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
+  var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
+  var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
+
+  return "#" + RR + GG + BB;
+};
+
+/***/ }),
+
+/***/ 2083:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 exports.default = MyVis;
 
 var _react = __webpack_require__(1);
@@ -2218,6 +2358,7 @@ function MyVis(_ref) {
   // const displayFirstValue = values.leftMostValue.value;
   // const displaySecondValue = values.secondLeftMostValue.value;
 
+
   var leftMostFormatted = typeof values.leftMostValue.value === "number" ? (0, _numeral2.default)(values.leftMostValue.value).format(format.leftMostFormat) : values.leftMostValue.value;
   var secondLeftMostFormatted = typeof values.secondLeftMostValue.value === "number" ? (0, _numeral2.default)(values.secondLeftMostValue.value).format(format.secondLeftMostFormat) : values.secondLeftMostValue.value;
 
@@ -2225,11 +2366,19 @@ function MyVis(_ref) {
   var displaySecondValue = !values.secondLeftMostValue ? "" : values.secondLeftMostValue.rendered || secondLeftMostFormatted;
   var width = values.percentage.value === 0 ? 0 : values.percentage.value + "%";
   var overlayStyle = width ? { width: width } : { visibilty: "hidden" };
-  var overlayWithPercent = config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress_with_percentage_gray";
+
+  var overlayWithPercent = config.compareType === "calculate_progress_with_percentage" || config.compareType === "calculate_progress_with_percentage_gray" || config.compareType === "calculate_progress_with_percentage_ryg";
   var overlay = config.compareType === "calculate_progress" || config.compareType === "calculate_progress_gray" || overlayWithPercent;
   var percentageSpanClass = overlayWithPercent ? "" : "none";
   var leftMostLinks = links[0];
   var secondLeftMostLinks = links[1];
+
+  var flagStyle = config.flag_color ? { backgroundColor: config.flag_color } : null;
+
+  var _useState = (0, _react.useState)(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      isHovered = _useState2[0],
+      setIsHovered = _useState2[1];
 
   var overlayBlock = _react2.default.createElement(
     _react2.default.Fragment,
@@ -2243,6 +2392,7 @@ function MyVis(_ref) {
     ),
     _react2.default.createElement("div", { className: "overlay", style: overlayStyle })
   );
+  var linkStyle = isHovered ? { borderBottom: "2px solid " + config.valueColor } : {};
 
   function clickHandler(event, linkArr) {
     LookerCharts.Utils.openDrillMenu({
@@ -2253,12 +2403,22 @@ function MyVis(_ref) {
 
   return _react2.default.createElement(
     "div",
-    { className: "vis-container" },
+    {
+      className: config.flag_color ? "flag-container clipped" : "vis-container",
+      style: flagStyle,
+      onClick: function onClick(event) {
+        return clickHandler(event, leftMostLinks);
+      },
+      onMouseEnter: function onMouseEnter() {
+        return setIsHovered(true);
+      },
+      onMouseLeave: function onMouseLeave() {
+        return setIsHovered(false);
+      }
+    },
     _react2.default.createElement(
       "div",
-      { className: "val-1", onClick: function onClick(event) {
-          return clickHandler(event, leftMostLinks);
-        } },
+      { className: "val-1", style: linkStyle },
       displayFirstValue
     ),
     _react2.default.createElement(
@@ -2295,9 +2455,12 @@ function MyVis(_ref) {
       ),
       _react2.default.createElement(
         "span",
-        { id: "second-val", onClick: function onClick(event) {
+        {
+          id: "second-val",
+          onClick: function onClick(event) {
             return clickHandler(event, secondLeftMostLinks);
-          } },
+          }
+        },
         displaySecondValue,
         " "
       ),
@@ -2308,7 +2471,7 @@ function MyVis(_ref) {
 
 /***/ }),
 
-/***/ 2083:
+/***/ 2084:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2335,7 +2498,6 @@ function Title(_ref) {
       weight = _ref.weight;
 
 
-  console.log(title);
   return _react2.default.createElement(
     "div",
     { className: "title__vis", style: { fontSize: size + "px", color: color, fontWeight: weight } },
@@ -2345,11 +2507,11 @@ function Title(_ref) {
 
 /***/ }),
 
-/***/ 2084:
+/***/ 2085:
 /***/ (function(module, exports, __webpack_require__) {
 
 
-        var result = __webpack_require__(2085);
+        var result = __webpack_require__(2086);
 
         if (typeof result === "string") {
             module.exports = result;
@@ -2360,7 +2522,7 @@ function Title(_ref) {
 
 /***/ }),
 
-/***/ 2085:
+/***/ 2086:
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(99)(false);
@@ -2368,7 +2530,7 @@ exports = module.exports = __webpack_require__(99)(false);
 
 
 // module
-exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  \n  font-weight: 100;\n}\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}\n\n\n.title__vis{\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-align: center;\n  margin-top: 20px;\n  }", ""]);
+exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n}\n.flag-container {\n  margin: 0 auto;\n  width: 250px;\n  height: 100vh;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n  position: relative;\n  \n}\n\n.clipped {\n  clip-path: polygon(100% 0%, 100% 70%, 50% 90%, 50% 90%, 0 70%, 0 0);\n}\n\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-weight: 100;\n}\n\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}\n\n\n.title__vis{\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-align: center;\n  margin-top: 20px;\n  }\n\n  .flag{\n    width: 100%;\n    height: 100px;\n  }", ""]);
 
 // exports
 
