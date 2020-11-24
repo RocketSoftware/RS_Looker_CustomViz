@@ -432,7 +432,7 @@ looker.plugins.visualizations.add({
   label: "new_vis",
 
   create: function create(element) {
-    element.innerHTML = "\n    <style>\n  \n  .vis-body {\n    width: 100%;\n    height: 100%;\n}\n    * {\n      font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\", \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\", \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n}\n   \n    </style>\n  ";
+    element.innerHTML = "\n    <style>\n  \n  .vis-body {\n    width: 100%;\n    height: 100%;\n    overflow-y: hidden; \n    overflow-x: hidden;\n}\n    * {\n      font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\", \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\", \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n}\n   \n    </style>\n  ";
 
     var nStyle = document.createElement('style');
     nStyle.innerHTML = style;
@@ -465,7 +465,7 @@ looker.plugins.visualizations.add({
 
     if (config.show_as_title) {
 
-      this.chart = _reactDom2.default.render(_react2.default.createElement(_title2.default, { title: leftMostValue.realVal, size: config.title_size, color: config.title_color, weight: config.title_style }), this.vis);
+      this.chart = _reactDom2.default.render(_react2.default.createElement(_title2.default, { title: leftMostValue.realVal, size: config.title_size, color: config.title_color, weight: config.title_style, overide: config.title_overide, isFlag: config.show_title_as_flag, flagColor: config.title_flag_color, link: config.title_link, titleColor: config.title_color }), this.vis);
       document.body.style.backgroundColor = config.chart_color;
     } else {
       if (config.valueColor) {
@@ -29400,14 +29400,50 @@ var modifyOptions = function modifyOptions(vis, config, qr) {
   };
 
   if (config.show_as_title) {
-    options.title_size = {
+    options.title_overide = {
+      order: .5,
+      default: "",
+      display_size: "whole",
+      label: "Title Overide",
+      section: "Title",
+      type: "string"
+    };
+    options.show_title_as_flag = {
+      order: 0.6,
+      display_size: "whole",
+      type: "boolean",
+      label: "Show As Flag",
+      default: false,
+      section: "Title"
+    };
+    if (config.show_title_as_flag) {
+      options.title_flag_color = {
+        order: 0.7,
+        default: "#7CB242",
+        display: "color",
+        display_size: "whole",
+        label: "Flag Color",
+        section: "Title",
+        type: "string"
+      };
+    }
+    options.title_link = {
       order: 1,
+      default: "",
+      display_size: "whole",
+      label: "Title Link",
+      section: "Title",
+      type: "string"
+    };
+    options.title_size = {
+      order: 1.1,
       default: 20,
       display_size: "half",
       label: "Title Font Size",
       section: "Title",
       type: "number"
     };
+
     options.title_style = {
       order: 1.2,
       default: "normal",
@@ -29899,7 +29935,7 @@ function makeTitle(config) {
   return title;
 }
 
-function makeLink(config) {
+function makeLink(config, leftVal) {
   var link = "";
   if (config.show_link) {
     link = _react2.default.createElement(
@@ -29908,6 +29944,7 @@ function makeLink(config) {
       config.valueLink
     );
   }
+
   return link;
 }
 
@@ -30036,7 +30073,7 @@ var parseData = exports.parseData = function parseData(data, queryResponse, conf
 
   var label = makeLabel(config, secondLeftMostField);
   var title = makeTitle(config);
-  var link = makeLink(config);
+  var link = makeLink(config, leftMostValue.realVal);
   // if(!config.show_as_title){
 
   // }
@@ -30163,7 +30200,7 @@ function MyVis(_ref) {
     ),
     _react2.default.createElement("div", { className: "overlay", style: overlayStyle })
   );
-  var linkStyle = isHovered ? { borderBottom: "2px solid " + config.valueColor } : {};
+  var linkStyle = isHovered ? { borderBottom: "2px solid " + config.valueColor, backgroundColor: "rgba(232, 234, 238, 0.7)" } : {};
 
   function clickHandler(event, linkArr) {
     LookerCharts.Utils.openDrillMenu({
@@ -31273,6 +31310,11 @@ return numeral;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 exports.default = Title;
 
 var _react = __webpack_require__(1);
@@ -31281,20 +31323,41 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import numeral from "numeral"
-// import "./css/my_vis.css"
-
 function Title(_ref) {
   var title = _ref.title,
       size = _ref.size,
       color = _ref.color,
-      weight = _ref.weight;
+      weight = _ref.weight,
+      overide = _ref.overide,
+      isFlag = _ref.isFlag,
+      flagColor = _ref.flagColor,
+      link = _ref.link,
+      titleColor = _ref.titleColor;
 
+  var _React$useState = _react2.default.useState(false),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      isHovered = _React$useState2[0],
+      setIsHovered = _React$useState2[1];
 
+  var baseStyle = { fontSize: size + "px", color: color, fontWeight: weight };
+  var style = isFlag ? _extends({}, baseStyle, { backgroundColor: flagColor }) : _extends({}, baseStyle);
   return _react2.default.createElement(
     "div",
-    { className: "title__vis", style: { fontSize: size + "px", color: color, fontWeight: weight } },
-    title
+    {
+      onMouseEnter: function onMouseEnter() {
+        return setIsHovered(true);
+      },
+      onMouseLeave: function onMouseLeave() {
+        return setIsHovered(false);
+      },
+      href: link,
+      className: isFlag ? "flag-container clipped" : "title__vis",
+      style: style },
+    _react2.default.createElement(
+      "p",
+      { href: link, className: "title_p", style: { padding: "10px", backgroundColor: isHovered ? "rgba(232, 234, 238, 0.7)" : null, borderBottom: isHovered ? "2px solid " + titleColor : null } },
+      overide || title
+    )
   );
 }
 
@@ -31321,7 +31384,7 @@ exports = module.exports = __webpack_require__(28)(false);
 
 
 // module
-exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n}\n.flag-container {\n  margin: 0 auto;\n  width: 250px;\n  height: 100vh;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n  position: relative;\n  \n}\n\n.clipped {\n  clip-path: polygon(100% 0%, 100% 70%, 50% 90%, 50% 90%, 0 70%, 0 0);\n}\n\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-weight: 100;\n}\n\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}\n\n\n.title__vis{\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-align: center;\n  margin-top: 20px;\n  }\n\n  .flag{\n    width: 100%;\n    height: 100px;\n  }", ""]);
+exports.push([module.i, ".vis-container {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n}\n.flag-container {\n  margin: 0 auto;\n  width: 100%;\n  height: 110%;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  cursor: pointer;\n  position: relative;\n  \n}\n\n.clipped {\n  clip-path: polygon(100% 0%, 100% 70%, 50% 90%, 50% 90%, 0 70%, 0 0);\n}\n\n\n.val-1 {\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-weight: 100;\n  padding: 10px;\n}\n\n\n.val-2 {\n  height: 20px;\n  font-family: \"Open Sans\", \"Noto Sans JP\", \"Noto Sans CJK KR\",\n    \"Noto Sans Arabic UI\", \"Noto Sans Devanagari UI\", \"Noto Sans Hebrew\",\n    \"Noto Sans Thai UI\", Helvetica, Arial, sans-serif, \"Noto Sans\";\n  text-align: center;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  padding: 15px;\n  font-weight: 400;\n}\n.underlay-BG {\n  background-color: #F5F5F6;\n}\n.opactic-text {\n  color: rgba(0, 0, 0, 0);\n}\n.opactic-BG {\n  background-color: rgba(0, 0, 0, 0);\n}\n.none{\n    display: none;\n}\n.overlay {\n  height: 50px;\n  background-color: #E2E3E4;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  /* padding: 15px; */\n}\n\n.label {\n  opacity: 0.75;\n  font-weight: 100;\n}\n\n.title {\n  margin-top: 15px;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  padding: 0 10px;\n  font-weight: 100;\n}\n#of-text{\n    opacity: 0.75;\n    font-weight: 100;\n}\n\n\n.title__vis{\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-align: center;\n  margin-top: 20px;\n\n  }\n\n  .flag{\n    width: 100%;\n    height: 100px;\n  }\n  .title_p{\n    position: absolute;\n    z-index: 100;\n  }", ""]);
 
 // exports
 
