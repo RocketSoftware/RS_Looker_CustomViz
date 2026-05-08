@@ -68,11 +68,11 @@
     }
     .rkt-topbar-left { display: flex; align-items: center; gap: 9px; }
     .rkt-logo { width: 22px; height: 22px; flex-shrink: 0; }
-    .rkt-title { font-size: 12px; font-weight: 500; color: ${T.tx}; }
-    .rkt-count { font-size: 10px; color: ${T.mt}; }
+    .rkt-title { font-size: 15px; font-weight: 500; color: ${T.tx}; }
+    .rkt-count { font-size: 12px; color: #A8A8D0; }
     .rkt-gline { height: 2px; background: linear-gradient(90deg, ${T.B}, ${T.P}, ${T.K}); flex-shrink: 0; }
     .rkt-toolbar {
-      padding: 9px 14px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -85,22 +85,22 @@
       background: ${T.card};
       border: 1px solid ${T.bo2};
       border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 10px;
-      color: ${T.tx};
+      padding: 6px 12px;
+      font-size: 13px;
+      color: #EDEDFF;
       outline: none;
       transition: border-color .15s;
     }
-    .rkt-search::placeholder { color: ${T.mt}; }
+    .rkt-search::placeholder { color: #7878A8; }
     .rkt-search:focus { border-color: rgba(123,63,228,.5); }
-    .rkt-pg-info { font-size: 9px; color: ${T.mt}; white-space: nowrap; }
+    .rkt-pg-info { font-size: 12px; color: #A8A8D0; white-space: nowrap; }
     .rkt-pg-btn {
       background: ${T.card};
       border: 1px solid ${T.bo2};
       border-radius: 5px;
-      color: ${T.mt};
-      font-size: 10px;
-      padding: 4px 9px;
+      color: #C8C8EE;
+      font-size: 12px;
+      padding: 5px 11px;
       cursor: pointer;
       transition: all .15s;
     }
@@ -113,19 +113,20 @@
     .rkt-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
+      font-size: 13px;
       table-layout: auto;
     }
     .rkt-table thead { position: sticky; top: 0; z-index: 2; }
     .rkt-table th {
       background: ${T.surf};
-      color: ${T.dm};
-      font-weight: 400;
-      font-size: 9px;
+      color: #7878A8;
+      font-weight: 500;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: .6px;
-      padding: 7px 10px;
+      padding: 10px 14px;
       border-bottom: 1px solid ${T.bo2};
+      border-right: 1px solid rgba(100,65,210,.1);
       text-align: left;
       white-space: nowrap;
       cursor: pointer;
@@ -136,8 +137,9 @@
     .rkt-table th.sort-asc::after  { content: ' ↑'; color: ${T.P}; }
     .rkt-table th.sort-desc::after { content: ' ↓'; color: ${T.P}; }
     .rkt-table td {
-      padding: 7px 10px;
+      padding: 10px 14px;
       border-bottom: 1px solid rgba(100,65,210,.06);
+      border-right: 1px solid rgba(100,65,210,.1);
       color: ${T.tx};
       white-space: nowrap;
       max-width: 220px;
@@ -145,11 +147,13 @@
       text-overflow: ellipsis;
     }
     .rkt-table tr:last-child td { border-bottom: none; }
+    .rkt-table th:last-child,
+    .rkt-table td:last-child { border-right: none; }
     .rkt-table tbody tr { transition: background .12s; }
     .rkt-table tbody tr:hover td { background: ${T.card2}; }
     .rkt-badge {
-      font-size: 8px;
-      padding: 2px 7px;
+      font-size: 11px;
+      padding: 3px 9px;
       border-radius: 4px;
       display: inline-block;
       letter-spacing: .3px;
@@ -164,8 +168,8 @@
     .rkt-empty {
       padding: 40px 20px;
       text-align: center;
-      color: ${T.mt};
-      font-size: 11px;
+      color: #A8A8D0;
+      font-size: 14px;
     }
     .rkt-number { font-variant-numeric: tabular-nums; }
     .rkt-diag-bg {
