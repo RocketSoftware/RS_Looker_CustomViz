@@ -245,38 +245,70 @@
     .rpc-tooltip {
       position: fixed;
       pointer-events: none;
-      background: ${T.surf};
-      border: 1px solid ${T.bo};
-      border-radius: 8px;
-      padding: 9px 13px;
-      font-size: 12px;
-      color: ${T.tx};
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: rgba(13,13,34,0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(100,65,210,.38);
+      border-radius: 10px;
+      padding: 0;
+      overflow: hidden;
       z-index: 9999;
       opacity: 0;
-      transition: opacity .12s;
-      box-shadow: 0 4px 20px rgba(0,0,0,.5);
-      min-width: 120px;
-      max-width: 220px;
+      transform: translateY(6px) scale(0.97);
+      transition: opacity .15s ease, transform .15s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,.65), 0 0 0 1px rgba(123,63,228,.08);
+      min-width: 148px;
+      max-width: 240px;
     }
-    .rpc-tooltip.visible { opacity: 1; }
+    .rpc-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .rpc-tt-accent {
+      height: 3px;
+      background: ${T.P};
+      flex-shrink: 0;
+    }
+    .rpc-tt-body {
+      padding: 10px 14px 13px;
+    }
+    .rpc-tt-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+    .rpc-tt-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: ${T.P};
+      flex-shrink: 0;
+    }
     .rpc-tooltip-label {
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .8px;
-      color: ${T.mt};
-      margin-bottom: 5px;
+      letter-spacing: 1.1px;
+      color: #7878A8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .rpc-tooltip-value {
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 24px;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
       color: ${T.tx};
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-bottom: 5px;
     }
     .rpc-tooltip-pct {
-      font-size: 12px;
+      font-size: 11px;
       color: ${T.mt};
-      margin-top: 3px;
+      letter-spacing: .2px;
     }
 
     /* ── Slice interaction ── */
@@ -552,9 +584,15 @@
           </div>
         </div>
         <div class="rpc-tooltip" id="rpc-tooltip">
-          <div class="rpc-tooltip-label" id="rpc-tt-label"></div>
-          <div class="rpc-tooltip-value" id="rpc-tt-value"></div>
-          <div class="rpc-tooltip-pct"   id="rpc-tt-pct"></div>
+          <div class="rpc-tt-accent" id="rpc-tt-accent"></div>
+          <div class="rpc-tt-body">
+            <div class="rpc-tt-header">
+              <span class="rpc-tt-dot" id="rpc-tt-dot"></span>
+              <span class="rpc-tooltip-label" id="rpc-tt-label"></span>
+            </div>
+            <div class="rpc-tooltip-value" id="rpc-tt-value"></div>
+            <div class="rpc-tooltip-pct"   id="rpc-tt-pct"></div>
+          </div>
         </div>
       `);
 
@@ -801,20 +839,35 @@
       const svgEl = body.querySelector("#rpc-svg");
       if (!svgEl || !tooltip) { done(); return; }
 
-      const ttLabel = tooltip.querySelector("#rpc-tt-label");
-      const ttValue = tooltip.querySelector("#rpc-tt-value");
-      const ttPct   = tooltip.querySelector("#rpc-tt-pct");
-      const cvEl    = body.querySelector("#rpc-cv");
-      const clEl    = body.querySelector("#rpc-cl");
+      const ttLabel  = tooltip.querySelector("#rpc-tt-label");
+      const ttValue  = tooltip.querySelector("#rpc-tt-value");
+      const ttPct    = tooltip.querySelector("#rpc-tt-pct");
+      const ttDot    = tooltip.querySelector("#rpc-tt-dot");
+      const ttAccent = tooltip.querySelector("#rpc-tt-accent");
+      const cvEl     = body.querySelector("#rpc-cv");
+      const clEl     = body.querySelector("#rpc-cl");
+
+      /* Helper: populate and show tooltip for a given slice */
+      function showTooltip(s) {
+        const valDisp = s.rend != null ? s.rend : fmtNumber(s.val);
+        const pct     = ((s.val / total) * 100).toFixed(1) + "%";
+        if (ttDot)    ttDot.style.background    = s.color;
+        if (ttAccent) ttAccent.style.background = s.color;
+        if (ttLabel)  ttLabel.textContent = s.label;
+        if (ttValue)  ttValue.textContent = valDisp;
+        if (ttPct)    ttPct.textContent   = pct + " of total";
+        tooltip.classList.add("visible");
+        return valDisp;
+      }
+
+      function hideTooltip() {
+        tooltip.classList.remove("visible");
+      }
 
       svgEl.querySelectorAll(".rpc-slice").forEach(g => {
         const idx = parseInt(g.dataset.idx, 10);
         const s   = slices[idx];
         if (!s) return;
-
-        const pct = ((s.val / total) * 100).toFixed(1) + "%";
-        const valDisp = s.rend != null ? s.rend : fmtNumber(s.val);
-        const extraLine = measField2 && s.rend2 ? `<div style="font-size:11px;color:${T.mt};margin-top:4px;">${esc(measField2.label_short || measField2.label || "")}: ${esc(s.rend2)}</div>` : "";
 
         g.addEventListener("mouseenter", () => {
           /* Dim all others */
@@ -824,14 +877,10 @@
           body.querySelectorAll(".rpc-legend-item").forEach(li => {
             li.classList.toggle("dimmed", parseInt(li.dataset.idx, 10) !== idx);
           });
-          /* Update center */
+          /* Update center + show tooltip */
+          const valDisp = showTooltip(s);
           if (cvEl) cvEl.textContent = valDisp;
           if (clEl) clEl.textContent = s.label;
-          /* Show tooltip */
-          if (ttLabel) ttLabel.textContent = s.label;
-          if (ttValue) ttValue.textContent = valDisp;
-          if (ttPct)   ttPct.innerHTML     = pct + " of total" + (extraLine ? "<br>" + s.rend2 : "");
-          tooltip.classList.add("visible");
         });
 
         g.addEventListener("mouseleave", () => {
@@ -839,7 +888,7 @@
           body.querySelectorAll(".rpc-legend-item").forEach(li => li.classList.remove("dimmed"));
           if (cvEl) cvEl.textContent = fmtNumber(total);
           if (clEl) clEl.textContent = centerLabelText;
-          tooltip.classList.remove("visible");
+          hideTooltip();
         });
 
         /* Click to drill */
@@ -853,9 +902,12 @@
         });
       });
 
-      /* Legend item hover mirrors slice hover */
+      /* Legend item hover mirrors slice hover — including center update and tooltip */
       body.querySelectorAll(".rpc-legend-item").forEach(li => {
         const idx = parseInt(li.dataset.idx, 10);
+        const s   = slices[idx];
+        if (!s) return;
+
         li.addEventListener("mouseenter", () => {
           svgEl.querySelectorAll(".rpc-slice").forEach(g => {
             g.classList.toggle("dimmed", parseInt(g.dataset.idx, 10) !== idx);
@@ -863,10 +915,19 @@
           body.querySelectorAll(".rpc-legend-item").forEach(l => {
             l.classList.toggle("dimmed", parseInt(l.dataset.idx, 10) !== idx);
           });
+          /* Update donut center + show tooltip */
+          const valDisp = showTooltip(s);
+          if (cvEl) cvEl.textContent = valDisp;
+          if (clEl) clEl.textContent = s.label;
         });
+
         li.addEventListener("mouseleave", () => {
           svgEl.querySelectorAll(".rpc-slice").forEach(g => g.classList.remove("dimmed"));
           body.querySelectorAll(".rpc-legend-item").forEach(l => l.classList.remove("dimmed"));
+          /* Reset donut center + hide tooltip */
+          if (cvEl) cvEl.textContent = fmtNumber(total);
+          if (clEl) clEl.textContent = centerLabelText;
+          hideTooltip();
         });
       });
 
