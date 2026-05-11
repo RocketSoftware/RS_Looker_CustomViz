@@ -320,6 +320,20 @@
       filter: brightness(1.18) drop-shadow(0 0 6px rgba(255,255,255,.15));
     }
     .rpc-slice.dimmed { opacity: .28; }
+    .rpc-slice.pinned {
+      filter: brightness(1.2) drop-shadow(0 0 9px rgba(255,255,255,.22));
+    }
+    .rpc-slice.pinned path {
+      stroke: rgba(255,255,255,0.55);
+      stroke-width: 3;
+    }
+    .rpc-legend-item.pinned {
+      background: rgba(123,63,228,.22) !important;
+    }
+    .rpc-legend-item.pinned .rpc-legend-name {
+      color: #E2E2FF;
+      font-weight: 600;
+    }
 
     /* ── Empty / error state ── */
     .rpc-empty {
@@ -612,6 +626,9 @@
         }
       });
 
+      /* Pin state — persists across re-renders */
+      if (this._pinnedIdx === undefined) this._pinnedIdx = null;
+
       /* ResizeObserver */
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(entries => {
@@ -713,6 +730,12 @@
 
       /* Assign colors */
       slices.forEach((s, i) => { s.color = PALETTE[i % PALETTE.length]; });
+
+      /* Guard: if data changed and pinned index is now out of range, clear it */
+      if (this._pinnedIdx !== null && this._pinnedIdx >= slices.length) {
+        this._pinnedIdx = null;
+      }
+      const vis = this; // capture for event listener closures
 
       /* ── Chart title ── */
       const measLabel = measField.label_short || measField.label || measField.name;
@@ -847,7 +870,7 @@
       const cvEl     = body.querySelector("#rpc-cv");
       const clEl     = body.querySelector("#rpc-cl");
 
-      /* Helper: populate and show tooltip for a given slice */
+      /* ── Helper: show tooltip with formatted number + percentage ── */
       function showTooltip(s) {
         const valDisp = s.rend != null ? s.rend : fmtNumber(s.val);
         const pct     = ((s.val / total) * 100).toFixed(1) + "%";
@@ -855,7 +878,7 @@
         if (ttAccent) ttAccent.style.background = s.color;
         if (ttLabel)  ttLabel.textContent = s.label;
         if (ttValue)  ttValue.textContent = valDisp;
-        if (ttPct)    ttPct.textContent   = pct + " of total";
+        if (ttPct)    ttPct.textContent   = valDisp + "  ·  " + pct + " of total";
         tooltip.classList.add("visible");
         return valDisp;
       }
@@ -864,72 +887,99 @@
         tooltip.classList.remove("visible");
       }
 
+      /* ── Helper: apply or clear the pinned-selection state ── */
+      function applyPinState() {
+        const pi = vis._pinnedIdx;
+        const allSlices      = svgEl.querySelectorAll(".rpc-slice");
+        const allLegendItems = body.querySelectorAll(".rpc-legend-item");
+
+        if (pi !== null && slices[pi]) {
+          const ps      = slices[pi];
+          const valDisp = ps.rend != null ? ps.rend : fmtNumber(ps.val);
+          allSlices.forEach(g => {
+            const gi = parseInt(g.dataset.idx, 10);
+            g.classList.toggle("dimmed", gi !== pi);
+            g.classList.toggle("pinned", gi === pi);
+          });
+          allLegendItems.forEach(l => {
+            const li = parseInt(l.dataset.idx, 10);
+            l.classList.toggle("dimmed", li !== pi);
+            l.classList.toggle("pinned", li === pi);
+          });
+          if (cvEl) cvEl.textContent = valDisp;
+          if (clEl) clEl.textContent = ps.label;
+        } else {
+          allSlices.forEach(g => { g.classList.remove("dimmed"); g.classList.remove("pinned"); });
+          allLegendItems.forEach(l => { l.classList.remove("dimmed"); l.classList.remove("pinned"); });
+          if (cvEl) cvEl.textContent = fmtNumber(total);
+          if (clEl) clEl.textContent = centerLabelText;
+        }
+      }
+
+      /* ── Shared activate / deactivate logic used by both slice and legend ── */
+      function activateHover(idx, s) {
+        svgEl.querySelectorAll(".rpc-slice").forEach(g => {
+          const gi = parseInt(g.dataset.idx, 10);
+          g.classList.toggle("dimmed", gi !== idx);
+          g.classList.remove("pinned");
+        });
+        body.querySelectorAll(".rpc-legend-item").forEach(l => {
+          l.classList.toggle("dimmed", parseInt(l.dataset.idx, 10) !== idx);
+          l.classList.remove("pinned");
+        });
+        const valDisp = showTooltip(s);
+        if (cvEl) cvEl.textContent = valDisp;
+        if (clEl) clEl.textContent = s.label;
+      }
+
+      function deactivateHover() {
+        applyPinState();
+        hideTooltip();
+      }
+
+      function togglePin(idx) {
+        vis._pinnedIdx = (vis._pinnedIdx === idx) ? null : idx;
+        applyPinState();
+      }
+
+      /* ── Slice events ── */
       svgEl.querySelectorAll(".rpc-slice").forEach(g => {
         const idx = parseInt(g.dataset.idx, 10);
         const s   = slices[idx];
         if (!s) return;
 
-        g.addEventListener("mouseenter", () => {
-          /* Dim all others */
-          svgEl.querySelectorAll(".rpc-slice").forEach(gg => {
-            gg.classList.toggle("dimmed", gg !== g);
-          });
-          body.querySelectorAll(".rpc-legend-item").forEach(li => {
-            li.classList.toggle("dimmed", parseInt(li.dataset.idx, 10) !== idx);
-          });
-          /* Update center + show tooltip */
-          const valDisp = showTooltip(s);
-          if (cvEl) cvEl.textContent = valDisp;
-          if (clEl) clEl.textContent = s.label;
-        });
-
-        g.addEventListener("mouseleave", () => {
-          svgEl.querySelectorAll(".rpc-slice").forEach(gg => gg.classList.remove("dimmed"));
-          body.querySelectorAll(".rpc-legend-item").forEach(li => li.classList.remove("dimmed"));
-          if (cvEl) cvEl.textContent = fmtNumber(total);
-          if (clEl) clEl.textContent = centerLabelText;
-          hideTooltip();
-        });
-
-        /* Click to drill */
-        g.addEventListener("click", () => {
-          if (s.idx >= 0 && data[s.idx]) {
-            LookerCharts.Utils.openDrillMenu({
-              links:  data[s.idx][measField.name]?.links || [],
-              event:  event,
-            });
-          }
+        g.addEventListener("mouseenter", () => activateHover(idx, s));
+        g.addEventListener("mouseleave", () => deactivateHover());
+        g.addEventListener("click", (e) => {
+          e.stopPropagation();
+          togglePin(idx);
         });
       });
 
-      /* Legend item hover mirrors slice hover — including center update and tooltip */
+      /* ── Legend events ── */
       body.querySelectorAll(".rpc-legend-item").forEach(li => {
         const idx = parseInt(li.dataset.idx, 10);
         const s   = slices[idx];
         if (!s) return;
 
-        li.addEventListener("mouseenter", () => {
-          svgEl.querySelectorAll(".rpc-slice").forEach(g => {
-            g.classList.toggle("dimmed", parseInt(g.dataset.idx, 10) !== idx);
-          });
-          body.querySelectorAll(".rpc-legend-item").forEach(l => {
-            l.classList.toggle("dimmed", parseInt(l.dataset.idx, 10) !== idx);
-          });
-          /* Update donut center + show tooltip */
-          const valDisp = showTooltip(s);
-          if (cvEl) cvEl.textContent = valDisp;
-          if (clEl) clEl.textContent = s.label;
-        });
-
-        li.addEventListener("mouseleave", () => {
-          svgEl.querySelectorAll(".rpc-slice").forEach(g => g.classList.remove("dimmed"));
-          body.querySelectorAll(".rpc-legend-item").forEach(l => l.classList.remove("dimmed"));
-          /* Reset donut center + hide tooltip */
-          if (cvEl) cvEl.textContent = fmtNumber(total);
-          if (clEl) clEl.textContent = centerLabelText;
-          hideTooltip();
+        li.addEventListener("mouseenter", () => activateHover(idx, s));
+        li.addEventListener("mouseleave", () => deactivateHover());
+        li.addEventListener("click", (e) => {
+          e.stopPropagation();
+          togglePin(idx);
         });
       });
+
+      /* Click on empty chart area clears pin */
+      svgEl.addEventListener("click", () => {
+        if (vis._pinnedIdx !== null) {
+          vis._pinnedIdx = null;
+          applyPinState();
+        }
+      });
+
+      /* Restore pin state after any re-render */
+      applyPinState();
 
       done();
     },
