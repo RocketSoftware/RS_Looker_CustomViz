@@ -324,8 +324,11 @@
       filter: brightness(1.2) drop-shadow(0 0 9px rgba(255,255,255,.22));
     }
     .rpc-slice.pinned path {
-      stroke: rgba(255,255,255,0.55);
-      stroke-width: 3;
+      stroke: rgba(255,255,255,0.55) !important;
+      stroke-width: 3 !important;
+      /* Override the entrance-animation dash state so the full perimeter is stroked */
+      stroke-dasharray: none !important;
+      stroke-dashoffset: 0 !important;
     }
     .rpc-legend-item.pinned {
       background: rgba(123,63,228,.22) !important;
@@ -872,7 +875,7 @@
 
       /* ── Helper: show tooltip with formatted number + percentage ── */
       function showTooltip(s) {
-        const valDisp = s.rend != null ? s.rend : fmtNumber(s.val);
+        const valDisp = fmtNumber(s.val);   // always K / M / B notation
         const pct     = ((s.val / total) * 100).toFixed(1) + "%";
         if (ttDot)    ttDot.style.background    = s.color;
         if (ttAccent) ttAccent.style.background = s.color;
@@ -895,7 +898,7 @@
 
         if (pi !== null && slices[pi]) {
           const ps      = slices[pi];
-          const valDisp = ps.rend != null ? ps.rend : fmtNumber(ps.val);
+          const valDisp = fmtNumber(ps.val);   // always K / M / B notation
           allSlices.forEach(g => {
             const gi = parseInt(g.dataset.idx, 10);
             g.classList.toggle("dimmed", gi !== pi);

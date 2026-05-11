@@ -420,11 +420,13 @@
         ...(queryResponse.fields.table_calculations || []),
       ];
 
-      /* ── Update title — derive from first field name when no override is set ── */
+      /* ── Update title — derive from first field name when no override is set.
+            Treat the legacy default "Accounts" as blank for backward compat. ── */
       const derivedTitle = allFields.length > 0
         ? (allFields[0].label_short || allFields[0].label || allFields[0].name)
         : "Data";
-      document.getElementById("rkt-title").textContent = config.title || derivedTitle;
+      const titleOverride = (config.title && config.title !== "Accounts") ? config.title : null;
+      document.getElementById("rkt-title").textContent = titleOverride || derivedTitle;
 
       /* ── Toggle toolbar ── */
       const toolbar = document.getElementById("rkt-toolbar");
