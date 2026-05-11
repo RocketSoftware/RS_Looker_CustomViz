@@ -12,13 +12,14 @@
  *   - Two measures   → first = value, second = comparison (delta computed automatically)
  *   - Table calc     → auto-detected as delta if it contains "%" or "change" in its name
  *   - Date dimension + measure → sparkline rendered in bottom-right corner
+ *   - Fully responsive: adapts padding, font size, and chrome at any tile size
  *
- * Version: 1.0.0  |  May 2025
+ * Version: 1.1.0  |  May 2025
  */
- 
+
 (function () {
   "use strict";
- 
+
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
     bg:   "#05050E",
@@ -32,7 +33,7 @@
     ok:   "#2DD4A0",
     er:   "#F06060",
   };
- 
+
   /* ─── Gradient presets for the accent line ────────────────────────────── */
   const GRAD = {
     "blue":         T.B,
@@ -42,7 +43,7 @@
     "pink":         T.K,
     "full":         `linear-gradient(90deg, ${T.B}, ${T.P}, ${T.K})`,
   };
- 
+
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
   const CSS = `
     .sv-root {
@@ -71,7 +72,7 @@
       position: relative;
       box-sizing: border-box;
     }
- 
+
     .sv-body {
       flex: 1;
       display: flex;
@@ -81,7 +82,7 @@
       position: relative;
       box-sizing: border-box;
     }
- 
+
     .sv-logo {
       position: absolute;
       top: 18px;
@@ -91,7 +92,7 @@
       opacity: 0.28;
       flex-shrink: 0;
     }
- 
+
     .sv-label {
       font-size: 11px;
       font-weight: 500;
@@ -101,7 +102,7 @@
       margin-bottom: 14px;
       line-height: 1;
     }
- 
+
     .sv-value-row {
       display: flex;
       align-items: baseline;
@@ -109,22 +110,22 @@
       margin-bottom: 14px;
       line-height: 1;
     }
- 
+
     .sv-prefix,
     .sv-suffix {
       font-weight: 400;
       color: ${T.mt};
       line-height: 1;
     }
- 
+
     .sv-value {
       font-weight: 500;
       color: ${T.tx};
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
- 
-    /* font-size driven by data-size attribute on sv-root */
+
+    /* Fixed size tiers driven by data-size on sv-root */
     .sv-root[data-size="sm"]   .sv-value { font-size: 36px; }
     .sv-root[data-size="sm"]   .sv-prefix,
     .sv-root[data-size="sm"]   .sv-suffix { font-size: 20px; }
@@ -137,7 +138,16 @@
     .sv-root[data-size="xl"]   .sv-value { font-size: 88px; }
     .sv-root[data-size="xl"]   .sv-prefix,
     .sv-root[data-size="xl"]   .sv-suffix { font-size: 46px; }
- 
+
+    /* Auto size: driven by CSS custom property set by ResizeObserver */
+    .sv-root[data-size="auto"] .sv-value {
+      font-size: var(--sv-auto-fs, 52px);
+    }
+    .sv-root[data-size="auto"] .sv-prefix,
+    .sv-root[data-size="auto"] .sv-suffix {
+      font-size: var(--sv-auto-pre, 28px);
+    }
+
     .sv-delta {
       display: flex;
       align-items: center;
@@ -145,7 +155,7 @@
       font-size: 13px;
       line-height: 1;
     }
- 
+
     .sv-arrow-badge {
       display: flex;
       align-items: center;
@@ -155,35 +165,76 @@
       font-size: 12px;
       font-weight: 500;
     }
- 
+
     .sv-arrow-badge.up-good   { background: rgba(45,212,160,.14); color: ${T.ok}; }
     .sv-arrow-badge.up-bad    { background: rgba(240,96,96,.14);  color: ${T.er}; }
     .sv-arrow-badge.down-good { background: rgba(45,212,160,.14); color: ${T.ok}; }
     .sv-arrow-badge.down-bad  { background: rgba(240,96,96,.14);  color: ${T.er}; }
     .sv-arrow-badge.neutral   { background: rgba(100,65,210,.14); color: #A8A8D0; }
- 
+
     .sv-delta-label {
       font-size: 12px;
       color: ${T.mt};
     }
- 
+
     .sv-sparkline-wrap {
       position: absolute;
       right: 24px;
       bottom: 28px;
+      line-height: 0;
     }
- 
-    .sv-sparkline-wrap svg {
-      display: block;
-    }
- 
+
+    .sv-sparkline-wrap svg { display: block; }
+
     .sv-line {
       height: 2px;
       width: 100%;
       flex-shrink: 0;
+      background-size: 200% 100%;
+      animation: sv-grad-flow 5s ease-in-out infinite alternate;
     }
+
+    @keyframes sv-grad-flow {
+      from { background-position: 0% 50%; }
+      to   { background-position: 100% 50%; }
+    }
+
+    /* ── Responsive: width breakpoints via data-w on sv-root ── */
+
+    /* Narrow: < 260px wide */
+    .sv-root[data-w="xs"] .sv-body { padding: 14px 16px 12px; }
+    .sv-root[data-w="xs"] .sv-label { font-size: 9px; letter-spacing: 0.7px; margin-bottom: 8px; }
+    .sv-root[data-w="xs"] .sv-delta { display: none; }
+    .sv-root[data-w="xs"] .sv-sparkline-wrap { display: none; }
+    .sv-root[data-w="xs"] .sv-logo { width: 14px; height: 14px; top: 10px; right: 12px; }
+    .sv-root[data-w="xs"] .sv-value-row { margin-bottom: 0; }
+
+    /* Small: 260–380px wide */
+    .sv-root[data-w="sm"] .sv-body { padding: 20px 22px 16px; }
+    .sv-root[data-w="sm"] .sv-label { font-size: 10px; margin-bottom: 10px; }
+    .sv-root[data-w="sm"] .sv-sparkline-wrap { display: none; }
+    .sv-root[data-w="sm"] .sv-value-row { margin-bottom: 10px; }
+
+    /* Medium: 380–560px wide */
+    .sv-root[data-w="md"] .sv-body { padding: 24px 28px 18px; }
+
+    /* ── Responsive: height breakpoints via data-h on sv-root ── */
+
+    /* Very short: < 110px tall — show only the value */
+    .sv-root[data-h="xs"] .sv-label { display: none; }
+    .sv-root[data-h="xs"] .sv-delta { display: none; }
+    .sv-root[data-h="xs"] .sv-sparkline-wrap { display: none; }
+    .sv-root[data-h="xs"] .sv-body { padding: 8px 16px; justify-content: center; }
+    .sv-root[data-h="xs"] .sv-value-row { margin-bottom: 0; }
+
+    /* Short: 110–160px tall — hide comparison label text */
+    .sv-root[data-h="sm"] .sv-delta-label { display: none; }
+    .sv-root[data-h="sm"] .sv-sparkline-wrap { display: none; }
+    .sv-root[data-h="sm"] .sv-body { padding: 12px 24px 10px; }
+    .sv-root[data-h="sm"] .sv-value-row { margin-bottom: 8px; }
+    .sv-root[data-h="sm"] .sv-label { margin-bottom: 8px; }
   `;
- 
+
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
   const LOGO = `
     <svg class="sv-logo" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
@@ -201,21 +252,21 @@
             stroke="url(#sv-lg)" stroke-width="2.4" fill="none"
             stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`;
- 
+
   /* ─── Helpers ─────────────────────────────────────────────────────────── */
- 
+
   /** Escape HTML entities. */
   function esc(s) {
     return String(s == null ? "" : s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
- 
+
   /** Extract the best display string from a Looker cell. */
   function cellVal(cell) {
     if (cell == null) return null;
     return cell.rendered != null ? cell.rendered : cell.value;
   }
- 
+
   /** Format a raw number with optional prefix/suffix. */
   function fmtNumber(v) {
     if (v == null || v === "") return "—";
@@ -227,7 +278,7 @@
     if (Number.isInteger(n)) return n.toLocaleString();
     return n.toFixed(2);
   }
- 
+
   /** Detect whether a field looks like a percentage change/delta. */
   function isDeltaLike(field) {
     const n = (field.name + " " + (field.label || "")).toLowerCase();
@@ -235,7 +286,36 @@
            n.includes("growth") || n.includes("vs") || n.includes("prior") ||
            n.includes("percent") || field.value_format === "%";
   }
- 
+
+  /**
+   * Compute auto font size from container dimensions.
+   * Returns [valueFontSize, prefixSuffixFontSize] in px.
+   */
+  function autoSize(w, h) {
+    // Scale to fill roughly 40% of the shorter axis, clamped to a readable range
+    const base = Math.min(w * 0.42, h * 0.42);
+    const fs   = Math.max(22, Math.min(112, Math.round(base)));
+    return [fs, Math.round(fs * 0.52)];
+  }
+
+  /**
+   * Apply width/height breakpoint attributes and (if auto) font-size custom properties.
+   * Called by ResizeObserver.
+   */
+  function applyBreakpoints(root, w, h) {
+    root.setAttribute("data-w",
+      w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
+    );
+    root.setAttribute("data-h",
+      h < 110 ? "xs" : h < 160 ? "sm" : "lg"
+    );
+    if (root.getAttribute("data-size") === "auto") {
+      const [fs, pre] = autoSize(w, h);
+      root.style.setProperty("--sv-auto-fs",  fs  + "px");
+      root.style.setProperty("--sv-auto-pre", pre + "px");
+    }
+  }
+
   /** Build a compact SVG sparkline from an array of numbers. */
   function buildSparkline(values, w, h, strokeColor) {
     if (!values || values.length < 2) return "";
@@ -250,10 +330,10 @@
       const y = pad + (1 - (v - min) / range) * (h - pad * 2);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
- 
+
     const areaBottom = h - pad;
     const areaPath = `M${pts[0]} L${pts.join(" L")} L${pts[pts.length - 1].split(",")[0]},${areaBottom} L${pts[0].split(",")[0]},${areaBottom} Z`;
- 
+
     return `
       <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
            xmlns="http://www.w3.org/2000/svg"
@@ -284,12 +364,12 @@
           fill="${T.K}"/>
       </svg>`;
   }
- 
+
   /* ─── Looker visualization definition ────────────────────────────────── */
   looker.plugins.visualizations.add({
     id:    "rocket_single_value",
     label: "Rocket — Single Value",
- 
+
     options: {
       title_override: {
         type:        "string",
@@ -324,8 +404,14 @@
         type:    "string",
         label:   "Value size",
         display: "select",
-        values:  [{ Small: "sm" }, { Medium: "md" }, { Large: "lg" }, { "Extra large": "xl" }],
-        default: "lg",
+        values:  [
+          { "Auto (fills tile)": "auto" },
+          { Small:               "sm"   },
+          { Medium:              "md"   },
+          { Large:               "lg"   },
+          { "Extra large":       "xl"   },
+        ],
+        default: "auto",
         section: "Value",
         order:   5,
       },
@@ -379,97 +465,123 @@
         label:   "Accent line thickness",
         display: "select",
         values:  [
-          { "Thin (1px)":   "1" },
-          { "Default (2px)":"2" },
-          { "Medium (3px)": "3" },
-          { "Bold (4px)":   "4" },
+          { "Thin (1px)":    "1" },
+          { "Default (2px)": "2" },
+          { "Medium (3px)":  "3" },
+          { "Bold (4px)":    "4" },
         ],
         default: "2",
         section: "Style",
         order:   11,
       },
     },
- 
+
     /* ── Create ── */
     create: function (element, config) {
       const style = document.createElement("style");
       style.textContent = CSS;
       element.appendChild(style);
       element.insertAdjacentHTML("beforeend",
-        `<div class="sv-root" id="sv-root" data-size="lg">
+        `<div class="sv-root" id="sv-root" data-size="auto" data-w="lg" data-h="lg">
            ${LOGO}
            <div class="sv-body" id="sv-body"></div>
            <div class="sv-line" id="sv-line"></div>
          </div>`
       );
+
+      /* ResizeObserver: update breakpoint attributes whenever tile is resized */
+      if (typeof ResizeObserver !== "undefined") {
+        this._ro = new ResizeObserver(entries => {
+          const { width, height } = entries[0].contentRect;
+          const root = element.querySelector("#sv-root");
+          if (root) applyBreakpoints(root, width, height);
+        });
+        this._ro.observe(element);
+      }
     },
- 
+
     /* ── Update ── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const root = element.querySelector("#sv-root");
       const body = element.querySelector("#sv-body");
       const line = element.querySelector("#sv-line");
- 
+
       if (!root || !body || !line) { done(); return; }
- 
+
       /* ── Accent line ── */
-      const thickness  = config.line_thickness || "2";
-      const gradKey    = config.gradient_stop  || "full";
-      line.style.height     = thickness + "px";
-      line.style.background = GRAD[gradKey] || GRAD.full;
- 
-      /* ── Font size ── */
-      root.setAttribute("data-size", config.font_size || "lg");
- 
+      const thickness = config.line_thickness || "2";
+      const gradKey   = config.gradient_stop  || "full";
+      line.style.height          = thickness + "px";
+      line.style.backgroundImage = GRAD[gradKey] || GRAD.full;
+
+      /* ── Font size mode ── */
+      const sizeMode = config.font_size || "auto";
+      root.setAttribute("data-size", sizeMode);
+
+      /* For auto mode, seed CSS vars immediately from current dimensions */
+      if (sizeMode === "auto") {
+        const w = element.offsetWidth  || 300;
+        const h = element.offsetHeight || 200;
+        applyBreakpoints(root, w, h);
+      } else {
+        /* For fixed modes, still apply layout breakpoints */
+        const w = element.offsetWidth  || 300;
+        const h = element.offsetHeight || 200;
+        root.setAttribute("data-w",
+          w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
+        );
+        root.setAttribute("data-h",
+          h < 110 ? "xs" : h < 160 ? "sm" : "lg"
+        );
+      }
+
       /* ── Collect fields ── */
-      const dims  = queryResponse.fields.dimensions        || [];
-      const meas  = queryResponse.fields.measures          || [];
-      const calcs = queryResponse.fields.table_calculations|| [];
+      const dims     = queryResponse.fields.dimensions         || [];
+      const meas     = queryResponse.fields.measures           || [];
+      const calcs    = queryResponse.fields.table_calculations || [];
       const allMeasures = [...meas, ...calcs];
- 
+
       if (allMeasures.length === 0 || data.length === 0) {
         body.innerHTML = `<div style="color:${T.mt};font-size:14px;padding:20px 0;">
           Add at least one measure to display a value.</div>`;
         done();
         return;
       }
- 
-      /* ── Primary measure (first measure or table calc) ── */
+
+      /* ── Primary measure ── */
       const primaryField = allMeasures[0];
- 
-      /* ── Delta field: second measure, OR first table calc that looks like % change ── */
+
+      /* ── Delta field ── */
       let deltaField = null;
       if (allMeasures.length > 1) {
-        /* Prefer a field that explicitly looks like a delta */
         const explicit = allMeasures.slice(1).find(f => isDeltaLike(f));
         deltaField = explicit || allMeasures[1];
       }
- 
-      /* ── Primary value: sum across rows (works for both single-row and multi-row) ── */
-      let primaryRaw = null;
+
+      /* ── Primary value ── */
+      let primaryRaw      = null;
       let primaryRendered = null;
- 
+
       if (data.length === 1) {
-        const cell = data[0][primaryField.name];
+        const cell   = data[0][primaryField.name];
         primaryRaw      = cell?.value;
         primaryRendered = cell?.rendered;
       } else {
-        /* Multi-row: sum numeric values; use last row's rendered for display if possible */
         const nums = data.map(r => r[primaryField.name]?.value)
                          .filter(v => v != null && !isNaN(parseFloat(v)));
         primaryRaw = nums.reduce((a, b) => a + parseFloat(b), 0);
       }
- 
+
       /* ── Delta value ── */
       let deltaRaw      = null;
       let deltaRendered = null;
       if (deltaField && data.length >= 1) {
-        const cell = data[data.length - 1][deltaField.name];
+        const cell    = data[data.length - 1][deltaField.name];
         deltaRaw      = cell?.value;
         deltaRendered = cell?.rendered;
       }
- 
-      /* ── Sparkline data: gather primary measure across all rows ── */
+
+      /* ── Sparkline data ── */
       const hasDateDim = dims.some(d =>
         d.type === "date" || d.type === "date_time" ||
         (d.name || "").toLowerCase().includes("date") ||
@@ -479,13 +591,13 @@
       const sparkValues = (hasDateDim && data.length > 2)
         ? data.map(r => r[primaryField.name]?.value).filter(v => v != null)
         : [];
- 
+
       /* ── Label ── */
       const label = config.title_override ||
                     primaryField.label_short ||
                     primaryField.label ||
                     primaryField.name;
- 
+
       /* ── Format value ── */
       let displayVal;
       if (config.auto_format !== false && typeof primaryRaw === "number") {
@@ -495,17 +607,17 @@
           ? esc(primaryRendered)
           : fmtNumber(primaryRaw);
       }
- 
+
       const prefix = esc(config.value_prefix || "");
       const suffix = esc(config.value_suffix || "");
- 
+
       /* ── Format delta ── */
       let deltaHtml = "";
       if (config.show_comparison !== false && deltaField && deltaRaw != null) {
         const dNum  = parseFloat(String(deltaRaw).replace(/[^0-9.\-]/g, ""));
         const isUp  = !isNaN(dNum) ? dNum >= 0 : true;
         const arrow = isUp ? "▲" : "▼";
- 
+
         let badgeCls;
         if (isNaN(dNum)) {
           badgeCls = "neutral";
@@ -514,13 +626,13 @@
         } else {
           badgeCls = isUp ? "up-bad" : "down-good";
         }
- 
+
         const dDisp = deltaRendered != null
           ? esc(deltaRendered)
           : (!isNaN(dNum) ? (isUp ? "+" : "") + dNum.toFixed(1) + "%" : esc(String(deltaRaw)));
- 
+
         const compLabel = esc(config.comparison_label || "vs. prior period");
- 
+
         deltaHtml = `
           <div class="sv-delta">
             <span class="sv-arrow-badge ${badgeCls}">
@@ -530,16 +642,20 @@
             <span class="sv-delta-label">${compLabel}</span>
           </div>`;
       }
- 
-      /* ── Sparkline ── */
+
+      /* ── Sparkline (scales with container) ── */
       let sparkHtml = "";
       if (config.show_sparkline !== false && sparkValues.length > 2) {
-        const spk = buildSparkline(sparkValues, 96, 40, T.P);
+        const containerW = element.offsetWidth  || 300;
+        const containerH = element.offsetHeight || 200;
+        const spkW = Math.round(Math.min(100, Math.max(56, containerW * 0.26)));
+        const spkH = Math.round(Math.min(44,  Math.max(24, containerH * 0.18)));
+        const spk  = buildSparkline(sparkValues, spkW, spkH, T.P);
         if (spk) {
           sparkHtml = `<div class="sv-sparkline-wrap">${spk}</div>`;
         }
       }
- 
+
       /* ── Render ── */
       body.innerHTML = `
         <div class="sv-label">${esc(label)}</div>
@@ -551,7 +667,7 @@
         ${deltaHtml}
         ${sparkHtml}
       `;
- 
+
       done();
     },
   });
