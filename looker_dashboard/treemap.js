@@ -249,25 +249,27 @@
     function flushRow(row, cx, cy, cw, ch) {
       const rowArea = row.reduce((a, d) => a + d._a, 0);
       if (cw <= ch) {
-        /* Horizontal strip */
-        const stripW = cw > 0 ? rowArea / ch : 0;
-        let ry = cy;
-        row.forEach(d => {
-          const dh = ch > 0 ? d._a / stripW : 0;
-          results.push({ ...d, x: cx, y: ry, w: stripW, h: dh });
-          ry += dh;
-        });
-        return { nx: cx + stripW, ny: cy, nw: cw - stripW, nh: ch };
-      } else {
-        /* Vertical strip */
-        const stripH = ch > 0 ? rowArea / cw : 0;
+        /* Tall rectangle → lay a horizontal strip across the full width,
+           items placed left-to-right inside it.                          */
+        const stripH = cw > 0 ? rowArea / cw : 0;
         let rx = cx;
         row.forEach(d => {
-          const dw = cw > 0 ? d._a / stripH : 0;
+          const dw = stripH > 0 ? d._a / stripH : 0;
           results.push({ ...d, x: rx, y: cy, w: dw, h: stripH });
           rx += dw;
         });
         return { nx: cx, ny: cy + stripH, nw: cw, nh: ch - stripH };
+      } else {
+        /* Wide rectangle → lay a vertical strip down the full height,
+           items placed top-to-bottom inside it.                          */
+        const stripW = ch > 0 ? rowArea / ch : 0;
+        let ry = cy;
+        row.forEach(d => {
+          const dh = stripW > 0 ? d._a / stripW : 0;
+          results.push({ ...d, x: cx, y: ry, w: stripW, h: dh });
+          ry += dh;
+        });
+        return { nx: cx + stripW, ny: cy, nw: cw - stripW, nh: ch };
       }
     }
 
