@@ -297,16 +297,15 @@
   /* ─── Looker visualization definition ────────────────────────────────── */
   looker.plugins.visualizations.add({
     id:    "rocket_accounts_table",
-    label: "Rocket — Data Table",
+    label: "Rocket — Accounts Table",
 
     options: {
       title: {
-        type:        "string",
-        label:       "Table title",
-        default:     "",
-        placeholder: "Leave blank to derive from field names",
-        section:     "Style",
-        order:       1,
+        type:    "string",
+        label:   "Table title",
+        default: "Accounts",
+        section: "Style",
+        order:   1,
       },
       rows_per_page: {
         type:    "number",
@@ -374,13 +373,13 @@
         <div class="rkt-topbar">
           <div class="rkt-topbar-left">
             ${LOGO_SVG}
-            <span class="rkt-title" id="rkt-title">Data</span>
+            <span class="rkt-title" id="rkt-title">Accounts</span>
           </div>
           <span class="rkt-count" id="rkt-count"></span>
         </div>
         <div class="rkt-gline"></div>
         <div class="rkt-toolbar" id="rkt-toolbar" style="display:none">
-          <input class="rkt-search" id="rkt-search" type="text" placeholder="Search…"/>
+          <input class="rkt-search" id="rkt-search" type="text" placeholder="Search accounts…"/>
           <span class="rkt-pg-info" id="rkt-pg-info"></span>
           <button class="rkt-pg-btn" id="rkt-prev">‹ Prev</button>
           <button class="rkt-pg-btn" id="rkt-next">Next ›</button>
@@ -420,13 +419,8 @@
         ...(queryResponse.fields.table_calculations || []),
       ];
 
-      /* ── Update title — derive from first field name when no override is set.
-            Treat the legacy default "Accounts" as blank for backward compat. ── */
-      const derivedTitle = allFields.length > 0
-        ? (allFields[0].label_short || allFields[0].label || allFields[0].name)
-        : "Data";
-      const titleOverride = (config.title && config.title !== "Accounts") ? config.title : null;
-      document.getElementById("rkt-title").textContent = titleOverride || derivedTitle;
+      /* ── Update title ── */
+      document.getElementById("rkt-title").textContent = config.title || "Accounts";
 
       /* ── Toggle toolbar ── */
       const toolbar = document.getElementById("rkt-toolbar");
