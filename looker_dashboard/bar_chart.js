@@ -162,6 +162,13 @@
       transform-origin: bottom;
       animation: rbc-grow .45s cubic-bezier(.4,0,.2,1) both;
     }
+    /* Negative bars grow downward — origin flips to top */
+    .rbc-bar.negative rect {
+      transform-origin: top;
+    }
+
+    /* ── Zero baseline (shown when chart spans negative values) ── */
+    .rbc-zeroline { stroke: rgba(226,226,255,.3); stroke-width: 1; }
 
     /* ── Value labels on bars ── */
     .rbc-val-label {
@@ -523,44 +530,64 @@
       const svgW   = availW;
       const svgH   = availH;
 
-      /* Y-scale */
-      let maxVal = 0;
+      /* Y-scale — track true min AND max to support negative values */
+      let rawMax = 0, rawMin = 0;
       if (isStacked) {
         groups.forEach((_, gi) => {
-          const sum = series.reduce((s, se) => s + se.values[gi], 0);
-          maxVal = Math.max(maxVal, sum);
+          let posSum = 0, negSum = 0;
+          series.forEach(se => {
+            const v = se.values[gi];
+            if (v >= 0) posSum += v; else negSum += v;
+          });
+          rawMax = Math.max(rawMax, posSum);
+          rawMin = Math.min(rawMin, negSum);
         });
       } else {
-        series.forEach(se => se.values.forEach(v => maxVal = Math.max(maxVal, v)));
+        series.forEach(se => se.values.forEach(v => {
+          rawMax = Math.max(rawMax, v);
+          rawMin = Math.min(rawMin, v);
+        }));
       }
-      const yMax   = niceMax(maxVal * 1.08);
-      const yScale = v => chartH - (v / yMax) * chartH;
+      const yMax   = rawMax >= 0 ? niceMax(rawMax * 1.08 || 1) :  0;
+      const yMin   = rawMin <  0 ? -niceMax(Math.abs(rawMin) * 1.08) : 0;
+      const yRange = yMax - yMin || 1;
+      /* yScale: value → pixel offset from top of chart area */
+      const yScale = v => chartH * (1 - (v - yMin) / yRange);
+      const zeroY  = MT + yScale(0);  // SVG y-coordinate of the zero baseline
+      const hasNeg = rawMin < 0;
 
       /* X-scale */
-      const groupW      = chartW / groups.length;
-      const barPad      = Math.max(3, groupW * 0.12);
-      const innerW      = groupW - barPad * 2;
-      const barW        = isStacked ? innerW : Math.max(2, innerW / series.length - 1);
-      const groupX      = gi => ML + gi * groupW + barPad;
+      const groupW  = chartW / groups.length;
+      const barPad  = Math.max(3, groupW * 0.12);
+      const innerW  = groupW - barPad * 2;
+      const barW    = isStacked ? innerW : Math.max(2, innerW / series.length - 1);
+      const groupX  = gi => ML + gi * groupW + barPad;
 
       /* Y-axis tick count */
-      const tickCount = Math.min(5, Math.max(2, Math.floor(chartH / 30)));
+      const tickCount = Math.min(6, Math.max(2, Math.floor(chartH / 30)));
 
       /* ── SVG construction ── */
       const svgNS = "http://www.w3.org/2000/svg";
 
-      /* Y-axis gridlines + labels */
+      /* Y-axis gridlines + labels (evenly spaced from yMin → yMax) */
       let gridLines = "";
       for (let ti = 0; ti <= tickCount; ti++) {
-        const v  = yMax * ti / tickCount;
-        const y  = MT + yScale(v);
-        const lx = ML - 6;
+        const v   = yMin + (yMax - yMin) * (ti / tickCount);
+        const y   = MT + yScale(v);
+        const lx  = ML - 6;
+        /* Round floating-point drift at tick boundaries */
+        const vr  = Math.round(v * 1e9) / 1e9;
         gridLines += `
-          <line class="rbc-gridline" x1="${ML}" y1="${y}" x2="${ML + chartW}" y2="${y}"/>
-          <text class="rbc-axis-label" x="${lx}" y="${y}" text-anchor="end" dominant-baseline="middle">${fmtAxis(v)}</text>`;
+          <line class="rbc-gridline" x1="${ML}" y1="${y.toFixed(1)}" x2="${ML + chartW}" y2="${y.toFixed(1)}"/>
+          <text class="rbc-axis-label" x="${lx}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle">${fmtAxis(vr)}</text>`;
+      }
+      /* Explicit zero line when chart spans negatives */
+      if (hasNeg) {
+        gridLines += `
+          <line class="rbc-zeroline" x1="${ML}" y1="${zeroY.toFixed(1)}" x2="${ML + chartW}" y2="${zeroY.toFixed(1)}"/>`;
       }
 
-      /* X-axis labels */
+      /* X-axis labels (always at bottom of chart area) */
       let xLabels = "";
       const maxLabelW = Math.max(20, groupW - 4);
       groups.forEach((g, gi) => {
@@ -576,24 +603,47 @@
       let barGroups = "";
       series.forEach((se, si) => {
         se.values.forEach((val, gi) => {
-          if (val <= 0) return;
+          if (val === 0) return;
+          const isNeg = val < 0;
           let bx, by, bh;
+
           if (isStacked) {
-            const base = series.slice(0, si).reduce((s, ps) => s + ps.values[gi], 0);
-            bh = Math.max(1, (val / yMax) * chartH);
-            by = MT + yScale(base + val);
+            if (!isNeg) {
+              /* Positive: stack upward from zero (or from positive base) */
+              const posBase = series.slice(0, si).reduce((s, ps) => {
+                const pv = ps.values[gi]; return s + (pv > 0 ? pv : 0);
+              }, 0);
+              by = MT + yScale(posBase + val);
+              bh = Math.max(1, yScale(posBase) - yScale(posBase + val));
+            } else {
+              /* Negative: stack downward from zero (or from negative base) */
+              const negBase = series.slice(0, si).reduce((s, ps) => {
+                const pv = ps.values[gi]; return s + (pv < 0 ? pv : 0);
+              }, 0);
+              by = MT + yScale(negBase);
+              bh = Math.max(1, yScale(negBase + val) - yScale(negBase));
+            }
             bx = groupX(gi);
           } else {
-            bh = Math.max(1, (val / yMax) * chartH);
-            by = MT + chartH - bh;
+            /* Grouped */
             bx = groupX(gi) + si * (barW + 1);
+            if (!isNeg) {
+              bh = Math.max(1, yScale(0) - yScale(val));
+              by = MT + yScale(val);
+            } else {
+              bh = Math.max(1, yScale(val) - yScale(0));
+              by = zeroY;
+            }
           }
+
           const barKey = `${si}-${gi}`;
           const delay  = (gi * 0.04 + si * 0.015).toFixed(3);
           const radius = Math.min(3, barW / 3, bh / 2);
+          /* Value label: above positive bars, below negative bars */
+          const labelY = isNeg ? (by + bh + 10).toFixed(1) : (by - 3).toFixed(1);
 
           barGroups += `
-            <g class="rbc-bar" data-si="${si}" data-gi="${gi}" data-key="${esc(barKey)}">
+            <g class="rbc-bar${isNeg ? ' negative' : ''}" data-si="${si}" data-gi="${gi}" data-key="${esc(barKey)}">
               <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}"
                     width="${barW.toFixed(1)}" height="${bh.toFixed(1)}"
                     fill="${se.color}" fill-opacity="0.85"
@@ -602,7 +652,7 @@
               ${showValues && bh > 14 ? `
               <text class="rbc-val-label"
                     x="${(bx + barW / 2).toFixed(1)}"
-                    y="${(by - 3).toFixed(1)}">${fmtNumber(val)}</text>` : ""}
+                    y="${labelY}">${fmtNumber(val)}</text>` : ""}
             </g>`;
         });
       });
@@ -611,6 +661,7 @@
       const axisLines = `
         <line class="rbc-axis-line" x1="${ML}" y1="${MT}" x2="${ML}" y2="${MT + chartH}"/>
         <line class="rbc-axis-line" x1="${ML}" y1="${MT + chartH}" x2="${ML + chartW}" y2="${MT + chartH}"/>`;
+
 
       /* Y-axis title */
       const yAxisTitle = config.y_axis_label || measLabel;
