@@ -37,28 +37,20 @@
     er:    "#F06060",
   };
 
-  /* ─── Slice color palette (cycles if more slices than colors) ─────────── */
+  /* ─── Slice color palette — blue → purple → pink brand family ────────── */
   const PALETTE = [
-    T.B,          // blue
-    T.P,          // purple
-    T.K,          // pink
-    T.ok,         // teal/green
-    T.wn,         // amber
-    "#6040EC",    // blue-purple mid
-    "#B038C8",    // purple-pink mid
-    T.er,         // red
-    "#40C4FF",    // light blue
-    "#C77DFF",    // lavender
-    "#1A9E6E",    // emerald
-    "#E06030",    // orange
-    "#4488DD",    // steel blue
-    "#AA44BB",    // orchid
-    "#88CC44",    // lime
-    "#DD4466",    // rose
-    "#44BBCC",    // cyan
-    "#CC8833",    // gold
-    "#8844EE",    // violet
-    "#44CC88",    // mint
+    "#3B7EF6",   // brand blue
+    "#5B5EF4",   // blue-indigo
+    "#7B3FE4",   // brand purple
+    "#9B30D0",   // purple-violet
+    "#B838B8",   // violet-magenta
+    "#D9349A",   // brand pink
+    "#2495CC",   // sky blue
+    "#4355E8",   // cobalt
+    "#6B28C8",   // deep purple
+    "#A020A8",   // magenta-purple
+    "#CC2888",   // deep pink
+    "#E03070",   // crimson-pink
   ];
 
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
@@ -967,39 +959,4 @@
         if (!s) return;
 
         g.addEventListener("mouseenter", () => activateHover(idx, s));
-        g.addEventListener("mouseleave", () => deactivateHover());
-        g.addEventListener("click", (e) => {
-          e.stopPropagation();
-          togglePin(idx);
-        });
-      });
-
-      /* ── Legend events ── */
-      body.querySelectorAll(".rpc-legend-item").forEach(li => {
-        const idx = parseInt(li.dataset.idx, 10);
-        const s   = slices[idx];
-        if (!s) return;
-
-        li.addEventListener("mouseenter", () => activateHover(idx, s));
-        li.addEventListener("mouseleave", () => deactivateHover());
-        li.addEventListener("click", (e) => {
-          e.stopPropagation();
-          togglePin(idx);
-        });
-      });
-
-      /* Click on empty chart area clears pin */
-      svgEl.addEventListener("click", () => {
-        if (vis._pinnedIdx !== null) {
-          vis._pinnedIdx = null;
-          applyPinState();
-        }
-      });
-
-      /* Restore pin state after any re-render */
-      applyPinState();
-
-      done();
-    },
-  });
-})();
+        g.addEventListe
