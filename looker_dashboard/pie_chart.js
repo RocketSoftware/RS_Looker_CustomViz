@@ -959,4 +959,39 @@
         if (!s) return;
 
         g.addEventListener("mouseenter", () => activateHover(idx, s));
-        g.addEventListe
+        g.addEventListener("mouseleave", () => deactivateHover());
+        g.addEventListener("click", (e) => {
+          e.stopPropagation();
+          togglePin(idx);
+        });
+      });
+
+      /* ── Legend events ── */
+      body.querySelectorAll(".rpc-legend-item").forEach(li => {
+        const idx = parseInt(li.dataset.idx, 10);
+        const s   = slices[idx];
+        if (!s) return;
+
+        li.addEventListener("mouseenter", () => activateHover(idx, s));
+        li.addEventListener("mouseleave", () => deactivateHover());
+        li.addEventListener("click", (e) => {
+          e.stopPropagation();
+          togglePin(idx);
+        });
+      });
+
+      /* Click on empty chart area clears pin */
+      svgEl.addEventListener("click", () => {
+        if (vis._pinnedIdx !== null) {
+          vis._pinnedIdx = null;
+          applyPinState();
+        }
+      });
+
+      /* Restore pin state after any re-render */
+      applyPinState();
+
+      done();
+    },
+  });
+})();
