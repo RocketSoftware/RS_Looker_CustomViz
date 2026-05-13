@@ -581,37 +581,98 @@
 
     /* ── create ─────────────────────────────────────────────────────────── */
     create: function (element, config) {
-      const styleEl = document.createElement("style");
-      styleEl.textContent = CSS;
-      element.appendChild(styleEl);
+      // Inject styles into <head> once (keyed so duplicates are skipped)
+      if (!document.getElementById("rkt-styles-v2")) {
+        const styleEl = document.createElement("style");
+        styleEl.id = "rkt-styles-v2";
+        styleEl.textContent = CSS;
+        document.head.appendChild(styleEl);
+      }
 
-      element.innerHTML += `<div class="rkt-wrap rkt-diag-bg" id="rkt-root" data-w="lg">
-        <div class="rkt-topbar">
-          <div class="rkt-topbar-left">
-            ${LOGO_SVG}
-            <span class="rkt-title" id="rkt-title">Accounts</span>
-          </div>
-          <span class="rkt-count" id="rkt-count"></span>
-        </div>
-        <div class="rkt-gline"></div>
-        <div class="rkt-toolbar" id="rkt-toolbar" style="display:none">
-          <input class="rkt-search" id="rkt-search" type="text" placeholder="Search…"/>
-          <span class="rkt-pg-info" id="rkt-pg-info"></span>
-          <button class="rkt-pg-btn" id="rkt-prev">‹ Prev</button>
-          <button class="rkt-pg-btn" id="rkt-next">Next ›</button>
-        </div>
-        <div class="rkt-table-wrap" id="rkt-table-wrap">
-          <div class="rkt-empty">Loading…</div>
-        </div>
-      </div>`;
+      // Build DOM with createElement so no existing nodes are destroyed
+      element.innerHTML = "";
+
+      const root = document.createElement("div");
+      root.className = "rkt-wrap rkt-diag-bg";
+      root.setAttribute("data-w", "lg");
+
+      // — topbar —
+      const topbar = document.createElement("div");
+      topbar.className = "rkt-topbar";
+
+      const topLeft = document.createElement("div");
+      topLeft.className = "rkt-topbar-left";
+      topLeft.innerHTML = LOGO_SVG;
+
+      const titleEl = document.createElement("span");
+      titleEl.className = "rkt-title";
+      titleEl.textContent = "Accounts";
+      topLeft.appendChild(titleEl);
+
+      const countEl = document.createElement("span");
+      countEl.className = "rkt-count";
+
+      topbar.appendChild(topLeft);
+      topbar.appendChild(countEl);
+
+      // — gradient line —
+      const gline = document.createElement("div");
+      gline.className = "rkt-gline";
+
+      // — toolbar —
+      const toolbar = document.createElement("div");
+      toolbar.className = "rkt-toolbar";
+      toolbar.style.display = "none";
+
+      const searchEl = document.createElement("input");
+      searchEl.className = "rkt-search";
+      searchEl.type = "text";
+      searchEl.placeholder = "Search…";
+
+      const pgInfo = document.createElement("span");
+      pgInfo.className = "rkt-pg-info";
+
+      const prevBtn = document.createElement("button");
+      prevBtn.className = "rkt-pg-btn";
+      prevBtn.textContent = "‹ Prev";
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "rkt-pg-btn";
+      nextBtn.textContent = "Next ›";
+
+      toolbar.appendChild(searchEl);
+      toolbar.appendChild(pgInfo);
+      toolbar.appendChild(prevBtn);
+      toolbar.appendChild(nextBtn);
+
+      // — table wrap —
+      const tableWrap = document.createElement("div");
+      tableWrap.className = "rkt-table-wrap";
+      tableWrap.innerHTML = '<div class="rkt-empty">Loading…</div>';
+
+      root.appendChild(topbar);
+      root.appendChild(gline);
+      root.appendChild(toolbar);
+      root.appendChild(tableWrap);
+      element.appendChild(root);
+
+      // Store scoped refs for use in updateAsync
+      this._root      = root;
+      this._titleEl   = titleEl;
+      this._countEl   = countEl;
+      this._toolbar   = toolbar;
+      this._searchEl  = searchEl;
+      this._pgInfo    = pgInfo;
+      this._prevBtn   = prevBtn;
+      this._nextBtn   = nextBtn;
+      this._tableWrap = tableWrap;
 
       this._state = { page: 0, sortCol: null, sortDir: 1, query: "" };
 
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(entries => {
           const { width } = entries[0].contentRect;
-          const root = element.querySelector("#rkt-root");
-          if (root) applyBreakpoint(root, width);
+          applyBreakpoint(this._root, width);
         });
         this._ro.observe(element);
       }
@@ -622,31 +683,37 @@
       const state   = this._state;
       const perPage = Math.max(1, config.rows_per_page || 10);
 
-      const root = element.querySelector("#rkt-root");
-      if (root) applyBreakpoint(root, element.offsetWidth || 600);
+      // Use scoped refs stored in create() — never touch document.getElementById
+      const titleEl   = this._titleEl;
+      const countEl   = this._countEl;
+      const toolbar   = this._toolbar;
+      const searchEl  = this._searchEl;
+      const pgInfo    = this._pgInfo;
+      const prevBtn   = this._prevBtn;
+      const nextBtn   = this._nextBtn;
+      const tableWrap = this._tableWrap;
+
+      applyBreakpoint(this._root, element.offsetWidth || 600);
 
       /* ── Build column model ── */
       const { columns, dims, measAll, pivots } = buildColumns(queryResponse);
-      const isPivoted = pivots.length > 0;
 
       /* ── Update title ── */
-      document.getElementById("rkt-title").textContent = config.title || "Accounts";
+      titleEl.textContent = config.title || "Accounts";
 
       /* ── Toggle toolbar ── */
-      const toolbar = document.getElementById("rkt-toolbar");
       toolbar.style.display = (config.show_search !== false) ? "flex" : "none";
 
       /* ── Wire search ── */
-      const searchInput = document.getElementById("rkt-search");
-      searchInput.oninput = () => {
-        state.query = searchInput.value.toLowerCase();
+      searchEl.oninput = () => {
+        state.query = searchEl.value.toLowerCase();
         state.page  = 0;
         render();
       };
 
       /* ── Wire paging ── */
-      document.getElementById("rkt-prev").onclick = () => { state.page--; render(); };
-      document.getElementById("rkt-next").onclick = () => { state.page++; render(); };
+      prevBtn.onclick = () => { state.page--; render(); };
+      nextBtn.onclick = () => { state.page++; render(); };
 
       /* ── Render ── */
       const render = () => {
@@ -679,26 +746,23 @@
         const slice   = rows.slice(state.page * perPage, (state.page + 1) * perPage);
 
         /* Count badge */
-        document.getElementById("rkt-count").textContent =
+        countEl.textContent =
           total + (total !== data.length ? " of " + data.length : "") + " records";
 
         /* Paging info */
         const start = total ? state.page * perPage + 1 : 0;
         const end   = Math.min((state.page + 1) * perPage, total);
-        document.getElementById("rkt-pg-info").textContent =
-          total ? `${start}–${end} of ${total}` : "No results";
-        document.getElementById("rkt-prev").disabled = state.page === 0;
-        document.getElementById("rkt-next").disabled = state.page >= maxPage;
+        pgInfo.textContent  = total ? `${start}–${end} of ${total}` : "No results";
+        prevBtn.disabled    = state.page === 0;
+        nextBtn.disabled    = state.page >= maxPage;
 
         /* Empty states */
         if (columns.length === 0) {
-          document.getElementById("rkt-table-wrap").innerHTML =
-            '<div class="rkt-empty">Add dimensions or measures to see data.</div>';
+          tableWrap.innerHTML = '<div class="rkt-empty">Add dimensions or measures to see data.</div>';
           return;
         }
         if (total === 0) {
-          document.getElementById("rkt-table-wrap").innerHTML =
-            '<div class="rkt-empty">No matching records found.</div>';
+          tableWrap.innerHTML = '<div class="rkt-empty">No matching records found.</div>';
           return;
         }
 
@@ -711,14 +775,14 @@
           return `<tr>${tds}</tr>`;
         }).join("");
 
-        document.getElementById("rkt-table-wrap").innerHTML = `
+        tableWrap.innerHTML = `
           <table class="rkt-table">
             <thead>${theadHtml}</thead>
             <tbody>${tbRows}</tbody>
           </table>`;
 
-        /* Bind sort headers — only cells with data-col are sortable */
-        document.querySelectorAll(".rkt-table th[data-col]").forEach(th => {
+        /* Bind sort headers — scoped to this tile's tableWrap only */
+        tableWrap.querySelectorAll("th[data-col]").forEach(th => {
           th.onclick = () => {
             const col = parseInt(th.dataset.col, 10);
             if (isNaN(col)) return;
@@ -738,8 +802,7 @@
         render();
       } catch (e) {
         console.error("[rocket_accounts_table] render error:", e);
-        const tw = document.getElementById("rkt-table-wrap");
-        if (tw) tw.innerHTML = `<div class="rkt-empty">Error rendering table — check browser console.</div>`;
+        tableWrap.innerHTML = `<div class="rkt-empty">Error rendering table — check browser console.</div>`;
       }
       done();
     },
