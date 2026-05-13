@@ -7,11 +7,15 @@
  *   2. In Looker Admin → Visualizations, add a new visualization and paste the URL.
  *   3. In any Explore, select "Rocket — Accounts Table" from the visualization picker.
  *
- * Supported field types: dimensions, measures, table calculations.
- * Health badge auto-detection works on any string field — configure keywords in viz options.
- * Fully responsive: adapts padding, toolbar layout, and chrome across tile sizes.
+ * Supported field types: dimensions, measures, table calculations — with and without pivots.
  *
- * Version: 1.1.0  |  May 2025
+ * Pivot support:
+ *   When a pivot is applied, the table renders a two-row header:
+ *     Row 1 — dimension columns (rowspan=2) | pivot-value groups (colspan = # measures each)
+ *     Row 2 — measure / table-calc names repeated under each pivot group
+ *   Sorting, search, and pagination all work across pivot columns.
+ *
+ * Version: 1.2.0  |  May 2025
  */
 
 (function () {
@@ -135,6 +139,8 @@
       table-layout: auto;
     }
     .rkt-table thead { position: sticky; top: 0; z-index: 2; }
+
+    /* ── Base header cell ── */
     .rkt-table th {
       background: ${T.surf};
       color: #7878A8;
@@ -147,13 +153,48 @@
       border-right: 1px solid rgba(100,65,210,.1);
       text-align: left;
       white-space: nowrap;
-      cursor: pointer;
       user-select: none;
       transition: color .15s;
     }
-    .rkt-table th:hover { color: ${T.tx}; }
-    .rkt-table th.sort-asc::after  { content: ' ↑'; color: ${T.P}; }
-    .rkt-table th.sort-desc::after { content: ' ↓'; color: ${T.P}; }
+
+    /* ── Sortable header cells (dimension + leaf measure under pivot) ── */
+    .rkt-table th.rkt-sortable {
+      cursor: pointer;
+    }
+    .rkt-table th.rkt-sortable:hover { color: ${T.tx}; }
+    .rkt-table th.sort-asc::after    { content: ' ↑'; color: ${T.P}; }
+    .rkt-table th.sort-desc::after   { content: ' ↓'; color: ${T.P}; }
+
+    /* ── Pivot group header (first header row, spans multiple measures) ── */
+    .rkt-table th.rkt-th-pivot {
+      text-align: center;
+      background: ${T.card};
+      color: ${T.tx};
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      border-bottom: 1px solid rgba(100,65,210,.25);
+      /* Left border marks the start of each pivot group */
+    }
+    .rkt-table th.rkt-th-pivot-start {
+      border-left: 1px solid rgba(100,65,210,.28);
+    }
+
+    /* ── Measure sub-header (second header row under pivot group) ── */
+    .rkt-table th.rkt-th-measure {
+      background: ${T.surf};
+      color: #7878A8;
+      font-size: 10px;
+    }
+    .rkt-table th.rkt-th-measure.rkt-col-start {
+      border-left: 1px solid rgba(100,65,210,.18);
+    }
+
+    /* ── Data cells that start a pivot group get a subtle left border ── */
+    .rkt-table td.rkt-col-start {
+      border-left: 1px solid rgba(100,65,210,.18);
+    }
+
     .rkt-table td {
       padding: 10px 14px;
       border-bottom: 1px solid rgba(100,65,210,.06);
@@ -197,8 +238,6 @@
     }
 
     /* ── Responsive: width breakpoints via data-w on rkt-wrap ── */
-
-    /* Narrow: < 340px — compact everything, stack toolbar, hide non-essentials */
     .rkt-wrap[data-w="xs"] .rkt-topbar { padding: 8px 10px; }
     .rkt-wrap[data-w="xs"] .rkt-title  { font-size: 13px; }
     .rkt-wrap[data-w="xs"] .rkt-count  { display: none; }
@@ -211,7 +250,6 @@
     .rkt-wrap[data-w="xs"] .rkt-table td { padding: 7px 9px; max-width: 120px; }
     .rkt-wrap[data-w="xs"] .rkt-badge  { font-size: 10px; padding: 2px 7px; }
 
-    /* Small: 340–520px — condensed but still functional */
     .rkt-wrap[data-w="sm"] .rkt-topbar { padding: 9px 12px; }
     .rkt-wrap[data-w="sm"] .rkt-title  { font-size: 14px; }
     .rkt-wrap[data-w="sm"] .rkt-count  { display: none; }
@@ -220,7 +258,6 @@
     .rkt-wrap[data-w="sm"] .rkt-table th { padding: 8px 10px; }
     .rkt-wrap[data-w="sm"] .rkt-table td { padding: 8px 10px; max-width: 160px; }
 
-    /* Medium: 520–760px — show most chrome but compact */
     .rkt-wrap[data-w="md"] .rkt-table th { padding: 9px 12px; }
     .rkt-wrap[data-w="md"] .rkt-table td { padding: 9px 12px; }
   `;
@@ -251,23 +288,20 @@
   function formatValue(cell) {
     if (cell == null) return "";
     if (cell.rendered != null) return cell.rendered;
-    if (cell.value  == null)   return "";
+    if (cell.value    == null) return "";
     const v = cell.value;
     if (typeof v === "number") return v.toLocaleString();
     return String(v);
   }
 
-  /** Returns a badge CSS class based on the cell's string value and config keywords. */
   function healthClass(rawVal, cfg) {
     if (rawVal == null) return null;
     const v = String(rawVal).toLowerCase().trim();
-
     const okWords   = (cfg.green_vals  || "healthy,green,expanding,on track,active").toLowerCase().split(",").map(s => s.trim());
     const warnWords = (cfg.warn_vals   || "at risk,warning,yellow,behind,renewing").toLowerCase().split(",").map(s => s.trim());
     const errWords  = (cfg.err_vals    || "critical,red,error,churned,lost").toLowerCase().split(",").map(s => s.trim());
     const blueWords = (cfg.blue_vals   || "new,prospect,qualified").toLowerCase().split(",").map(s => s.trim());
     const purpWords = (cfg.purple_vals || "renewing,proposal,negotiating").toLowerCase().split(",").map(s => s.trim());
-
     if (errWords.some(w  => w && v.includes(w))) return "rkt-badge-err";
     if (warnWords.some(w => w && v.includes(w))) return "rkt-badge-warn";
     if (okWords.some(w   => w && v.includes(w))) return "rkt-badge-ok";
@@ -276,22 +310,198 @@
     return null;
   }
 
-  /** Guess whether a field looks like a health/status field by name. */
   function isLikelyHealthField(name) {
     const n = name.toLowerCase();
     return ["health","status","stage","state","risk","flag","tier"].some(k => n.includes(k));
   }
 
-  /** Guess whether a field is numeric (measure or number dimension). */
   function isNumeric(field) {
     return field.type === "number" || field.category === "measure";
   }
 
-  /** Apply width breakpoint attribute to the root element. */
   function applyBreakpoint(root, w) {
     root.setAttribute("data-w",
       w < 340 ? "xs" : w < 520 ? "sm" : w < 760 ? "md" : "lg"
     );
+  }
+
+  /**
+   * Return a human-readable label for a pivot value.
+   * Handles single and multi-field pivots.
+   */
+  function pivotLabel(pivot) {
+    if (!pivot.data || Object.keys(pivot.data).length === 0) return pivot.key || "";
+    return Object.values(pivot.data)
+      .map(c => (c.rendered != null ? c.rendered : (c.value != null ? String(c.value) : "")))
+      .filter(s => s !== "")
+      .join(" / ");
+  }
+
+  /**
+   * Build the flat column descriptor array.
+   *
+   * Each column is one of:
+   *   { type: "dimension",     field, idx }
+   *   { type: "measure",       field, idx }          ← no-pivot path
+   *   { type: "pivot_measure", field, pivot, idx, pivotGroupStart }
+   *
+   * `idx` is the flat integer used as the sort key.
+   * `pivotGroupStart` marks the first measure column in each pivot group.
+   */
+  function buildColumns(queryResponse) {
+    const dims    = queryResponse.fields.dimensions         || [];
+    const meass   = queryResponse.fields.measures           || [];
+    const tcs     = queryResponse.fields.table_calculations || [];
+    const measAll = [...meass, ...tcs];
+    const pivots  = queryResponse.pivots || [];
+
+    const columns = [];
+    let idx = 0;
+
+    // Dimension columns are always flat
+    dims.forEach(f => {
+      columns.push({ type: "dimension", field: f, idx: idx++ });
+    });
+
+    if (pivots.length > 0) {
+      // Pivot path: for each pivot value, add one sub-column per measure
+      pivots.forEach(pv => {
+        measAll.forEach((mf, mi) => {
+          columns.push({
+            type: "pivot_measure",
+            field: mf,
+            pivot: pv,
+            idx: idx++,
+            pivotGroupStart: mi === 0,  // first measure of this pivot group
+          });
+        });
+      });
+    } else {
+      // Flat path: measures and table calculations as plain columns
+      measAll.forEach(f => {
+        columns.push({ type: "measure", field: f, idx: idx++ });
+      });
+    }
+
+    return { columns, dims, measAll, pivots };
+  }
+
+  /**
+   * Build the <thead> HTML string.
+   * Returns a single <tr> when not pivoted; two <tr>s when pivoted.
+   */
+  function buildHeader(columns, dims, measAll, pivots, state) {
+    const isPivoted = pivots.length > 0;
+
+    function sortClass(col) {
+      if (state.sortCol !== col.idx) return "";
+      return state.sortDir === 1 ? "sort-asc" : "sort-desc";
+    }
+
+    if (!isPivoted) {
+      // Single header row
+      const cells = columns.map(col => {
+        const label = col.field.label_short || col.field.label || col.field.name;
+        const sc    = sortClass(col);
+        return `<th class="rkt-sortable ${sc}" data-col="${col.idx}">${escHtml(label)}</th>`;
+      }).join("");
+      return `<tr>${cells}</tr>`;
+    }
+
+    // ── Two-row pivot header ──
+    const numMeas = measAll.length;
+
+    // Row 1: dimension placeholders (rowspan=2) + pivot group headers (colspan=numMeas)
+    let row1 = "";
+
+    // Dimension cells span both header rows
+    dims.forEach(f => {
+      const label = f.label_short || f.label || f.name;
+      row1 += `<th rowspan="2" class="rkt-sortable" data-col="${columns.find(c => c.type === 'dimension' && c.field === f).idx}">${escHtml(label)}</th>`;
+    });
+
+    // Pivot group cells
+    pivots.forEach((pv, pi) => {
+      const label = pivotLabel(pv);
+      const startClass = "rkt-th-pivot rkt-th-pivot-start";
+      row1 += `<th colspan="${numMeas}" class="${startClass}">${escHtml(label)}</th>`;
+    });
+
+    // Row 2: measure sub-headers under each pivot group
+    let row2 = "";
+    pivots.forEach((pv, pi) => {
+      measAll.forEach((mf, mi) => {
+        const label   = mf.label_short || mf.label || mf.name;
+        const col     = columns.find(c => c.type === "pivot_measure" && c.field === mf && c.pivot === pv);
+        const sc      = col ? sortClass(col) : "";
+        const startCl = mi === 0 ? " rkt-col-start" : "";
+        const sortIdx = col ? col.idx : "";
+        row2 += `<th class="rkt-th-measure rkt-sortable${startCl} ${sc}" data-col="${sortIdx}">${escHtml(label)}</th>`;
+      });
+    });
+
+    return `<tr>${row1}</tr><tr>${row2}</tr>`;
+  }
+
+  /**
+   * Get the comparable value for a row + column descriptor (for sorting).
+   */
+  function sortValue(row, col) {
+    if (col.type === "dimension" || col.type === "measure") {
+      const cell = row[col.field.name];
+      return cell ? (cell.value ?? "") : "";
+    }
+    // pivot_measure
+    const pivotCells = row[col.field.name];
+    if (!pivotCells) return "";
+    const cell = pivotCells[col.pivot.key];
+    return cell ? (cell.value ?? "") : "";
+  }
+
+  /**
+   * Get the display string for a row + column (for search).
+   */
+  function displayValue(row, col) {
+    if (col.type === "dimension" || col.type === "measure") {
+      const cell = row[col.field.name];
+      return cell ? String(cell.rendered ?? cell.value ?? "") : "";
+    }
+    const pivotCells = row[col.field.name];
+    if (!pivotCells) return "";
+    const cell = pivotCells[col.pivot.key];
+    return cell ? String(cell.rendered ?? cell.value ?? "") : "";
+  }
+
+  /**
+   * Build a single <td> HTML string.
+   */
+  function buildCell(row, col, config) {
+    let cell;
+    if (col.type === "dimension" || col.type === "measure") {
+      cell = row[col.field.name] || null;
+    } else {
+      // pivot_measure
+      const pivotCells = row[col.field.name];
+      cell = (pivotCells && pivotCells[col.pivot.key]) ? pivotCells[col.pivot.key] : null;
+    }
+
+    const raw  = cell ? cell.value : null;
+    const disp = formatValue(cell);
+
+    // Pivot group start gets a visual separator
+    const startClass = (col.type === "pivot_measure" && col.pivotGroupStart) ? " rkt-col-start" : "";
+
+    // Health badges on dimension/measure cells
+    const hCls = (col.type !== "pivot_measure") && isLikelyHealthField(col.field.name)
+      ? healthClass(raw, config)
+      : null;
+
+    if (hCls) {
+      return `<td class="${startClass.trim()}"><span class="rkt-badge ${hCls}">${escHtml(disp)}</span></td>`;
+    }
+
+    const align = isNumeric(col.field) ? ' style="text-align:right"' : "";
+    return `<td class="rkt-number${startClass}"${align} title="${escHtml(disp)}">${escHtml(disp)}</td>`;
   }
 
   /* ─── Looker visualization definition ────────────────────────────────── */
@@ -340,7 +550,7 @@
       err_vals: {
         type:        "string",
         label:       "Critical / red keywords",
-        default:     "critical,red,error,churned,lost",
+        default:     "critical,red,error,inactive,churned,lost",
         placeholder: "Comma-separated, case-insensitive",
         section:     "Health badges",
         order:       6,
@@ -363,7 +573,7 @@
       },
     },
 
-    /* Called once — set up the DOM skeleton and inject styles. */
+    /* ── create ─────────────────────────────────────────────────────────── */
     create: function (element, config) {
       const styleEl = document.createElement("style");
       styleEl.textContent = CSS;
@@ -379,7 +589,7 @@
         </div>
         <div class="rkt-gline"></div>
         <div class="rkt-toolbar" id="rkt-toolbar" style="display:none">
-          <input class="rkt-search" id="rkt-search" type="text" placeholder="Search accounts…"/>
+          <input class="rkt-search" id="rkt-search" type="text" placeholder="Search…"/>
           <span class="rkt-pg-info" id="rkt-pg-info"></span>
           <button class="rkt-pg-btn" id="rkt-prev">‹ Prev</button>
           <button class="rkt-pg-btn" id="rkt-next">Next ›</button>
@@ -389,10 +599,8 @@
         </div>
       </div>`;
 
-      /* State attached to the element for cross-call persistence. */
       this._state = { page: 0, sortCol: null, sortDir: 1, query: "" };
 
-      /* ResizeObserver: update breakpoint attribute whenever tile is resized */
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(entries => {
           const { width } = entries[0].contentRect;
@@ -403,21 +611,17 @@
       }
     },
 
-    /* Called on every data update. */
+    /* ── updateAsync ─────────────────────────────────────────────────────── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const state   = this._state;
       const perPage = Math.max(1, config.rows_per_page || 10);
 
-      /* Seed breakpoint from current width */
       const root = element.querySelector("#rkt-root");
       if (root) applyBreakpoint(root, element.offsetWidth || 600);
 
-      /* ── Collect all fields in display order ── */
-      const allFields = [
-        ...(queryResponse.fields.dimensions         || []),
-        ...(queryResponse.fields.measures           || []),
-        ...(queryResponse.fields.table_calculations || []),
-      ];
+      /* ── Build column model ── */
+      const { columns, dims, measAll, pivots } = buildColumns(queryResponse);
+      const isPivoted = pivots.length > 0;
 
       /* ── Update title ── */
       document.getElementById("rkt-title").textContent = config.title || "Accounts";
@@ -438,27 +642,28 @@
       document.getElementById("rkt-prev").onclick = () => { state.page--; render(); };
       document.getElementById("rkt-next").onclick = () => { state.page++; render(); };
 
-      /* ── Render function (re-runs on sort / search / page) ── */
+      /* ── Render ── */
       const render = () => {
-        /* Filter */
+        /* Filter: match any displayed value across all columns */
         let rows = data.filter(row => {
           if (!state.query) return true;
-          return allFields.some(f => {
-            const cell = row[f.name];
-            return cell && String(cell.rendered || cell.value || "").toLowerCase().includes(state.query);
-          });
+          return columns.some(col =>
+            displayValue(row, col).toLowerCase().includes(state.query)
+          );
         });
 
         /* Sort */
         if (state.sortCol !== null) {
-          const field = allFields[state.sortCol];
-          rows = rows.slice().sort((a, b) => {
-            const av = a[field.name]?.value ?? "";
-            const bv = b[field.name]?.value ?? "";
-            if (av < bv) return -state.sortDir;
-            if (av > bv) return  state.sortDir;
-            return 0;
-          });
+          const col = columns.find(c => c.idx === state.sortCol);
+          if (col) {
+            rows = rows.slice().sort((a, b) => {
+              const av = sortValue(a, col);
+              const bv = sortValue(b, col);
+              if (av < bv) return -state.sortDir;
+              if (av > bv) return  state.sortDir;
+              return 0;
+            });
+          }
         }
 
         /* Page bounds */
@@ -466,9 +671,6 @@
         const maxPage = Math.max(0, Math.ceil(total / perPage) - 1);
         state.page    = Math.min(Math.max(0, state.page), maxPage);
         const slice   = rows.slice(state.page * perPage, (state.page + 1) * perPage);
-
-        /* Determine current width breakpoint for inline decisions */
-        const tileW = element.offsetWidth || 600;
 
         /* Count badge */
         document.getElementById("rkt-count").textContent =
@@ -482,57 +684,38 @@
         document.getElementById("rkt-prev").disabled = state.page === 0;
         document.getElementById("rkt-next").disabled = state.page >= maxPage;
 
-        /* Build table */
-        if (allFields.length === 0) {
+        /* Empty states */
+        if (columns.length === 0) {
           document.getElementById("rkt-table-wrap").innerHTML =
             '<div class="rkt-empty">Add dimensions or measures to see data.</div>';
           return;
         }
-
         if (total === 0) {
           document.getElementById("rkt-table-wrap").innerHTML =
             '<div class="rkt-empty">No matching records found.</div>';
           return;
         }
 
-        /* Header */
-        const thCells = allFields.map((f, i) => {
-          const sortClass =
-            state.sortCol === i ? (state.sortDir === 1 ? "sort-asc" : "sort-desc") : "";
-          return `<th class="${sortClass}" data-col="${i}">${escHtml(f.label_short || f.label || f.name)}</th>`;
-        }).join("");
+        /* Build thead HTML */
+        const theadHtml = buildHeader(columns, dims, measAll, pivots, state);
 
-        /* Body */
+        /* Build tbody HTML */
         const tbRows = slice.map(row => {
-          const tds = allFields.map(f => {
-            const cell = row[f.name];
-            const raw  = cell?.value;
-            const disp = formatValue(cell);
-
-            /* Try to render as a health badge */
-            const hCls = isLikelyHealthField(f.name) ? healthClass(raw, config) : null;
-
-            if (hCls) {
-              return `<td><span class="rkt-badge ${hCls}">${escHtml(disp)}</span></td>`;
-            }
-
-            /* Right-align numbers */
-            const align = isNumeric(f) ? ' style="text-align:right"' : "";
-            return `<td class="rkt-number"${align} title="${escHtml(disp)}">${escHtml(disp)}</td>`;
-          }).join("");
+          const tds = columns.map(col => buildCell(row, col, config)).join("");
           return `<tr>${tds}</tr>`;
         }).join("");
 
         document.getElementById("rkt-table-wrap").innerHTML = `
           <table class="rkt-table">
-            <thead><tr>${thCells}</tr></thead>
+            <thead>${theadHtml}</thead>
             <tbody>${tbRows}</tbody>
           </table>`;
 
-        /* Bind sort headers */
+        /* Bind sort headers — only cells with data-col are sortable */
         document.querySelectorAll(".rkt-table th[data-col]").forEach(th => {
           th.onclick = () => {
             const col = parseInt(th.dataset.col, 10);
+            if (isNaN(col)) return;
             if (state.sortCol === col) {
               state.sortDir = state.sortDir === 1 ? -1 : 1;
             } else {
