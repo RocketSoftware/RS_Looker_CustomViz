@@ -486,20 +486,4 @@
       const suffix = esc(config.value_suffix || "");
 
       /* ── Value color ── */
-      const colorKey = config.value_color || "default";
-      const valueColor = VALUE_COLORS[colorKey] || T.tx;
-
-      /* ── Render ── */
-      body.innerHTML = `
-        <div class="sv-label">${esc(label)}</div>
-        <div class="sv-value-row">
-          ${prefix ? `<span class="sv-prefix">${prefix}</span>` : ""}
-          <span class="sv-value" style="color:${valueColor}">${displayVal}</span>
-          ${suffix ? `<span class="sv-suffix">${suffix}</span>` : ""}
-        </div>
-      `;
-
-      done();
-    },
-  });
-})();
+      const colorKey = config.value_color || "def
