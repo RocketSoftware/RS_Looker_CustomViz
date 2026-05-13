@@ -332,9 +332,12 @@
   function pivotLabel(pivot) {
     if (!pivot.data || Object.keys(pivot.data).length === 0) return pivot.key || "";
     return Object.values(pivot.data)
-      .map(c => (c.rendered != null ? c.rendered : (c.value != null ? String(c.value) : "")))
+      .map(c => {
+        if (c == null) return "";
+        return c.rendered != null ? c.rendered : (c.value != null ? String(c.value) : "");
+      })
       .filter(s => s !== "")
-      .join(" / ");
+      .join(" / ") || pivot.key || "";
   }
 
   /**
