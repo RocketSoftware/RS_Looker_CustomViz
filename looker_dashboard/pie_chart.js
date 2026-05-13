@@ -37,20 +37,28 @@
     er:    "#F06060",
   };
 
-  /* ─── Slice color palette — blue → purple → pink brand family ────────── */
+  /* ─── Slice color palette (cycles if more slices than colors) ─────────── */
   const PALETTE = [
-    "#3B7EF6",   // brand blue
-    "#5B5EF4",   // blue-indigo
-    "#7B3FE4",   // brand purple
-    "#9B30D0",   // purple-violet
-    "#B838B8",   // violet-magenta
-    "#D9349A",   // brand pink
-    "#2495CC",   // sky blue
-    "#4355E8",   // cobalt
-    "#6B28C8",   // deep purple
-    "#A020A8",   // magenta-purple
-    "#CC2888",   // deep pink
-    "#E03070",   // crimson-pink
+    T.B,          // blue
+    T.P,          // purple
+    T.K,          // pink
+    T.ok,         // teal/green
+    T.wn,         // amber
+    "#6040EC",    // blue-purple mid
+    "#B038C8",    // purple-pink mid
+    T.er,         // red
+    "#40C4FF",    // light blue
+    "#C77DFF",    // lavender
+    "#1A9E6E",    // emerald
+    "#E06030",    // orange
+    "#4488DD",    // steel blue
+    "#AA44BB",    // orchid
+    "#88CC44",    // lime
+    "#DD4466",    // rose
+    "#44BBCC",    // cyan
+    "#CC8833",    // gold
+    "#8844EE",    // violet
+    "#44CC88",    // mint
   ];
 
   /* ─── Injected CSS ────────────────────────────────────────────────────── */

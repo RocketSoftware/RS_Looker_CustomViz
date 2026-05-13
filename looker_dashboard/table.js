@@ -540,7 +540,7 @@
       green_vals: {
         type:        "string",
         label:       "Healthy / green keywords",
-        default:     "healthy,green,expanding,active,on track",
+        default:     "healthy,green,expanding,active,on track,yes",
         placeholder: "Comma-separated, case-insensitive",
         section:     "Health badges",
         order:       4,
@@ -556,7 +556,7 @@
       err_vals: {
         type:        "string",
         label:       "Critical / red keywords",
-        default:     "critical,red,error,inactive,churned,lost",
+        default:     "critical,red,error,inactive,churned,lost,no",
         placeholder: "Comma-separated, case-insensitive",
         section:     "Health badges",
         order:       6,

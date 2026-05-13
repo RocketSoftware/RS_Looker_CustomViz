@@ -381,64 +381,24 @@
       nd.x = colPad + nd.column * colW;
     });
 
-    /* ── 7. Compute node heights using a global px/unit scale ── */
-    // Find the column with the most total flow to set the scale
-    let maxColFlow = 0;
+    /* ── 7. Assign Y positions within each column (proportional to value) ── */
     columns.forEach(col => {
-      const ct = col.reduce((s, i) => s + nodes[i].value, 0);
-      if (ct > maxColFlow) maxColFlow = ct;
-    });
-    const maxColNodes = Math.max(...columns.map(col => col.length));
-    const totalPadMax = nodePad * (maxColNodes - 1);
-    const pxPerUnit   = maxColFlow > 0 ? (H - totalPadMax) / maxColFlow : 1;
-
-    nodes.forEach(nd => {
-      nd.h = Math.max(2, nd.value * pxPerUnit);
-    });
-
-    /* ── 8a. Initial column sort (value descending) ── */
-    function repositionCol(col) {
-      // Stack nodes with padding, then vertically center the whole group
-      const totalH = col.reduce((s, i) => s + nodes[i].h, 0)
-                   + nodePad * (col.length - 1);
-      const startY = Math.max(0, (H - totalH) / 2);
-      let cursor = startY;
-      col.forEach(i => {
-        nodes[i].y = cursor;
-        cursor += nodes[i].h + nodePad;
-      });
-    }
-
-    columns.forEach(col => {
+      // Sort by value descending for cleaner layout
       col.sort((a, b) => nodes[b].value - nodes[a].value);
-      repositionCol(col);
-    });
 
-    /* ── 8b. Barycenter crossing minimisation (3 forward + 3 backward passes) ── */
-    function barycenters(col, dir) {
-      // dir: "forward" = use source node positions, "backward" = use target node positions
+      const colTotal = col.reduce((s, i) => s + nodes[i].value, 0);
+      const totalPad = nodePad * (col.length - 1);
+      const availH   = H - totalPad;
+      const pxPerUnit = colTotal > 0 ? availH / colTotal : 1;
+
+      let cursor = 0;
       col.forEach(i => {
         const nd = nodes[i];
-        const links = dir === "forward" ? nd.targetLinks : nd.sourceLinks;
-        if (links.length === 0) {
-          nd._bary = nodes[i].y + nodes[i].h / 2;  // keep current position
-          return;
-        }
-        nd._bary = links.reduce((s, lk) => {
-          const other = nodes[dir === "forward" ? lk.source : lk.target];
-          return s + other.y + other.h / 2;
-        }, 0) / links.length;
+        nd.h = Math.max(2, nd.value * pxPerUnit);
+        nd.y = cursor;
+        cursor += nd.h + nodePad;
       });
-      col.sort((a, b) => nodes[a]._bary - nodes[b]._bary);
-      repositionCol(col);
-    }
-
-    for (let pass = 0; pass < 3; pass++) {
-      // Forward: columns L→R, sort by mean source Y
-      for (let c = 1; c < numCols; c++) barycenters(columns[c], "forward");
-      // Backward: columns R→L, sort by mean target Y
-      for (let c = numCols - 2; c >= 0; c--) barycenters(columns[c], "backward");
-    }
+    });
 
     /* ── 8. Assign colours ── */
     // Each unique source-column node gets a palette colour
@@ -467,38 +427,40 @@
     }
 
     /* ── 9. Assign link Y offsets ── */
-    // Sort each node's port lists by the Y position of the connected node.
-    // This makes bands leave/arrive in the same vertical order as their
-    // partner nodes, eliminating local crossings within each node's fan.
-    nodes.forEach(nd => {
-      nd.sourceLinks.sort((a, b) => nodes[a.target].y - nodes[b.target].y);
-      nd.targetLinks.sort((a, b) => nodes[a.source].y - nodes[b.source].y);
-    });
-
+    // For each node, track running offsets on source side (right) and target side (left)
     const srcOffset = new Array(N).fill(0);
     const tgtOffset = new Array(N).fill(0);
 
-    // Walk links column by column in source-node Y order
+    // Process links in a stable order: column by column, then by source node y
     const sortedLinks = [...links].sort((a, b) => {
       const colA = nodes[a.source].column;
       const colB = nodes[b.source].column;
       if (colA !== colB) return colA - colB;
-      // Within the same column, walk by source node top-to-bottom,
-      // then by target node top-to-bottom (same ordering as port sort above)
-      if (nodes[a.source].y !== nodes[b.source].y)
-        return nodes[a.source].y - nodes[b.source].y;
-      return nodes[a.target].y - nodes[b.target].y;
+      return nodes[a.source].y - nodes[b.source].y;
     });
 
+    const usablePxPerUnit = (() => {
+      // Compute pixels-per-unit using the column with the maximum total
+      let maxColTotal = 0;
+      columns.forEach(col => {
+        const ct = col.reduce((s, i) => s + nodes[i].value, 0);
+        if (ct > maxColTotal) maxColTotal = ct;
+      });
+      const totalPad = Math.max(0, columns.reduce((mx, col) => Math.max(mx, col.length), 0) - 1) * nodePad;
+      return maxColTotal > 0 ? (H - totalPad) / maxColTotal : 1;
+    })();
+
     sortedLinks.forEach(lk => {
-      const si  = lk.source, ti = lk.target;
-      const snd = nodes[si],  tnd = nodes[ti];
-      const pxH = Math.max(1, lk.value * pxPerUnit);
+      const si = lk.source, ti = lk.target;
+      const snd = nodes[si], tnd = nodes[ti];
+      const pxH = Math.max(1, lk.value * usablePxPerUnit);
       lk.h = pxH;
 
+      // y0 = center of band at source right edge
       lk.y0 = snd.y + srcOffset[si] + pxH / 2;
       srcOffset[si] += pxH;
 
+      // y1 = center of band at target left edge
       lk.y1 = tnd.y + tgtOffset[ti] + pxH / 2;
       tgtOffset[ti] += pxH;
 
@@ -707,16 +669,15 @@
       const layout = computeLayout(triples, W, chartH, nodeW, nodePad, colPad);
       const { nodes, links, columns, numCols } = layout;
 
-      /* ── Compute label clearance from actual label lengths ── */
-      const CH = 5.8;  // avg px per char at 11px Inter
-      const leftMaxChars  = Math.max(0, ...columns[0].map(i => nodes[i].label.length));
-      const rightMaxChars = Math.max(0, ...columns[numCols - 1].map(i => nodes[i].label.length));
-      const leftLabW  = Math.min(180, Math.max(50, Math.ceil(leftMaxChars  * CH) + 12));
-      const rightLabW = Math.min(220, Math.max(50, Math.ceil(rightMaxChars * CH) + 12));
+      /* ── Compute label clearance ── */
+      // Estimate max label char count for left/right columns
+      const maxLabelPx = 90;  // cap label width reservation
+      const leftLabW  = maxLabelPx;
+      const rightLabW = maxLabelPx;
 
       // Recompute X positions with label margins
-      const innerW  = W - leftLabW - rightLabW;
-      const colSpan = numCols > 1 ? (innerW - nodeW) / (numCols - 1) : innerW / 2;
+      const innerW   = W - leftLabW - rightLabW;
+      const colSpan  = numCols > 1 ? (innerW - nodeW) / (numCols - 1) : innerW / 2;
 
       nodes.forEach(nd => {
         nd.x = leftLabW + nd.column * colSpan;
@@ -843,30 +804,19 @@
         const smallLabel = nd.h < 20;
 
         if (showLabel) {
-          // First column: label to the LEFT of the node (anchor=end)
-          // Last column:  label to the RIGHT of the node (anchor=start)
-          // Middle cols:  label to the RIGHT (keeps chart readable)
-          const labelX = isFirst ? -6 : nodeW + 6;
+          const labelX = isFirst ? -5 : nodeW + 5;
           const anchor  = isFirst ? "end" : "start";
-
-          // Cap label length based on available margin space
-          const maxChars = isFirst
-            ? Math.max(8, Math.floor(leftLabW  / CH) - 1)
-            : Math.max(8, Math.floor(rightLabW / CH) - 1);
-          const displayLabel = nd.label.length > maxChars
-            ? nd.label.slice(0, maxChars - 1) + "…"
-            : nd.label;
 
           const lab = svgEl("text", {
             class: `rsk-node-label${smallLabel ? " small" : ""}`,
             x: labelX, y: midY,
             "text-anchor": anchor,
           });
-          lab.textContent = displayLabel;
+          lab.textContent = nd.label.length > 18 ? nd.label.slice(0, 16) + "…" : nd.label;
           g.appendChild(lab);
 
-          // Value hint (only when node is tall enough)
-          if (nd.h >= 28 && !smallLabel) {
+          // Value hint (show if not too small)
+          if (nd.h >= 26 && !smallLabel) {
             const valTxt = svgEl("text", {
               class: "rsk-node-val",
               x: labelX, y: midY + 13,
