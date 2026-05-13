@@ -416,8 +416,11 @@
 
     // Dimension cells span both header rows
     dims.forEach(f => {
-      const label = f.label_short || f.label || f.name;
-      row1 += `<th rowspan="2" class="rkt-sortable" data-col="${columns.find(c => c.type === 'dimension' && c.field === f).idx}">${escHtml(label)}</th>`;
+      const label  = f.label_short || f.label || f.name;
+      // Use name-based matching — object references can differ across updateAsync calls
+      const dimCol = columns.find(c => c.type === "dimension" && c.field.name === f.name);
+      const colIdx = dimCol ? dimCol.idx : "";
+      row1 += `<th rowspan="2" class="rkt-sortable" data-col="${colIdx}">${escHtml(label)}</th>`;
     });
 
     // Pivot group cells
@@ -432,7 +435,7 @@
     pivots.forEach((pv, pi) => {
       measAll.forEach((mf, mi) => {
         const label   = mf.label_short || mf.label || mf.name;
-        const col     = columns.find(c => c.type === "pivot_measure" && c.field === mf && c.pivot === pv);
+        const col     = columns.find(c => c.type === "pivot_measure" && c.field.name === mf.name && c.pivot.key === pv.key);
         const sc      = col ? sortClass(col) : "";
         const startCl = mi === 0 ? " rkt-col-start" : "";
         const sortIdx = col ? col.idx : "";
@@ -728,7 +731,13 @@
         });
       };
 
-      render();
+      try {
+        render();
+      } catch (e) {
+        console.error("[rocket_accounts_table] render error:", e);
+        const tw = document.getElementById("rkt-table-wrap");
+        if (tw) tw.innerHTML = `<div class="rkt-empty">Error rendering table — check browser console.</div>`;
+      }
       done();
     },
   });
