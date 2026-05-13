@@ -620,7 +620,7 @@
 
       /* Tooltip follow-mouse */
       element.addEventListener("mousemove", (e) => {
-        const tt = document.getElementById("rpc-tooltip");
+        const tt = element.querySelector(".rpc-tooltip");
         if (tt) {
           const pad = 14;
           const tw  = tt.offsetWidth  || 140;

@@ -370,7 +370,7 @@
 
       /* Tooltip follow-mouse */
       element.addEventListener("mousemove", (e) => {
-        const tt = document.getElementById("rhb-tooltip");
+        const tt = element.querySelector(".rhb-tooltip");
         if (!tt) return;
         const pad = 14, tw = tt.offsetWidth || 140, th = tt.offsetHeight || 60;
         let tx = e.clientX + pad, ty = e.clientY + pad;
