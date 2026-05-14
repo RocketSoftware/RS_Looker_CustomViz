@@ -157,6 +157,10 @@
     .rtm-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #7878A8; }
     .rtm-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
     .rtm-tt-pct    { font-size: 11px; color: ${T.mt}; }
+    .rtm-tt-sep    { height: 1px; background: rgba(100,65,210,.2); margin: 7px 0 5px; }
+    .rtm-tt-row    { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 3px; }
+    .rtm-tt-key    { font-size: 10px; color: ${T.mt}; white-space: nowrap; }
+    .rtm-tt-xval   { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; }
 
     /* ── Empty ── */
     .rtm-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; }
@@ -378,6 +382,7 @@
             </div>
             <div class="rtm-tt-value" id="rtm-tt-value"></div>
             <div class="rtm-tt-pct"   id="rtm-tt-pct"></div>
+            <div id="rtm-tt-extras" style="display:none"></div>
           </div>
         </div>
       `);
@@ -458,10 +463,18 @@
       const measField = allMeasures[0];
 
       /* ── Build raw items ── */
+      const extraFields = allMeasures.slice(1); // measures beyond the sizing one
       let items = data.map((row, i) => {
-        const label = String(cellVal(row[dimField.name]) ?? "—");
-        const val   = parseFloat(row[measField.name]?.value) || 0;
-        return { label, val, idx: i };
+        const label  = String(cellVal(row[dimField.name]) ?? "—");
+        const val    = parseFloat(row[measField.name]?.value) || 0;
+        const extras = extraFields.map(mf => {
+          const cell = row[mf.name];
+          const disp = cell
+            ? (cell.rendered != null ? cell.rendered : (cell.value != null ? fmtNumber(parseFloat(cell.value)) : "—"))
+            : "—";
+          return { label: mf.label_short || mf.label || mf.name, disp };
+        });
+        return { label, val, idx: i, extras };
       }).filter(d => d.val > 0);
 
       if (!items.length) {
@@ -581,11 +594,12 @@
 
       /* ── Interactions ── */
       const svgEl   = body.querySelector("#rtm-svg");
-      const ttDot   = tooltip?.querySelector("#rtm-tt-dot");
-      const ttAccent= tooltip?.querySelector("#rtm-tt-accent");
-      const ttLabel = tooltip?.querySelector("#rtm-tt-label");
-      const ttValue = tooltip?.querySelector("#rtm-tt-value");
-      const ttPct   = tooltip?.querySelector("#rtm-tt-pct");
+      const ttDot    = tooltip?.querySelector("#rtm-tt-dot");
+      const ttAccent = tooltip?.querySelector("#rtm-tt-accent");
+      const ttLabel  = tooltip?.querySelector("#rtm-tt-label");
+      const ttValue  = tooltip?.querySelector("#rtm-tt-value");
+      const ttPct    = tooltip?.querySelector("#rtm-tt-pct");
+      const ttExtras = tooltip?.querySelector("#rtm-tt-extras");
 
       function showTooltip(item) {
         const pct = ((item.val / total) * 100).toFixed(1) + "%";
@@ -594,6 +608,21 @@
         if (ttLabel)  ttLabel.textContent = item.label;
         if (ttValue)  ttValue.textContent = fmtNumber(item.val);
         if (ttPct)    ttPct.textContent   = fmtNumber(item.val) + "  ·  " + pct + " of total";
+        if (ttExtras) {
+          if (item.extras && item.extras.length) {
+            ttExtras.innerHTML = `<div class="rtm-tt-sep"></div>` +
+              item.extras.map(e =>
+                `<div class="rtm-tt-row">
+                  <span class="rtm-tt-key">${esc(e.label)}</span>
+                  <span class="rtm-tt-xval">${esc(String(e.disp))}</span>
+                </div>`
+              ).join("");
+            ttExtras.style.display = "";
+          } else {
+            ttExtras.innerHTML = "";
+            ttExtras.style.display = "none";
+          }
+        }
         tooltip?.classList.add("visible");
       }
 
