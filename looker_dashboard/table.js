@@ -497,8 +497,11 @@
     // Pivot group start gets a visual separator
     const startClass = (col.type === "pivot_measure" && col.pivotGroupStart) ? " rkt-col-start" : "";
 
-    // Health badges on dimension/measure cells
-    const hCls = (col.type !== "pivot_measure") && isLikelyHealthField(col.field.name)
+    // Health badges: apply to any non-numeric, non-pivot column whose value
+    // matches one of the configured keyword lists.  We no longer gate on
+    // isLikelyHealthField so that columns like "Is Active" with Yes/No values
+    // are also caught.  healthClass() returns null when nothing matches.
+    const hCls = (col.type !== "pivot_measure") && !isNumeric(col.field)
       ? healthClass(raw, config)
       : null;
 
