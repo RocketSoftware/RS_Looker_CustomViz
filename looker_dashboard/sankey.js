@@ -156,11 +156,11 @@
     /* ── Column headers ── */
     .rsk-col-header {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .9px;
-      fill: ${T.mt};
+      letter-spacing: 1.1px;
+      fill: #7878AA;
       text-anchor: middle;
     }
 
@@ -188,11 +188,11 @@
     .rsk-tt-body   { padding: 10px 14px 13px; }
     .rsk-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rsk-tt-dot    { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-    .rsk-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #7878A8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rsk-tt-sub    { font-size: 9px; color: ${T.mt}; margin-bottom: 6px; }
+    .rsk-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #C0C0F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rsk-tt-sub    { font-size: 11px; color: #9898C8; margin-bottom: 6px; }
     .rsk-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
-    .rsk-tt-pct    { font-size: 11px; color: ${T.mt}; letter-spacing: .2px; }
-    .rsk-tt-flow-arrow { color: #5555aa; font-size: 11px; }
+    .rsk-tt-pct    { font-size: 12px; color: #9898C8; letter-spacing: .2px; }
+    .rsk-tt-flow-arrow { color: #8888CC; font-size: 12px; }
 
     /* ── Empty ── */
     .rsk-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; width: 100%; }
@@ -548,7 +548,7 @@
         section: "Style", order: 2,
       },
       node_padding: {
-        type: "number", label: "Node gap (px)", default: 10,
+        type: "number", label: "Node gap (px)", default: 18,
         section: "Style", order: 3,
       },
       show_col_headers: {
@@ -697,9 +697,9 @@
 
       /* ── Layout constants ── */
       const nodeW   = Math.max(6, config.node_width   || 14);
-      const nodePad = Math.max(4, config.node_padding  || 10);
+      const nodePad = Math.max(4, config.node_padding  || 18);
       const colPad  = 14;
-      const HEADER_H = (config.show_col_headers !== false) ? 18 : 0;
+      const HEADER_H = (config.show_col_headers !== false) ? 24 : 0;
       const chartH   = Math.max(60, H - HEADER_H);
       const linkAlpha = Math.max(0.05, Math.min(0.9, config.link_opacity != null ? config.link_opacity : 0.38));
 
@@ -751,7 +751,7 @@
           const cx = nodes[colNodes[0]].x + nodeW / 2;
           const tx = svgEl("text", {
             class: "rsk-col-header",
-            x: cx, y: 12,
+            x: cx, y: 15,
             "text-anchor": "middle",
           });
           tx.textContent = lbl;

@@ -1,5 +1,5 @@
 /**
- * Rocket Software — Semicircular Gauge
+ * Rocket Software — Whitespace Gauge
  * Custom Looker Visualization
  *
  * To install:
@@ -168,8 +168,8 @@
 
   /* ─── Looker viz registration ───────────────────────────────────────────── */
   looker.plugins.visualizations.add({
-    id:    "rocket_gauge",
-    label: "Rocket — Gauge",
+    id:    "rocket_whitespace_gauge",
+    label: "Rocket — Whitespace Gauge",
 
     options: {
       title: {
@@ -189,7 +189,7 @@
       max_value: {
         type:    "number",
         label:   "Max value (overridden by 2nd measure if present)",
-        default: 100,
+        default: 14,
         section: "Data",
         order:   3,
       },
