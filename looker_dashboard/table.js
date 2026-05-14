@@ -526,7 +526,7 @@
       rows_per_page: {
         type:    "number",
         label:   "Rows per page",
-        default: 10,
+        default: 100,
         section: "Display",
         order:   2,
       },
