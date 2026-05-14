@@ -35,7 +35,7 @@
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
-    track:"rgba(89,89,133,.22)",
+    track:"rgba(58,58,110,.58)",
   };
 
   /* ─── CSS ──────────────────────────────────────────────────────────────── */
@@ -238,26 +238,26 @@
       topLeft.className = "rgg-topbar-left";
       topbar.appendChild(topLeft);
 
-      /* Rocket logo SVG */
+      /* Rocket logo SVG — upward trend line (matches pie/sankey/bar) */
       const logoSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      logoSvg.setAttribute("viewBox", "0 0 24 24");
+      logoSvg.setAttribute("viewBox", "0 0 22 22");
       logoSvg.setAttribute("class", "rgg-logo");
       logoSvg.setAttribute("fill", "none");
       logoSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       logoSvg.innerHTML = `
         <defs>
-          <linearGradient id="rgg-logo-grad-${instId}" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id="rgg-logo-grad-${instId}" x1="0" y1="1" x2="1" y2="0">
             <stop offset="0%"   stop-color="${T.B}"/>
             <stop offset="50%"  stop-color="${T.P}"/>
             <stop offset="100%" stop-color="${T.K}"/>
           </linearGradient>
         </defs>
-        <path d="M12 2C12 2 7 6 7 13H17C17 6 12 2 12 2Z"
-              fill="url(#rgg-logo-grad-${instId})"/>
-        <path d="M9 13C9 13 7 15 7 17H17C17 15 15 13 15 13H9Z"
-              fill="url(#rgg-logo-grad-${instId})" opacity=".7"/>
-        <rect x="10" y="17" width="4" height="3" rx="1"
-              fill="url(#rgg-logo-grad-${instId})" opacity=".5"/>
+        <path d="M3 18 Q6 13 10 15 Q14 8 19 6"
+              stroke="url(#rgg-logo-grad-${instId})" stroke-width="2.4" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14 6 L19 6 L19 11"
+              stroke="url(#rgg-logo-grad-${instId})" stroke-width="2.4" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
       `;
       topLeft.appendChild(logoSvg);
 
@@ -337,125 +337,119 @@
       const { value, minVal, maxVal, decimals, strokeW, label, instId } = this._lastRender;
 
       const wrap = this._svgWrap;
-      const W = wrap.clientWidth  || 300;
-      const H = wrap.clientHeight || 220;
+      const W    = wrap.clientWidth  || 300;
+      const H    = wrap.clientHeight || 180;
 
-      /* Gauge geometry: semicircle from 210° → 330° (bottom-left to bottom-right)
-         i.e. 240° total sweep, the open gap faces downward.
-         Standard angle convention: 0°=right, 90°=bottom, 180°=left, 270°=top */
-      const START_DEG = 210;  /* bottom-left */
-      const END_DEG   = 330;  /* bottom-right */
-      const SWEEP     = 240;  /* total degrees */
+      const START_DEG = 210;   /* bottom-left */
+      const END_DEG   = 330;   /* bottom-right */
+      const SWEEP     = 240;   /* total arc degrees */
+      const toRad     = (d) => (d * Math.PI) / 180;
 
-      /* Radius: fit inside available space with padding for stroke and labels */
-      const pad       = strokeW / 2 + 6;
-      const labelPad  = 22; /* extra room below for min/max labels */
+      /* ── Radius: sized so arc + text fills the space with no dead zone ─── *
+       * Vertical breakdown (top → bottom):                                   *
+       *   strokeW/2 + 4   — top padding before arc apex                      *
+       *   r               — apex down to arc center (cy)                     *
+       *   strokeW/2 + 4   — gap from arc endpoint level to text              *
+       *   labelFont + 2   — measure label line                               *
+       *   valFont + 4     — value text + bottom pad                          *
+       *   ≈  r * 1.52 + strokeW + valFont * 0.35                            *
+       * Horizontal: endpoints stick out (r + epPad) * cos(30°) ≈ 0.87 * r  */
+      const endLabelPad = 26;                              // horizontal buffer for "0"/"14"
+      const rByH = (H - strokeW - 10) / 1.55;
+      const rByW = W / 2 - strokeW / 2 - endLabelPad;
+      const r    = Math.max(20, Math.min(rByH, rByW));
 
-      /* The arc center should sit slightly above the widget center so the
-         label area below feels balanced. For a semicircle the bounding box
-         height = r (top of circle to center) + a bit below center line. */
-      const maxR      = Math.min(W / 2, H * 0.88) - pad - labelPad;
-      const r         = Math.max(30, maxR);
-
-      /* Center point — push up a bit so there's room for endpoint labels */
+      /* ── Center: pin arc apex to top of body ─────────────────────────── */
       const cx = W / 2;
-      const cy = H / 2 + r * 0.14;
+      const cy = strokeW / 2 + r + 4;
 
-      /* Compute arc lengths for stroke-dasharray trick */
+      /* ── Arc lengths ─────────────────────────────────────────────────── */
       const circumference = 2 * Math.PI * r;
-      const arcLen        = (SWEEP / 360) * circumference;
-
-      /* Clamp value to [min, max] */
+      const arcLen   = (SWEEP / 360) * circumference;
       const clamped  = Math.min(maxVal, Math.max(minVal, value == null ? minVal : value));
       const fraction = maxVal > minVal ? (clamped - minVal) / (maxVal - minVal) : 0;
       const filled   = fraction * arcLen;
 
-      /* Gradient stop positions along the arc */
-      /* We'll use a linearGradient approximating the arc sweep.
-         userSpaceOnUse coords: start point of arc → end point of arc */
-      const toRad = (d) => (d * Math.PI) / 180;
-      const gx1   = cx + r * Math.cos(toRad(START_DEG));
-      const gy1   = cy + r * Math.sin(toRad(START_DEG));
-      const gx2   = cx + r * Math.cos(toRad(END_DEG));
-      const gy2   = cy + r * Math.sin(toRad(END_DEG));
+      /* ── Gradient anchors (start-point of arc → end-point) ──────────── */
+      const gx1 = cx + r * Math.cos(toRad(START_DEG));
+      const gy1 = cy + r * Math.sin(toRad(START_DEG));
+      const gx2 = cx + r * Math.cos(toRad(END_DEG));
+      const gy2 = cy + r * Math.sin(toRad(END_DEG));
 
-      /* Track path */
-      const trackD = arcPath(cx, cy, r, START_DEG, END_DEG);
-      /* Filled arc — same path, masked by dasharray */
-      const arcD   = trackD;
+      /* ── Font sizes ──────────────────────────────────────────────────── */
+      const valFontSize   = Math.max(14, Math.min(48, r * 0.36));
+      const labelFontSize = Math.max(9,  Math.min(15, r * 0.13));
+      const endFontSize   = Math.max(8,  Math.min(12, r * 0.09));
 
-      /* Font sizes scale with radius */
-      const valFontSize   = Math.max(18, Math.min(52, r * 0.32));
-      const labelFontSize = Math.max(10, Math.min(18, r * 0.12));
-      const endFontSize   = Math.max(9,  Math.min(14, r * 0.10));
+      /* ── Text: dropped directly into the arc opening ─────────────────── *
+       * Arc endpoints sit at y = cy − 0.5r.                                *
+       * Text starts just below that (higher y = lower in SVG).             */
+      const textGap      = strokeW / 2 + 5;
+      const textTopY     = cy - r * 0.5 + textGap;
+      const centerLabelY = textTopY + labelFontSize * 0.85;
+      const centerValY   = centerLabelY + valFontSize + 2;
 
-      /* Min/max label positions (just outside arc endpoints) */
+      /* ── Min/max endpoint label positions ────────────────────────────── */
       const epOffset = strokeW / 2 + endFontSize + 2;
       const minLx    = cx + (r + epOffset) * Math.cos(toRad(START_DEG));
       const minLy    = cy + (r + epOffset) * Math.sin(toRad(START_DEG));
       const maxLx    = cx + (r + epOffset) * Math.cos(toRad(END_DEG));
       const maxLy    = cy + (r + epOffset) * Math.sin(toRad(END_DEG));
 
-      /* Center value Y positions */
-      const centerValY   = cy + valFontSize * 0.35;
-      const centerLabelY = cy - valFontSize * 0.55;
+      /* ── SVG height: just tall enough for the content ────────────────── */
+      const contentBottom = centerValY + valFontSize * 0.3 + 4;
+      const svgH = Math.max(contentBottom, 60);
 
-      /* Build SVG */
-      const gradId  = `rgg-arc-grad-${instId}`;
-      const maskId  = `rgg-arc-mask-${instId}`;
+      /* ── Build SVG ───────────────────────────────────────────────────── */
+      const gradId = `rgg-arc-grad-${instId}`;
+      const trackD = arcPath(cx, cy, r, START_DEG, END_DEG);
 
       const svgNS = "http://www.w3.org/2000/svg";
       const svg   = document.createElementNS(svgNS, "svg");
       svg.setAttribute("class",   "rgg-svg");
       svg.setAttribute("width",   W);
-      svg.setAttribute("height",  H);
-      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svg.setAttribute("height",  svgH);
+      svg.setAttribute("viewBox", `0 0 ${W} ${svgH}`);
 
       svg.innerHTML = `
         <defs>
-          <!-- Gradient runs from arc start to arc end -->
           <linearGradient id="${gradId}"
             gradientUnits="userSpaceOnUse"
             x1="${gx1}" y1="${gy1}"
             x2="${gx2}" y2="${gy2}">
-            <stop offset="0%"    stop-color="${T.B}"/>
-            <stop offset="45%"   stop-color="${T.P}"/>
-            <stop offset="100%"  stop-color="${T.K}"/>
+            <stop offset="0%"   stop-color="${T.B}"/>
+            <stop offset="45%"  stop-color="${T.P}"/>
+            <stop offset="100%" stop-color="${T.K}"/>
           </linearGradient>
         </defs>
 
-        <!-- Track (full arc, gray) -->
-        <path
-          class="rgg-track"
-          d="${trackD}"
-          stroke-width="${strokeW}"
-        />
+        <!-- Track: full arc, visible so unfilled portion is clearly shown -->
+        <path class="rgg-track" d="${trackD}" stroke-width="${strokeW}"/>
 
-        <!-- Filled arc (gradient, dasharray trick) -->
-        <path
-          class="rgg-arc"
-          d="${arcD}"
+        <!-- Filled arc: gradient, revealed via dasharray from arc start -->
+        <path class="rgg-arc"
+          d="${trackD}"
           stroke="url(#${gradId})"
           stroke-width="${strokeW}"
-          stroke-dasharray="${arcLen}"
+          stroke-dasharray="${arcLen} ${arcLen * 10}"
           stroke-dashoffset="${arcLen - filled}"
         />
 
-        <!-- Center label (measure name) -->
+        <!-- Measure label -->
         <text class="rgg-center-label"
           x="${cx}" y="${centerLabelY}"
           font-size="${labelFontSize}">
           ${esc(label)}
         </text>
 
-        <!-- Center value -->
+        <!-- Value -->
         <text class="rgg-center-value"
           x="${cx}" y="${centerValY}"
           font-size="${valFontSize}">
           ${fmt(clamped, decimals)}
         </text>
 
-        <!-- Min label -->
+        <!-- Min endpoint -->
         <text class="rgg-endpoint"
           x="${minLx}" y="${minLy}"
           text-anchor="middle"
@@ -463,7 +457,7 @@
           ${fmt(minVal, decimals)}
         </text>
 
-        <!-- Max label -->
+        <!-- Max endpoint -->
         <text class="rgg-endpoint"
           x="${maxLx}" y="${maxLy}"
           text-anchor="middle"
