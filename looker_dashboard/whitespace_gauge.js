@@ -340,26 +340,28 @@
       const W    = wrap.clientWidth  || 300;
       const H    = wrap.clientHeight || 180;
 
-      const START_DEG = 210;   /* bottom-left */
-      const END_DEG   = 330;   /* bottom-right */
-      const SWEEP     = 240;   /* total arc degrees */
+      /* ── Angles ─────────────────────────────────────────────────────────
+       * 150° (std-math) → lower-left  (x left, y = cy + 0.5r, below cy)
+       * 270° (std-math) → top apex    (x center, y = cy − r)
+       *  30° (std-math) → lower-right (x right, y = cy + 0.5r, below cy)
+       * span = (30−150+360)%360 = 240  →  large-arc = 1, sweep = 1
+       * This draws the 240° horseshoe arc from lower-left over the top to
+       * lower-right, with the opening at the bottom — exactly like a gauge. */
+      const START_DEG = 150;   /* lower-left  (min) */
+      const END_DEG   =  30;   /* lower-right (max) */
+      const SWEEP     = 240;
       const toRad     = (d) => (d * Math.PI) / 180;
 
-      /* ── Radius: sized so arc + text fills the space with no dead zone ─── *
-       * Vertical breakdown (top → bottom):                                   *
-       *   strokeW/2 + 4   — top padding before arc apex                      *
-       *   r               — apex down to arc center (cy)                     *
-       *   strokeW/2 + 4   — gap from arc endpoint level to text              *
-       *   labelFont + 2   — measure label line                               *
-       *   valFont + 4     — value text + bottom pad                          *
-       *   ≈  r * 1.52 + strokeW + valFont * 0.35                            *
-       * Horizontal: endpoints stick out (r + epPad) * cos(30°) ≈ 0.87 * r  */
-      const endLabelPad = 26;                              // horizontal buffer for "0"/"14"
-      const rByH = (H - strokeW - 10) / 1.55;
+      /* ── Radius ──────────────────────────────────────────────────────────
+       * Vertical content = strokeW/2 + r (apex→cy) + r*0.5 (cy→endpoints)
+       *                  + strokeW/2 + endFontSize + PAD_bottom
+       *                ≈ r * 1.5 + strokeW + 28                           */
+      const endLabelPad = 26;
+      const rByH = (H - strokeW - 28) / 1.5;
       const rByW = W / 2 - strokeW / 2 - endLabelPad;
       const r    = Math.max(20, Math.min(rByH, rByW));
 
-      /* ── Center: pin arc apex to top of body ─────────────────────────── */
+      /* ── Center: pin arc apex (cy − r) to near body top ─────────────── */
       const cx = W / 2;
       const cy = strokeW / 2 + r + 4;
 
@@ -370,7 +372,7 @@
       const fraction = maxVal > minVal ? (clamped - minVal) / (maxVal - minVal) : 0;
       const filled   = fraction * arcLen;
 
-      /* ── Gradient anchors (start-point of arc → end-point) ──────────── */
+      /* ── Gradient anchors: start-point (lower-left) → end-point ─────── */
       const gx1 = cx + r * Math.cos(toRad(START_DEG));
       const gy1 = cy + r * Math.sin(toRad(START_DEG));
       const gx2 = cx + r * Math.cos(toRad(END_DEG));
@@ -381,23 +383,24 @@
       const labelFontSize = Math.max(9,  Math.min(15, r * 0.13));
       const endFontSize   = Math.max(8,  Math.min(12, r * 0.09));
 
-      /* ── Text: dropped directly into the arc opening ─────────────────── *
-       * Arc endpoints sit at y = cy − 0.5r.                                *
-       * Text starts just below that (higher y = lower in SVG).             */
-      const textGap      = strokeW / 2 + 5;
-      const textTopY     = cy - r * 0.5 + textGap;
-      const centerLabelY = textTopY + labelFontSize * 0.85;
-      const centerValY   = centerLabelY + valFontSize + 2;
+      /* ── Text: centred inside the arc above the opening ─────────────────
+       * Arc endpoints are at y = cy + 0.5r (below cy).
+       * Text at cy level is well inside the horseshoe.                    */
+      const centerLabelY = cy - valFontSize * 0.55;
+      const centerValY   = cy + valFontSize * 0.35;
 
-      /* ── Min/max endpoint label positions ────────────────────────────── */
+      /* ── Min/max endpoint labels (sit just outside arc endpoints) ─────── */
       const epOffset = strokeW / 2 + endFontSize + 2;
       const minLx    = cx + (r + epOffset) * Math.cos(toRad(START_DEG));
       const minLy    = cy + (r + epOffset) * Math.sin(toRad(START_DEG));
       const maxLx    = cx + (r + epOffset) * Math.cos(toRad(END_DEG));
       const maxLy    = cy + (r + epOffset) * Math.sin(toRad(END_DEG));
 
-      /* ── SVG height: just tall enough for the content ────────────────── */
-      const contentBottom = centerValY + valFontSize * 0.3 + 4;
+      /* ── SVG height: content bottom is the lower of text or ep-labels ── */
+      const contentBottom = Math.max(
+        centerValY + valFontSize * 0.3,
+        minLy + endFontSize * 0.6
+      ) + 6;
       const svgH = Math.max(contentBottom, 60);
 
       /* ── Build SVG ───────────────────────────────────────────────────── */
