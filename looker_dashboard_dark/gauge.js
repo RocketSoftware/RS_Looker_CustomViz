@@ -1,5 +1,5 @@
 /**
- * Rocket Software — Semicircular Gauge
+ * Rocket Software — Gauge
  * Custom Looker Visualization
  *
  * To install:
@@ -8,9 +8,9 @@
  *   3. Select "Rocket — Gauge" from the visualization picker.
  *
  * Supports:
- *   - One measure  → current value (required)
- *   - Second measure (optional) → dynamic max value
- *   - config: min_value, max_value, title override, decimal places
+ *   - One measure   → current value (required)
+ *   - Two measures  → 1st = current value, 2nd = max value (overrides config)
+ *   - config: min_value, max_value (fallback), title override, decimal places
  *   - Gradient arc: brand blue → purple → pink
  *   - Responsive via ResizeObserver
  *
@@ -188,8 +188,8 @@
       },
       max_value: {
         type:    "number",
-        label:   "Max value (overridden by 2nd measure if present)",
-        default: 14,
+        label:   "Max value fallback (overridden by 2nd measure)",
+        default: 100,
         section: "Data",
         order:   3,
       },
