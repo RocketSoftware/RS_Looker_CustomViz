@@ -221,14 +221,16 @@
     .rhb-root[data-h="sm"] .rhb-body     { padding: 5px 10px 4px; }
   
 
-    /* ── Light background override (select via "Background theme" option) ── */
-    /* tooltip text stays light on dark-glass bg */
-    [data-theme="light"] .rhb-title,
-    [data-theme="light"] .rhb-leg-item.pinned .rhb-leg-name { color: #1A1A3A; }
-    [data-theme="light"] .rhb-subtitle,
-    [data-theme="light"] .rhb-axis-label,
-    [data-theme="light"] .rhb-empty { color: #6060A0; }
-    [data-theme="light"] .rhb-axis-label { fill: #6060A0; }
+
+    /* ─── Light-mode override (prefers-color-scheme: light) ────────────── */
+    @media (prefers-color-scheme: light) {
+      .rhb-title,
+      .rhb-leg-item.pinned .rhb-leg-name { color: #1A1A3A; }
+      .rhb-subtitle,
+      .rhb-axis-label,
+      .rhb-empty { color: #6060A0; }
+      .rhb-axis-label { fill: #6060A0; }
+    }
   
   `;
 
@@ -296,61 +298,11 @@
   /* ─── Viz definition ──────────────────────────────────────────────────── */
 
 
-  /* ─── Auto theme detection ──────────────────────────────────────────────── */
-  function _luminance(rgb) {
-    const m = rgb.match(/\d+/g);
-    if (!m || m.length < 3) return 0;
-    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
-      const c = parseInt(m[i]) / 255;
-      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-    }, 0);
-  }
-  function _walkBg(el) {
-    while (el && el !== document.documentElement) {
-      const bg = window.getComputedStyle(el).backgroundColor;
-      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
-        return _luminance(bg) > 0.179 ? 'light' : 'dark';
-      }
-      el = el.parentElement;
-    }
-    return null;
-  }
-  function _detectTheme(element, configOverride) {
-    // 1. Explicit config option takes priority
-    if (configOverride && configOverride !== 'auto') return configOverride;
-    // 2. Walk DOM in the current document (works when not in iframe)
-    const local = _walkBg(element.parentElement);
-    if (local) return local;
-    // 3. Try parent frame DOM (works if Looker is same-origin)
-    try {
-      const parentBg = _walkBg(window.parent.document.documentElement);
-      if (parentBg) return parentBg;
-    } catch (e) { /* cross-origin — blocked */ }
-    // 4. Check iframe's own document body background (Looker may inject it)
-    try {
-      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-      if (bodyBg && bodyBg !== 'transparent' && !bodyBg.startsWith('rgba(0, 0, 0, 0)')) {
-        return _luminance(bodyBg) > 0.179 ? 'light' : 'dark';
-      }
-    } catch (e) { /* */ }
-    // 5. Last resort: OS color scheme preference
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-
   looker.plugins.visualizations.add({
     id:    "rocket_horizontal_bar_tr",
     label: "Rocket — Horizontal Bar Chart",
 
     options: {
-      background_theme: {
-        type:    "string",
-        label:   "Background theme",
-        display: "select",
-        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
-        default: "dark",
-        section: "Display",
-        order:   99,
-      },
       chart_type: {
         type: "string", label: "Bar layout", display: "select",
         values: [{ "Stacked": "stacked" }, { "Grouped": "grouped" }],
@@ -469,9 +421,6 @@
       this._lastRenderArgs = [data, element, config, queryResponse, details, () => {}];
 
       const root    = element.querySelector("#rhb-root");
-      // Auto-detect light/dark background
-      const _theme = _detectTheme(element, config && config.background_theme);
-      if (root) root.setAttribute("data-theme", _theme);
       const body    = element.querySelector("#rhb-body");
       const gline   = element.querySelector("#rhb-gline");
       const tooltip = element.querySelector("#rhb-tooltip");

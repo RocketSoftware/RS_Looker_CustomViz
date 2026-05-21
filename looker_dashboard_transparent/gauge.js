@@ -139,13 +139,16 @@
     }
   
 
-    /* ── Light background override (select via "Background theme" option) ── */
-    [data-theme="light"] .rgg-title,
-    [data-theme="light"] .rgg-center-value { color: #1A1A3A; }
-    [data-theme="light"] .rgg-center-label,
-    [data-theme="light"] .rgg-endpoint { color: #6060A0; }
-    [data-theme="light"] .rgg-center-value { fill: #1A1A3A; }
-    [data-theme="light"] .rgg-center-label, [data-theme="light"] .rgg-endpoint { fill: #6060A0; }
+
+    /* ─── Light-mode override (prefers-color-scheme: light) ────────────── */
+    @media (prefers-color-scheme: light) {
+      .rgg-title,
+      .rgg-center-value { color: #1A1A3A; }
+      .rgg-center-label,
+      .rgg-endpoint { color: #6060A0; }
+      .rgg-center-value { fill: #1A1A3A; }
+      .rgg-center-label, .rgg-endpoint { fill: #6060A0; }
+    }
   
   `;
 
@@ -182,61 +185,11 @@
   /* ─── Looker viz registration ───────────────────────────────────────────── */
 
 
-  /* ─── Auto theme detection ──────────────────────────────────────────────── */
-  function _luminance(rgb) {
-    const m = rgb.match(/\d+/g);
-    if (!m || m.length < 3) return 0;
-    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
-      const c = parseInt(m[i]) / 255;
-      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-    }, 0);
-  }
-  function _walkBg(el) {
-    while (el && el !== document.documentElement) {
-      const bg = window.getComputedStyle(el).backgroundColor;
-      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
-        return _luminance(bg) > 0.179 ? 'light' : 'dark';
-      }
-      el = el.parentElement;
-    }
-    return null;
-  }
-  function _detectTheme(element, configOverride) {
-    // 1. Explicit config option takes priority
-    if (configOverride && configOverride !== 'auto') return configOverride;
-    // 2. Walk DOM in the current document (works when not in iframe)
-    const local = _walkBg(element.parentElement);
-    if (local) return local;
-    // 3. Try parent frame DOM (works if Looker is same-origin)
-    try {
-      const parentBg = _walkBg(window.parent.document.documentElement);
-      if (parentBg) return parentBg;
-    } catch (e) { /* cross-origin — blocked */ }
-    // 4. Check iframe's own document body background (Looker may inject it)
-    try {
-      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-      if (bodyBg && bodyBg !== 'transparent' && !bodyBg.startsWith('rgba(0, 0, 0, 0)')) {
-        return _luminance(bodyBg) > 0.179 ? 'light' : 'dark';
-      }
-    } catch (e) { /* */ }
-    // 5. Last resort: OS color scheme preference
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-
   looker.plugins.visualizations.add({
     id:    "rocket_gauge_tr",
     label: "Rocket — Gauge (Transparent)",
 
     options: {
-      background_theme: {
-        type:    "string",
-        label:   "Background theme",
-        display: "select",
-        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
-        default: "dark",
-        section: "Display",
-        order:   99,
-      },
       title: {
         type:    "string",
         label:   "Title override",
@@ -363,8 +316,6 @@
 
     /* ── updateAsync(): receive data, store params, trigger draw ─────────── */
     updateAsync(data, element, config, queryResponse, details, done) {
-      // Auto-detect light/dark background
-      if (this._root) { const _theme = _detectTheme(element, config && config.background_theme); this._root.setAttribute("data-theme", _theme); }
       const measures = queryResponse.fields.measure_like || [];
       if (!measures.length || !data.length) {
         this._titleEl.textContent = config.title || "Gauge";
