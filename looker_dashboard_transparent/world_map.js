@@ -517,6 +517,7 @@
 
   /* ─── Viz definition ──────────────────────────────────────────────────── */
 
+
   /* ─── Auto theme detection ──────────────────────────────────────────────── */
   function _luminance(rgb) {
     const m = rgb.match(/\d+/g);
@@ -526,15 +527,7 @@
       return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
     }, 0);
   }
-  function _detectTheme(element) {
-    // iframe fallback: use prefers-color-scheme
-    try {
-      if (window.self !== window.top) {
-        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      }
-    } catch (e) { /* cross-origin */ }
-    // Walk ancestor backgrounds
-    let el = element.parentElement;
+  function _walkBg(el) {
     while (el && el !== document.documentElement) {
       const bg = window.getComputedStyle(el).backgroundColor;
       if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
@@ -542,7 +535,28 @@
       }
       el = el.parentElement;
     }
-    return 'dark'; // safe fallback
+    return null;
+  }
+  function _detectTheme(element, configOverride) {
+    // 1. Explicit config option takes priority
+    if (configOverride && configOverride !== 'auto') return configOverride;
+    // 2. Walk DOM in the current document (works when not in iframe)
+    const local = _walkBg(element.parentElement);
+    if (local) return local;
+    // 3. Try parent frame DOM (works if Looker is same-origin)
+    try {
+      const parentBg = _walkBg(window.parent.document.documentElement);
+      if (parentBg) return parentBg;
+    } catch (e) { /* cross-origin — blocked */ }
+    // 4. Check iframe's own document body background (Looker may inject it)
+    try {
+      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+      if (bodyBg && bodyBg !== 'transparent' && !bodyBg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bodyBg) > 0.179 ? 'light' : 'dark';
+      }
+    } catch (e) { /* */ }
+    // 5. Last resort: OS color scheme preference
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   }
 
   looker.plugins.visualizations.add({
@@ -550,6 +564,15 @@
     label: "Rocket — World Map (Transparent)",
 
     options: {
+      background_theme: {
+        type:    "string",
+        label:   "Background theme",
+        display: "select",
+        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        default: "dark",
+        section: "Display",
+        order:   99,
+      },
       title: {
         type: "string", label: "Chart title", default: "",
         section: "Style", order: 1,
@@ -672,7 +695,7 @@
     _render(data, el, config, queryResponse, details, done) {
       const root       = this._root;
       // Auto-detect light/dark background
-      if (root) { const _theme = _detectTheme(el); root.setAttribute("data-theme", _theme); }
+      if (root) { const _theme = _detectTheme(el, config && config.background_theme); root.setAttribute("data-theme", _theme); }
       const body       = this._body;
       const svg        = this._svg;
       const stateEl    = this._stateEl;
