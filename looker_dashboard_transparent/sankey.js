@@ -32,8 +32,8 @@
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
     bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     dm:   "rgba(100,100,180,.18)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
@@ -219,17 +219,16 @@
     .rsk-root[data-h="sm"] .rsk-body     { padding: 5px 10px 4px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-    .rsk-tt-value { color: #E2E2FF !important; }
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rsk-title,
-    [data-theme="dark"] .rsk-node-label { color: #E2E2FF; }
-    [data-theme="dark"] .rsk-subtitle,
-    [data-theme="dark"] .rsk-node-val,
-    [data-theme="dark"] .rsk-empty { color: #9898C8; }
-    [data-theme="dark"] .rsk-node-val { fill: #9898C8; }
-    [data-theme="dark"] .rsk-node-label { fill: #E2E2FF; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    /* tooltip text stays light on dark-glass bg */
+    [data-theme="light"] .rsk-title,
+    [data-theme="light"] .rsk-node-label { color: #1A1A3A; }
+    [data-theme="light"] .rsk-subtitle,
+    [data-theme="light"] .rsk-node-val,
+    [data-theme="light"] .rsk-empty { color: #6060A0; }
+    [data-theme="light"] .rsk-node-label { fill: #1A1A3A; }
+    [data-theme="light"] .rsk-node-val { fill: #6060A0; }
+  
   `;
 
   /* ─── Logo SVG ────────────────────────────────────────────────────────── */
@@ -600,7 +599,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

@@ -29,8 +29,8 @@
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
     bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     dm:   "rgba(100,100,180,.18)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
@@ -139,16 +139,14 @@
     }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rgg-title,
-    [data-theme="dark"] .rgg-center-value { color: #E2E2FF; }
-    [data-theme="dark"] .rgg-center-label,
-    [data-theme="dark"] .rgg-endpoint { color: #9898C8; }
-    [data-theme="dark"] .rgg-center-label,
-    [data-theme="dark"] .rgg-endpoint { fill: #9898C8; }
-    [data-theme="dark"] .rgg-center-value { fill: #E2E2FF; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    [data-theme="light"] .rgg-title,
+    [data-theme="light"] .rgg-center-value { color: #1A1A3A; }
+    [data-theme="light"] .rgg-center-label,
+    [data-theme="light"] .rgg-endpoint { color: #6060A0; }
+    [data-theme="light"] .rgg-center-value { fill: #1A1A3A; }
+    [data-theme="light"] .rgg-center-label, [data-theme="light"] .rgg-endpoint { fill: #6060A0; }
+  
   `;
 
   /* ─── SVG arc helper ────────────────────────────────────────────────────── */
@@ -234,7 +232,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

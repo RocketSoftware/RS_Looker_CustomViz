@@ -385,19 +385,17 @@
     }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-    .rpc-tooltip-value { color: #E2E2FF !important; }
-    .rpc-tooltip-pct { color: #9898C8 !important; }
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rpc-title,
-    [data-theme="dark"] .rpc-center-value { color: #E2E2FF; }
-    [data-theme="dark"] .rpc-subtitle,
-    [data-theme="dark"] .rpc-center-label-text,
-    [data-theme="dark"] .rpc-legend-pct,
-    [data-theme="dark"] .rpc-empty { color: #9898C8; }
-    [data-theme="dark"] .rpc-center-label-text { fill: #9898C8; }
-    [data-theme="dark"] .rpc-center-value { fill: #E2E2FF; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    /* tooltip text stays light on dark-glass bg */
+    [data-theme="light"] .rpc-title,
+    [data-theme="light"] .rpc-center-value { color: #1A1A3A; }
+    [data-theme="light"] .rpc-subtitle,
+    [data-theme="light"] .rpc-center-label-text,
+    [data-theme="light"] .rpc-legend-pct,
+    [data-theme="light"] .rpc-empty { color: #6060A0; }
+    [data-theme="light"] .rpc-center-value { fill: #1A1A3A; }
+    [data-theme="light"] .rpc-center-label-text { fill: #6060A0; }
+  
   `;
 
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
@@ -547,7 +545,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

@@ -25,8 +25,8 @@
     bg:   "transparent",
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -235,13 +235,12 @@
     .sv-root[data-h="sm"] .sv-label { margin-bottom: 8px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .sv-value { color: #E2E2FF; }
-    [data-theme="dark"] .sv-label,
-    [data-theme="dark"] .sv-suffix,
-    [data-theme="dark"] .sv-delta-label { color: #9898C8; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    [data-theme="light"] .sv-value { color: #1A1A3A; }
+    [data-theme="light"] .sv-label,
+    [data-theme="light"] .sv-suffix,
+    [data-theme="light"] .sv-delta-label { color: #6060A0; }
+  
   `;
 
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
@@ -427,7 +426,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

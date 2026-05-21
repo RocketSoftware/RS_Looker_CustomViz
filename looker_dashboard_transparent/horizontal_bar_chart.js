@@ -28,8 +28,8 @@
     bg:   "transparent",
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -221,17 +221,15 @@
     .rhb-root[data-h="sm"] .rhb-body     { padding: 5px 10px 4px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-    .rhb-tt-value { color: #E2E2FF !important; }
-    .rhb-tt-pct { color: #9898C8 !important; }
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rhb-title,
-    [data-theme="dark"] .rhb-leg-item.pinned .rhb-leg-name { color: #E2E2FF; }
-    [data-theme="dark"] .rhb-subtitle,
-    [data-theme="dark"] .rhb-axis-label,
-    [data-theme="dark"] .rhb-empty { color: #9898C8; }
-    [data-theme="dark"] .rhb-axis-label { fill: #9898C8; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    /* tooltip text stays light on dark-glass bg */
+    [data-theme="light"] .rhb-title,
+    [data-theme="light"] .rhb-leg-item.pinned .rhb-leg-name { color: #1A1A3A; }
+    [data-theme="light"] .rhb-subtitle,
+    [data-theme="light"] .rhb-axis-label,
+    [data-theme="light"] .rhb-empty { color: #6060A0; }
+    [data-theme="light"] .rhb-axis-label { fill: #6060A0; }
+  
   `;
 
   /* ─── Logo ────────────────────────────────────────────────────────────── */
@@ -348,7 +346,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

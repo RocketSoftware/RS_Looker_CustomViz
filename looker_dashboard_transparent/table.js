@@ -265,14 +265,13 @@
     .rkt-wrap[data-w="md"] .rkt-table td { padding: 9px 12px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rkt-wrap,
-    [data-theme="dark"] .rkt-title,
-    [data-theme="dark"] .rkt-table th.rkt-th-pivot,
-    [data-theme="dark"] .rkt-table td { color: #E2E2FF; }
-    [data-theme="dark"] .rkt-badge-neu { color: #9898C8; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    [data-theme="light"] .rkt-wrap,
+    [data-theme="light"] .rkt-title,
+    [data-theme="light"] .rkt-table th.rkt-th-pivot,
+    [data-theme="light"] .rkt-table td { color: #1A1A3A; }
+    [data-theme="light"] .rkt-badge-neu { color: #6060A0; }
+  
   `;
 
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
@@ -576,7 +575,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

@@ -27,8 +27,8 @@
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
     bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     dm:   "rgba(100,100,180,.18)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
@@ -231,17 +231,15 @@
     .rbu-root[data-h="sm"] .rbu-body    { padding: 5px 10px 4px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-    .rbu-tt-val { color: #E2E2FF !important; }
-    .rbu-tt-key { color: #9898C8 !important; }
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rbu-title,
-    [data-theme="dark"] .rbu-leg-item.pinned .rbu-leg-name { color: #E2E2FF; }
-    [data-theme="dark"] .rbu-subtitle,
-    [data-theme="dark"] .rbu-axis-label,
-    [data-theme="dark"] .rbu-empty { color: #9898C8; }
-    [data-theme="dark"] .rbu-axis-label { fill: #9898C8; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    /* tooltip text stays light on dark-glass bg */
+    [data-theme="light"] .rbu-title,
+    [data-theme="light"] .rbu-leg-item.pinned .rbu-leg-name { color: #1A1A3A; }
+    [data-theme="light"] .rbu-subtitle,
+    [data-theme="light"] .rbu-axis-label,
+    [data-theme="light"] .rbu-empty { color: #6060A0; }
+    [data-theme="light"] .rbu-axis-label { fill: #6060A0; }
+  
   `;
 
   /* ─── Logo SVG ────────────────────────────────────────────────────────── */
@@ -366,7 +364,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,

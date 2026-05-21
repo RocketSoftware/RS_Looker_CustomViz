@@ -32,8 +32,8 @@
     surf: "rgba(120,120,200,.10)",
     bo:   "rgba(100,65,210,.22)",
     bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#6060A0",
+    tx:   "#E2E2FF",
+    mt:   "#9898C8",
     dm:   "rgba(100,100,180,.18)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
@@ -386,20 +386,16 @@
     .rwm-root[data-h="sm"] .rwm-topbar  { padding: 6px 12px; }
   
 
-    /* ── Tooltip text fix (always light — dark glass bg) ── */
-    .rwm-tt-value { color: #E2E2FF !important; }
-    .rwm-tt-pct,
-    .rwm-tt-nodata { color: #9898C8 !important; }
-
-    /* ── Dark background theme overrides ── */
-    [data-theme="dark"] .rwm-title,
-    [data-theme="dark"] .rwm-legend-title { color: #E2E2FF; }
-    [data-theme="dark"] .rwm-subtitle,
-    [data-theme="dark"] .rwm-legend-label,
-    [data-theme="dark"] .rwm-nodata-label { color: #9898C8; }
-    [data-theme="dark"] .rwm-legend-label,
-    [data-theme="dark"] .rwm-nodata-label { fill: #9898C8; }
-    [data-theme="dark"] .rwm-legend-title { fill: #E2E2FF; }
+    /* ── Light background override (select via "Background theme" option) ── */
+    /* tooltip text stays light on dark-glass bg */
+    [data-theme="light"] .rwm-title,
+    [data-theme="light"] .rwm-legend-title { color: #1A1A3A; }
+    [data-theme="light"] .rwm-subtitle,
+    [data-theme="light"] .rwm-legend-label,
+    [data-theme="light"] .rwm-nodata-label { color: #6060A0; }
+    [data-theme="light"] .rwm-legend-title { fill: #1A1A3A; }
+    [data-theme="light"] .rwm-legend-label, [data-theme="light"] .rwm-nodata-label { fill: #6060A0; }
+  
   `;
 
   /* ─── Logo SVG ────────────────────────────────────────────────────────── */
@@ -568,7 +564,7 @@
         type:    "string",
         label:   "Background theme",
         display: "select",
-        values:  [{"Dark (default)": "dark"}, {"Light": "light"}, {"Auto-detect": "auto"}],
+        values:  [{"Dark background (default)": "dark"}, {"Light background": "light"}],
         default: "dark",
         section: "Display",
         order:   99,
