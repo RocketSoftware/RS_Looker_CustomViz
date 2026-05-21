@@ -137,6 +137,18 @@
       font-size: 11px;
       fill: ${T.mt};
     }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rgg-title,
+    [data-theme="dark"] .rgg-center-value { color: #E2E2FF; }
+    [data-theme="dark"] .rgg-center-label,
+    [data-theme="dark"] .rgg-endpoint { color: #9898C8; }
+    [data-theme="dark"] .rgg-center-label,
+    [data-theme="dark"] .rgg-endpoint { fill: #9898C8; }
+    [data-theme="dark"] .rgg-center-value { fill: #E2E2FF; }
   `;
 
   /* ─── SVG arc helper ────────────────────────────────────────────────────── */
@@ -170,6 +182,35 @@
   }
 
   /* ─── Looker viz registration ───────────────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_gauge_tr",
     label: "Rocket — Gauge (Transparent)",
@@ -301,6 +342,8 @@
 
     /* ── updateAsync(): receive data, store params, trigger draw ─────────── */
     updateAsync(data, element, config, queryResponse, details, done) {
+      // Auto-detect light/dark background
+      if (this._root) { const _theme = _detectTheme(element); this._root.setAttribute("data-theme", _theme); }
       const measures = queryResponse.fields.measure_like || [];
       if (!measures.length || !data.length) {
         this._titleEl.textContent = config.title || "Gauge";

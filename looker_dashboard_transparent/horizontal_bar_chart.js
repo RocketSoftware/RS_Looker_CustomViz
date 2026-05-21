@@ -219,6 +219,19 @@
     .rhb-root[data-h="xs"] .rhb-body     { padding: 3px 6px; }
     .rhb-root[data-h="sm"] .rhb-topbar   { padding: 6px 12px; }
     .rhb-root[data-h="sm"] .rhb-body     { padding: 5px 10px 4px; }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+    .rhb-tt-value { color: #E2E2FF !important; }
+    .rhb-tt-pct { color: #9898C8 !important; }
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rhb-title,
+    [data-theme="dark"] .rhb-leg-item.pinned .rhb-leg-name { color: #E2E2FF; }
+    [data-theme="dark"] .rhb-subtitle,
+    [data-theme="dark"] .rhb-axis-label,
+    [data-theme="dark"] .rhb-empty { color: #9898C8; }
+    [data-theme="dark"] .rhb-axis-label { fill: #9898C8; }
   `;
 
   /* ─── Logo ────────────────────────────────────────────────────────────── */
@@ -283,6 +296,35 @@
   }
 
   /* ─── Viz definition ──────────────────────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_horizontal_bar_tr",
     label: "Rocket — Horizontal Bar Chart",
@@ -406,6 +448,9 @@
       this._lastRenderArgs = [data, element, config, queryResponse, details, () => {}];
 
       const root    = element.querySelector("#rhb-root");
+      // Auto-detect light/dark background
+      const _theme = _detectTheme(element);
+      if (root) root.setAttribute("data-theme", _theme);
       const body    = element.querySelector("#rhb-body");
       const gline   = element.querySelector("#rhb-gline");
       const tooltip = element.querySelector("#rhb-tooltip");

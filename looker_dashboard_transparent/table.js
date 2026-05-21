@@ -263,6 +263,16 @@
 
     .rkt-wrap[data-w="md"] .rkt-table th { padding: 9px 12px; }
     .rkt-wrap[data-w="md"] .rkt-table td { padding: 9px 12px; }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rkt-wrap,
+    [data-theme="dark"] .rkt-title,
+    [data-theme="dark"] .rkt-table th.rkt-th-pivot,
+    [data-theme="dark"] .rkt-table td { color: #E2E2FF; }
+    [data-theme="dark"] .rkt-badge-neu { color: #9898C8; }
   `;
 
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
@@ -514,6 +524,35 @@
   }
 
   /* ─── Looker visualization definition ────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_accounts_table_tr",
     label: "Rocket — Accounts Table",
@@ -683,6 +722,11 @@
 
     /* ── updateAsync ─────────────────────────────────────────────────────── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
+      // Auto-detect light/dark background
+      if (this._root) {
+        const _theme = _detectTheme(element);
+        this._root.setAttribute("data-theme", _theme);
+      }
       const state   = this._state;
       const perPage = Math.max(1, config.rows_per_page || 10);
 

@@ -229,6 +229,19 @@
     .rbu-root[data-h="xs"] .rbu-body    { padding: 3px 6px; }
     .rbu-root[data-h="sm"] .rbu-topbar  { padding: 6px 12px; }
     .rbu-root[data-h="sm"] .rbu-body    { padding: 5px 10px 4px; }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+    .rbu-tt-val { color: #E2E2FF !important; }
+    .rbu-tt-key { color: #9898C8 !important; }
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rbu-title,
+    [data-theme="dark"] .rbu-leg-item.pinned .rbu-leg-name { color: #E2E2FF; }
+    [data-theme="dark"] .rbu-subtitle,
+    [data-theme="dark"] .rbu-axis-label,
+    [data-theme="dark"] .rbu-empty { color: #9898C8; }
+    [data-theme="dark"] .rbu-axis-label { fill: #9898C8; }
   `;
 
   /* ─── Logo SVG ────────────────────────────────────────────────────────── */
@@ -301,6 +314,35 @@
   }
 
   /* ─── Viz definition ──────────────────────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_bubble_chart_tr",
     label: "Rocket — Bubble Chart (Transparent)",
@@ -417,6 +459,8 @@
     _render(data, el, config, queryResponse, details, done) {
       const wrap       = this._wrap;
       const root       = this._root;
+      // Auto-detect light/dark background
+      if (root) { const _theme = _detectTheme(el); root.setAttribute("data-theme", _theme); }
       const titleEl    = this._titleEl;
       const subtitleEl = this._subtitleEl;
       const legendEl   = this._legendEl;

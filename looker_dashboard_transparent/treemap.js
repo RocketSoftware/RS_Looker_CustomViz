@@ -176,6 +176,18 @@
     .rtm-root[data-h="xs"] .rtm-gline    { display: none; }
     .rtm-root[data-h="xs"] .rtm-body     { padding: 2px 3px; }
     .rtm-root[data-h="sm"] .rtm-topbar   { padding: 6px 12px; }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+    .rtm-tt-value,
+    .rtm-tt-xval { color: #E2E2FF !important; }
+    .rtm-tt-pct,
+    .rtm-tt-key { color: #9898C8 !important; }
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rtm-title { color: #E2E2FF; }
+    [data-theme="dark"] .rtm-subtitle,
+    [data-theme="dark"] .rtm-empty { color: #9898C8; }
   `;
 
   /* ─── Logo ────────────────────────────────────────────────────────────── */
@@ -302,6 +314,35 @@
   }
 
   /* ─── Viz definition ──────────────────────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_treemap_tr",
     label: "Rocket — Tree Map",
@@ -425,6 +466,9 @@
       this._lastRenderArgs = [data, element, config, queryResponse, details, () => {}];
 
       const root    = element.querySelector("#rtm-root");
+      // Auto-detect light/dark background
+      const _theme = _detectTheme(element);
+      if (root) root.setAttribute("data-theme", _theme);
       const body    = element.querySelector("#rtm-body");
       const gline   = element.querySelector("#rtm-gline");
       const tooltip = element.querySelector("#rtm-tooltip");

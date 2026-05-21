@@ -225,6 +225,19 @@
     .rbc-root[data-h="xs"] .rbc-body    { padding: 3px 6px; }
     .rbc-root[data-h="sm"] .rbc-topbar  { padding: 6px 12px; }
     .rbc-root[data-h="sm"] .rbc-body    { padding: 5px 10px 4px; }
+  
+
+    /* ── Tooltip text fix (always light — dark glass bg) ── */
+    .rbc-tt-value { color: #E2E2FF !important; }
+    .rbc-tt-pct { color: #9898C8 !important; }
+
+    /* ── Dark background theme overrides ── */
+    [data-theme="dark"] .rbc-title,
+    [data-theme="dark"] .rbc-leg-item.pinned .rbc-leg-name { color: #E2E2FF; }
+    [data-theme="dark"] .rbc-subtitle,
+    [data-theme="dark"] .rbc-axis-label,
+    [data-theme="dark"] .rbc-empty { color: #9898C8; }
+    [data-theme="dark"] .rbc-axis-label { fill: #9898C8; }
   `;
 
   /* ─── Logo ────────────────────────────────────────────────────────────── */
@@ -289,6 +302,35 @@
   }
 
   /* ─── Viz definition ──────────────────────────────────────────────────── */
+
+  /* ─── Auto theme detection ──────────────────────────────────────────────── */
+  function _luminance(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return 0;
+    return [0.2126, 0.7152, 0.0722].reduce((sum, w, i) => {
+      const c = parseInt(m[i]) / 255;
+      return sum + w * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }, 0);
+  }
+  function _detectTheme(element) {
+    // iframe fallback: use prefers-color-scheme
+    try {
+      if (window.self !== window.top) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+    } catch (e) { /* cross-origin */ }
+    // Walk ancestor backgrounds
+    let el = element.parentElement;
+    while (el && el !== document.documentElement) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      if (bg && bg !== 'transparent' && !bg.startsWith('rgba(0, 0, 0, 0)')) {
+        return _luminance(bg) > 0.179 ? 'light' : 'dark';
+      }
+      el = el.parentElement;
+    }
+    return 'dark'; // safe fallback
+  }
+
   looker.plugins.visualizations.add({
     id:    "rocket_bar_chart_tr",
     label: "Rocket — Bar Chart (Transparent)",
@@ -412,6 +454,9 @@
       this._lastRenderArgs = [data, element, config, queryResponse, details, () => {}];
 
       const root    = element.querySelector("#rbc-root");
+      // Auto-detect light/dark background
+      const _theme = _detectTheme(element);
+      if (root) root.setAttribute("data-theme", _theme);
       const body    = element.querySelector("#rbc-body");
       const gline   = element.querySelector("#rbc-gline");
       const tooltip = element.querySelector("#rbc-tooltip");
