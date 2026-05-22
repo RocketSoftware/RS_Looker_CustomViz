@@ -25,13 +25,13 @@
 
   /* ─── Brand tokens ─────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#F7F7FF",
-    surf: "#EEEEF8",
-    bo:   "rgba(100,65,210,.22)",
-    bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#7070A0",
-    dm:   "#CECEF0",
+    bg:   "#FAFAFA",
+    surf: "rgba(255,255,255,0.85)",
+    bo:   "rgba(0,0,0,0.07)",
+    bo2:  "rgba(0,0,0,0.04)",
+    tx:   "#1C1C1E",
+    mt:   "#6B6B7B",
+    dm:   "rgba(0,0,0,0.06)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -46,17 +46,20 @@
       display: flex; flex-direction: column;
       background: ${T.bg};
       background-image:
-        repeating-linear-gradient(135deg, rgba(100,65,210,.04) 0, rgba(100,65,210,.04) 1px, transparent 1px, transparent 18px),
-        repeating-linear-gradient(45deg,  rgba(59,126,246,.03) 0, rgba(59,126,246,.03) 1px, transparent 1px, transparent 18px);
+        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
       overflow: hidden;
       box-sizing: border-box;
       border-radius: 10px;
       border: 1px solid ${T.bo};
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
       position: relative;
     }
 
     .rgg-topbar {
       background: ${T.surf};
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo};
       display: flex; align-items: center; justify-content: space-between; gap: 8px;

@@ -23,11 +23,11 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#F7F7FF",
-    surf: "#EEEEF8",
-    bo:   "rgba(100,65,210,.22)",
-    tx:   "#1A1A3A",
-    mt:   "#7070A0",
+    bg:   "#FAFAFA",
+    surf: "rgba(255,255,255,0.85)",
+    bo:   "rgba(0,0,0,0.07)",
+    tx:   "#1C1C1E",
+    mt:   "#6B6B7B",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -67,20 +67,8 @@
       flex-direction: column;
       background: ${T.bg};
       background-image:
-        repeating-linear-gradient(
-          135deg,
-          rgba(100,65,210,.04) 0,
-          rgba(100,65,210,.04) 1px,
-          transparent 1px,
-          transparent 18px
-        ),
-        repeating-linear-gradient(
-          45deg,
-          rgba(59,126,246,.03) 0,
-          rgba(59,126,246,.03) 1px,
-          transparent 1px,
-          transparent 18px
-        );
+        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
       overflow: hidden;
       position: relative;
       box-sizing: border-box;

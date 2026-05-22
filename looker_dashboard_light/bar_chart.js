@@ -24,13 +24,13 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#F7F7FF",
-    surf: "#EEEEF8",
-    bo:   "rgba(100,65,210,.22)",
-    bo2:  "rgba(100,65,210,.11)",
-    tx:   "#1A1A3A",
-    mt:   "#7070A0",
-    dm:   "#CECEF0",
+    bg:   "#FAFAFA",
+    surf: "rgba(255,255,255,0.85)",
+    bo:   "rgba(0,0,0,0.07)",
+    bo2:  "rgba(0,0,0,0.04)",
+    tx:   "#1C1C1E",
+    mt:   "#6B6B7B",
+    dm:   "rgba(0,0,0,0.06)",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -63,17 +63,20 @@
       display: flex; flex-direction: column;
       background: ${T.bg};
       background-image:
-        repeating-linear-gradient(135deg, rgba(100,65,210,.04) 0, rgba(100,65,210,.04) 1px, transparent 1px, transparent 18px),
-        repeating-linear-gradient(45deg,  rgba(59,126,246,.03) 0, rgba(59,126,246,.03) 1px, transparent 1px, transparent 18px);
+        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
       overflow: hidden;
       box-sizing: border-box;
       border-radius: 10px;
       border: 1px solid ${T.bo};
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
       position: relative;
     }
 
     .rbc-topbar {
       background: ${T.surf};
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo};
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -120,12 +123,12 @@
       border-radius: 4px;
       transition: background .12s;
     }
-    .rbc-leg-item:hover  { background: rgba(123,63,228,.10); }
+    .rbc-leg-item:hover  { background: rgba(0,0,0,0.05); }
     .rbc-leg-item.dimmed { opacity: .3; }
-    .rbc-leg-item.pinned { background: rgba(123,63,228,.16) !important; }
+    .rbc-leg-item.pinned { background: rgba(0,0,0,0.07) !important; }
     .rbc-leg-item.pinned .rbc-leg-name { color: ${T.tx}; font-weight: 600; }
     .rbc-leg-dot  { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
-    .rbc-leg-name { font-size: 11px; color: #9898C8; white-space: nowrap; }
+    .rbc-leg-name { font-size: 11px; color: #8A8A9A; white-space: nowrap; }
 
     /* ── Chart area ── */
     .rbc-chart-wrap {
@@ -141,8 +144,8 @@
       font-size: 10px;
       fill: ${T.mt};
     }
-    .rbc-gridline { stroke: rgba(120,120,175,.22); stroke-width: 1; }
-    .rbc-axis-line { stroke: rgba(100,100,160,.32); stroke-width: 1; }
+    .rbc-gridline { stroke: rgba(0,0,0,0.07); stroke-width: 1; }
+    .rbc-axis-line { stroke: rgba(0,0,0,0.12); stroke-width: 1; }
 
     /* ── Bars ── */
     .rbc-bar {
@@ -168,13 +171,13 @@
     }
 
     /* ── Zero baseline (shown when chart spans negative values) ── */
-    .rbc-zeroline { stroke: rgba(50,50,120,.20); stroke-width: 1; }
+    .rbc-zeroline { stroke: rgba(0,0,0,0.10); stroke-width: 1; }
 
     /* ── Value labels on bars ── */
     .rbc-val-label {
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 9px;
-      fill: rgba(30,30,100,.65);
+      fill: rgba(0,0,0,0.55);
       text-anchor: middle;
       pointer-events: none;
     }
@@ -187,7 +190,7 @@
       background: rgba(248,248,255,0.97);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(100,65,210,.38);
+      border: 1px solid rgba(0,0,0,0.09);
       border-radius: 10px;
       padding: 0;
       overflow: hidden;
@@ -195,7 +198,7 @@
       opacity: 0;
       transform: translateY(6px) scale(0.97);
       transition: opacity .15s ease, transform .15s ease;
-      box-shadow: 0 8px 32px rgba(80,80,160,.18), 0 0 0 1px rgba(123,63,228,.08);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04);
       min-width: 148px; max-width: 240px;
     }
     .rbc-tooltip.visible { opacity: 1; transform: translateY(0) scale(1); }
@@ -203,8 +206,8 @@
     .rbc-tt-body   { padding: 10px 14px 13px; }
     .rbc-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rbc-tt-dot    { width: 8px; height: 8px; border-radius: 2px; background: ${T.P}; flex-shrink: 0; }
-    .rbc-tt-group  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #7878A8; }
-    .rbc-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #7878A8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rbc-tt-group  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
+    .rbc-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rbc-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
     .rbc-tt-pct    { font-size: 11px; color: ${T.mt}; letter-spacing: .2px; }
 

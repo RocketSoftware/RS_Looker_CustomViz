@@ -23,15 +23,15 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:      "#F7F7FF",
-    surf:    "#EEEEF8",
-    card:    "#F2F2FC",
-    card2:   "#121230",
-    bo:      "rgba(100,65,210,.22)",
-    bo2:     "rgba(100,65,210,.11)",
-    tx:      "#1A1A3A",
-    mt:      "#7070A0",
-    dm:      "#CECEF0",
+    bg:   "#FAFAFA",
+    surf: "rgba(255,255,255,0.85)",
+    card:    "#F6F6F8",
+    card2:   "#ECECF0",
+    bo:   "rgba(0,0,0,0.07)",
+    bo2:  "rgba(0,0,0,0.04)",
+    tx:   "#1C1C1E",
+    mt:   "#6B6B7B",
+    dm:   "rgba(0,0,0,0.06)",
     B:       "#3B7EF6",
     P:       "#7B3FE4",
     K:       "#D9349A",
@@ -42,9 +42,9 @@
     wnBg:    "rgba(240,168,48,.12)",
     erBg:    "rgba(240,96,96,.12)",
     bBg:     "rgba(59,126,246,.15)",
-    bTx:     "#7FAAFF",
+    bTx:     "#2E6BE6",
     pBg:     "rgba(123,63,228,.15)",
-    pTx:     "#B890FF",
+    pTx:     "#6B2FD4",
   };
 
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
@@ -59,10 +59,13 @@
       overflow: hidden;
       border-radius: 10px;
       border: 1px solid ${T.bo};
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
       box-sizing: border-box;
     }
     .rkt-topbar {
       background: ${T.surf};
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo};
       display: flex;
@@ -78,7 +81,7 @@
       font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rkt-count { font-size: 12px; color: #A8A8D0; white-space: nowrap; }
+    .rkt-count { font-size: 12px; color: #8E8E9A; white-space: nowrap; }
     .rkt-gline {
       height: 2px;
       background: linear-gradient(90deg, ${T.B}, ${T.P}, ${T.K});
@@ -108,30 +111,30 @@
       border-radius: 6px;
       padding: 6px 12px;
       font-size: 13px;
-      color: #EDEDFF;
+      color: ${T.tx};
       outline: none;
       transition: border-color .15s;
     }
-    .rkt-search::placeholder { color: #7878A8; }
-    .rkt-search:focus { border-color: rgba(123,63,228,.5); }
-    .rkt-pg-info { font-size: 12px; color: #A8A8D0; white-space: nowrap; }
+    .rkt-search::placeholder { color: #6B6B7B; }
+    .rkt-search:focus { border-color: rgba(59,126,246,0.50); }
+    .rkt-pg-info { font-size: 12px; color: #8E8E9A; white-space: nowrap; }
     .rkt-pg-btn {
       background: ${T.card};
       border: 1px solid ${T.bo2};
       border-radius: 5px;
-      color: #C8C8EE;
+      color: ${T.tx};
       font-size: 12px;
       padding: 5px 11px;
       cursor: pointer;
       transition: all .15s;
       white-space: nowrap;
     }
-    .rkt-pg-btn:hover:not(:disabled) { border-color: rgba(123,63,228,.45); color: ${T.tx}; }
+    .rkt-pg-btn:hover:not(:disabled) { border-color: rgba(0,0,0,0.20); color: ${T.tx}; }
     .rkt-pg-btn:disabled { opacity: .35; cursor: default; }
     .rkt-table-wrap { flex: 1; overflow-y: auto; overflow-x: auto; }
     .rkt-table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
     .rkt-table-wrap::-webkit-scrollbar-track { background: ${T.bg}; }
-    .rkt-table-wrap::-webkit-scrollbar-thumb { background: rgba(123,63,228,.3); border-radius: 3px; }
+    .rkt-table-wrap::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
     .rkt-table {
       width: 100%;
       border-collapse: collapse;
@@ -143,14 +146,14 @@
     /* ── Base header cell ── */
     .rkt-table th {
       background: ${T.surf};
-      color: #7878A8;
+      color: #6B6B7B;
       font-weight: 500;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: .6px;
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo2};
-      border-right: 1px solid rgba(100,65,210,.1);
+      border-right: 1px solid rgba(0,0,0,0.06);
       text-align: left;
       white-space: nowrap;
       user-select: none;
@@ -173,32 +176,32 @@
       font-size: 11px;
       font-weight: 600;
       letter-spacing: .5px;
-      border-bottom: 1px solid rgba(100,65,210,.25);
+      border-bottom: 1px solid rgba(0,0,0,0.10);
       /* Left border marks the start of each pivot group */
     }
     .rkt-table th.rkt-th-pivot-start {
-      border-left: 1px solid rgba(100,65,210,.28);
+      border-left: 1px solid rgba(0,0,0,0.11);
     }
 
     /* ── Measure sub-header (second header row under pivot group) ── */
     .rkt-table th.rkt-th-measure {
       background: ${T.surf};
-      color: #7878A8;
+      color: #6B6B7B;
       font-size: 10px;
     }
     .rkt-table th.rkt-th-measure.rkt-col-start {
-      border-left: 1px solid rgba(100,65,210,.18);
+      border-left: 1px solid rgba(0,0,0,0.07);
     }
 
     /* ── Data cells that start a pivot group get a subtle left border ── */
     .rkt-table td.rkt-col-start {
-      border-left: 1px solid rgba(100,65,210,.18);
+      border-left: 1px solid rgba(0,0,0,0.07);
     }
 
     .rkt-table td {
       padding: 10px 14px;
-      border-bottom: 1px solid rgba(100,65,210,.06);
-      border-right: 1px solid rgba(100,65,210,.1);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      border-right: 1px solid rgba(0,0,0,0.06);
       color: ${T.tx};
       white-space: nowrap;
       max-width: 220px;
@@ -223,18 +226,18 @@
     .rkt-badge-err  { background: ${T.erBg}; color: ${T.er}; }
     .rkt-badge-blue { background: ${T.bBg};  color: ${T.bTx}; }
     .rkt-badge-purp { background: ${T.pBg};  color: ${T.pTx}; }
-    .rkt-badge-neu  { background: rgba(100,65,210,.12); color: ${T.mt}; }
+    .rkt-badge-neu  { background: rgba(0,0,0,0.06); color: ${T.mt}; }
     .rkt-empty {
       padding: 40px 20px;
       text-align: center;
-      color: #A8A8D0;
+      color: #8E8E9A;
       font-size: 14px;
     }
     .rkt-number { font-variant-numeric: tabular-nums; }
     .rkt-diag-bg {
       background-image:
-        repeating-linear-gradient(135deg, rgba(100,65,210,.025) 0, rgba(100,65,210,.025) 1px, transparent 1px, transparent 18px),
-        repeating-linear-gradient(45deg,  rgba(59,126,246,.02)  0, rgba(59,126,246,.02)  1px, transparent 1px, transparent 18px);
+        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
     }
 
     /* ── Responsive: width breakpoints via data-w on rkt-wrap ── */
