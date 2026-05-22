@@ -22,11 +22,11 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#FAFAFA",
-    surf: "rgba(255,255,255,0.85)",
-    bo:   "rgba(0,0,0,0.07)",
+    bg:   "#FFFFFF",
+    surf: "#F8F8FA",
+    bo:   "#E5E5EA",
     tx:   "#1C1C1E",
-    mt:   "#6B6B7B",
+    mt:   "#8E8E93",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -53,9 +53,6 @@
       display: flex;
       flex-direction: column;
       background: ${T.bg};
-      background-image:
-        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
       overflow: hidden;
       position: relative;
       box-sizing: border-box;
@@ -158,7 +155,7 @@
     .sv-arrow-badge.up-bad    { background: rgba(240,96,96,.14);  color: ${T.er}; }
     .sv-arrow-badge.down-good { background: rgba(45,212,160,.14); color: ${T.ok}; }
     .sv-arrow-badge.down-bad  { background: rgba(240,96,96,.14);  color: ${T.er}; }
-    .sv-arrow-badge.neutral   { background: rgba(0,0,0,0.06); color: #8E8E9A; }
+    .sv-arrow-badge.neutral   { background: rgba(0,0,0,0.06); color: #8E8E93; }
 
     .sv-delta-label {
       font-size: 12px;

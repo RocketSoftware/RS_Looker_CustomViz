@@ -23,15 +23,15 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#FAFAFA",
-    surf: "rgba(255,255,255,0.85)",
-    card:    "#F6F6F8",
-    card2:   "#ECECF0",
-    bo:   "rgba(0,0,0,0.07)",
-    bo2:  "rgba(0,0,0,0.04)",
+    bg:   "#FFFFFF",
+    surf: "#F8F8FA",
+    card:    "#F8F8FA",
+    card2:   "#FFFFFF",
+    bo:   "#E5E5EA",
+    bo2:  "#EBEBF0",
     tx:   "#1C1C1E",
-    mt:   "#6B6B7B",
-    dm:   "rgba(0,0,0,0.06)",
+    mt:   "#8E8E93",
+    dm:   "#F2F2F7",
     B:       "#3B7EF6",
     P:       "#7B3FE4",
     K:       "#D9349A",
@@ -59,13 +59,11 @@
       overflow: hidden;
       border-radius: 10px;
       border: 1px solid ${T.bo};
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.08);
       box-sizing: border-box;
     }
     .rkt-topbar {
       background: ${T.surf};
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo};
       display: flex;
@@ -81,7 +79,7 @@
       font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rkt-count { font-size: 12px; color: #8E8E9A; white-space: nowrap; }
+    .rkt-count { font-size: 12px; color: #8E8E93; white-space: nowrap; }
     .rkt-gline {
       height: 2px;
       background: linear-gradient(90deg, ${T.B}, ${T.P}, ${T.K});
@@ -117,7 +115,7 @@
     }
     .rkt-search::placeholder { color: #6B6B7B; }
     .rkt-search:focus { border-color: rgba(59,126,246,0.50); }
-    .rkt-pg-info { font-size: 12px; color: #8E8E9A; white-space: nowrap; }
+    .rkt-pg-info { font-size: 12px; color: #8E8E93; white-space: nowrap; }
     .rkt-pg-btn {
       background: ${T.card};
       border: 1px solid ${T.bo2};
@@ -176,7 +174,7 @@
       font-size: 11px;
       font-weight: 600;
       letter-spacing: .5px;
-      border-bottom: 1px solid rgba(0,0,0,0.10);
+      border-bottom: 1px solid #DDDDE5;
       /* Left border marks the start of each pivot group */
     }
     .rkt-table th.rkt-th-pivot-start {
@@ -190,12 +188,12 @@
       font-size: 10px;
     }
     .rkt-table th.rkt-th-measure.rkt-col-start {
-      border-left: 1px solid rgba(0,0,0,0.07);
+      border-left: 1px solid rgba(0,0,0,0.06);
     }
 
     /* ── Data cells that start a pivot group get a subtle left border ── */
     .rkt-table td.rkt-col-start {
-      border-left: 1px solid rgba(0,0,0,0.07);
+      border-left: 1px solid rgba(0,0,0,0.06);
     }
 
     .rkt-table td {
@@ -230,14 +228,11 @@
     .rkt-empty {
       padding: 40px 20px;
       text-align: center;
-      color: #8E8E9A;
+      color: #8E8E93;
       font-size: 14px;
     }
     .rkt-number { font-variant-numeric: tabular-nums; }
     .rkt-diag-bg {
-      background-image:
-        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
     }
 
     /* ── Responsive: width breakpoints via data-w on rkt-wrap ── */

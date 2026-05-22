@@ -25,11 +25,11 @@
 
   /* ─── Brand tokens ────────────────────────────────────────────────────── */
   const T = {
-    bg:   "#FAFAFA",
-    surf: "rgba(255,255,255,0.85)",
-    bo:   "rgba(0,0,0,0.07)",
+    bg:   "#FFFFFF",
+    surf: "#F8F8FA",
+    bo:   "#E5E5EA",
     tx:   "#1C1C1E",
-    mt:   "#6B6B7B",
+    mt:   "#8E8E93",
     B:    "#3B7EF6",
     P:    "#7B3FE4",
     K:    "#D9349A",
@@ -58,21 +58,16 @@
       width: 100%; height: 100%;
       display: flex; flex-direction: column;
       background: ${T.bg};
-      background-image:
-        radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59,126,246,0.06) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 70% at 85% 90%, rgba(123,63,228,0.05) 0%, transparent 65%);
       overflow: hidden;
       box-sizing: border-box;
       border-radius: 10px;
       border: 1px solid ${T.bo};
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.08);
       position: relative;
     }
 
     .rhb-topbar {
       background: ${T.surf};
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
       padding: 10px 14px;
       border-bottom: 1px solid ${T.bo};
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -121,10 +116,10 @@
     }
     .rhb-leg-item:hover  { background: rgba(0,0,0,0.05); }
     .rhb-leg-item.dimmed { opacity: .3; }
-    .rhb-leg-item.pinned { background: rgba(0,0,0,0.07) !important; }
+    .rhb-leg-item.pinned { background: rgba(0,0,0,0.06) !important; }
     .rhb-leg-item.pinned .rhb-leg-name { color: ${T.tx}; font-weight: 600; }
     .rhb-leg-dot  { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
-    .rhb-leg-name { font-size: 11px; color: #8A8A9A; white-space: nowrap; }
+    .rhb-leg-name { font-size: 11px; color: #8E8E93; white-space: nowrap; }
 
     /* ── Chart area ── */
     .rhb-chart-wrap {
@@ -140,9 +135,9 @@
       font-size: 10px;
       fill: ${T.mt};
     }
-    .rhb-gridline  { stroke: rgba(0,0,0,0.07); stroke-width: 1; }
-    .rhb-zeroline  { stroke: rgba(0,0,0,0.10); stroke-width: 1; }
-    .rhb-axis-line { stroke: rgba(0,0,0,0.12); stroke-width: 1; }
+    .rhb-gridline  { stroke: rgba(0,0,0,0.06); stroke-width: 1; }
+    .rhb-zeroline  { stroke: #DDDDE5; stroke-width: 1; }
+    .rhb-axis-line { stroke: #DDDDE5; stroke-width: 1; }
 
     /* ── Bars ── */
     .rhb-bar {
@@ -171,7 +166,7 @@
     .rhb-val-label {
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 9px;
-      fill: rgba(0,0,0,0.55);
+      fill: #8E8E93;
       dominant-baseline: middle;
       pointer-events: none;
     }
@@ -181,7 +176,7 @@
       position: fixed;
       pointer-events: none;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: rgba(248,248,255,0.97);
+      background: rgba(255,255,255,0.98);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(0,0,0,0.09);
