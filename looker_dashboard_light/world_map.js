@@ -44,7 +44,7 @@
   };
 
   /* ─── Heatmap color stops (blue → purple → pink) ─────────────────────── */
-  const HEAT_STOPS = ["#3B7EF6", "#7B3FE4", "#D9349A"];
+  const HEAT_STOPS = ["#C8D9FB", "#3B7EF6", "#7B3FE4", "#D9349A"];
 
   /* ─── ISO alpha-2 → ISO numeric (3-digit string) ─────────────────────── */
   /* Covers all 249 UN M.49 territories recognised by world-atlas             */
@@ -268,7 +268,7 @@
     .rwm-country {
       cursor: pointer;
       transition: stroke .12s, stroke-width .12s, opacity .18s;
-      stroke: rgba(0,0,0,0.15);
+      stroke: rgba(0,0,0,0.08);
       stroke-width: 0.4;
     }
     .rwm-country.hovered {
@@ -286,8 +286,8 @@
     /* ── Country borders (mesh lines between neighbours) ── */
     .rwm-borders {
       fill: none;
-      stroke: #DDDDE5;
-      stroke-width: 0.35;
+      stroke: rgba(255,255,255,0.85);
+      stroke-width: 0.6;
       pointer-events: none;
     }
 
@@ -301,7 +301,7 @@
 
     /* ── Sphere (background) ── */
     .rwm-sphere {
-      fill: #D4E6F5;
+      fill: #EDF2FA;
       pointer-events: none;
     }
 
@@ -310,9 +310,9 @@
       pointer-events: none;
     }
     .rwm-legend-bg {
-      fill: rgba(255,255,255,0.92);
+      fill: rgba(255,255,255,0.96);
       rx: 6; ry: 6;
-      stroke: rgba(0,0,0,0.06);
+      stroke: #E5E5EA;
       stroke-width: 0.5;
     }
     .rwm-legend-label {
@@ -481,9 +481,9 @@
     return lerpColor(stops[i], stops[i + 1], frac);
   }
 
-  /** Opacity encoding: lower value ↔ more transparent */
+  /** Full opacity — color scale handles light→dark encoding */
   function heatOpacity(t) {
-    return 0.15 + 0.80 * Math.max(0, Math.min(1, t));
+    return 1.0;
   }
 
   /** Dynamically load a script and resolve when ready */
@@ -737,14 +737,16 @@
       const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
       defs.innerHTML = `
         <linearGradient id="rwm-heat-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stop-color="${HEAT_STOPS[0]}" stop-opacity="${heatOpacity(0)}"/>
-          <stop offset="50%"  stop-color="${HEAT_STOPS[1]}" stop-opacity="${heatOpacity(0.5)}"/>
-          <stop offset="100%" stop-color="${HEAT_STOPS[2]}" stop-opacity="${heatOpacity(1)}"/>
+          <stop offset="0%"   stop-color="${HEAT_STOPS[0]}" stop-opacity="1"/>
+          <stop offset="33%"  stop-color="${HEAT_STOPS[1]}" stop-opacity="1"/>
+          <stop offset="67%"  stop-color="${HEAT_STOPS[2]}" stop-opacity="1"/>
+          <stop offset="100%" stop-color="${HEAT_STOPS[3]}" stop-opacity="1"/>
         </linearGradient>
         <linearGradient id="rwm-heat-grad-opaque" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%"   stop-color="${HEAT_STOPS[0]}"/>
-          <stop offset="50%"  stop-color="${HEAT_STOPS[1]}"/>
-          <stop offset="100%" stop-color="${HEAT_STOPS[2]}"/>
+          <stop offset="33%"  stop-color="${HEAT_STOPS[1]}"/>
+          <stop offset="67%"  stop-color="${HEAT_STOPS[2]}"/>
+          <stop offset="100%" stop-color="${HEAT_STOPS[3]}"/>
         </linearGradient>`;
       svg.appendChild(defs);
 
@@ -776,7 +778,7 @@
         const hasData = !!info;
 
         const t     = hasData ? tForValue(info.value) : null;
-        const color = hasData ? heatColor(t)   : "#C8CDD8";
+        const color = hasData ? heatColor(t)   : "#DFE2E9";
         const alpha = hasData ? heatOpacity(t) : 1;
 
         const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -907,7 +909,7 @@
       const ndR = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       ndR.setAttribute("width", 8); ndR.setAttribute("height", 8);
       ndR.setAttribute("rx", 1); ndR.setAttribute("ry", 1);
-      ndR.setAttribute("fill", "#C8CDD8");
+      ndR.setAttribute("fill", "#DFE2E9");
       ndR.setAttribute("stroke", "rgba(0,0,0,0.18)");
       ndR.setAttribute("stroke-width", "0.5");
       ndG.appendChild(ndR);
@@ -950,7 +952,7 @@
           : isoNum;
         body.innerHTML = `
           <div class="rwm-tt-header">
-            <div class="rwm-tt-swatch" style="background:#C8CDD8; border-color:rgba(0,0,0,0.15)"></div>
+            <div class="rwm-tt-swatch" style="background:#DFE2E9; border-color:rgba(0,0,0,0.15)"></div>
             <span class="rwm-tt-label">${esc(name)}</span>
           </div>
           <div class="rwm-tt-nodata">No data available</div>`;
