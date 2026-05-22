@@ -273,15 +273,15 @@
     .rwm-country {
       cursor: pointer;
       transition: stroke .12s, stroke-width .12s, opacity .18s;
-      stroke: rgba(226,226,255,.08);
+      stroke: rgba(0,0,0,0.15);
       stroke-width: 0.4;
     }
     .rwm-country.hovered {
-      stroke: rgba(226,226,255,.9);
+      stroke: rgba(0,0,0,0.65);
       stroke-width: 1.2;
     }
     .rwm-country.pinned {
-      stroke: #ffffff;
+      stroke: #1C1C1E;
       stroke-width: 1.6;
     }
     .rwm-country.dimmed {
@@ -291,7 +291,7 @@
     /* ── Country borders (mesh lines between neighbours) ── */
     .rwm-borders {
       fill: none;
-      stroke: rgba(226,226,255,.06);
+      stroke: rgba(0,0,0,0.12);
       stroke-width: 0.35;
       pointer-events: none;
     }
@@ -299,14 +299,14 @@
     /* ── Graticule ── */
     .rwm-graticule {
       fill: none;
-      stroke: rgba(89,89,133,.12);
+      stroke: rgba(0,0,0,0.08);
       stroke-width: 0.35;
       pointer-events: none;
     }
 
     /* ── Sphere (background) ── */
     .rwm-sphere {
-      fill: #080818;
+      fill: #D4E6F5;
       pointer-events: none;
     }
 
@@ -315,8 +315,10 @@
       pointer-events: none;
     }
     .rwm-legend-bg {
-      fill: rgba(9,9,28,.78);
+      fill: rgba(255,255,255,0.92);
       rx: 6; ry: 6;
+      stroke: rgba(0,0,0,0.07);
+      stroke-width: 0.5;
     }
     .rwm-legend-label {
       font-family: 'Inter', system-ui, sans-serif;
@@ -362,7 +364,7 @@
     .rwm-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rwm-tt-swatch {
       width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-      border: 1.5px solid rgba(255,255,255,.18);
+      border: 1.5px solid rgba(0,0,0,0.15);
     }
     .rwm-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rwm-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
@@ -779,7 +781,7 @@
         const hasData = !!info;
 
         const t     = hasData ? tForValue(info.value) : null;
-        const color = hasData ? heatColor(t)   : "#12122A";
+        const color = hasData ? heatColor(t)   : "#C8CDD8";
         const alpha = hasData ? heatOpacity(t) : 1;
 
         const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -910,8 +912,8 @@
       const ndR = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       ndR.setAttribute("width", 8); ndR.setAttribute("height", 8);
       ndR.setAttribute("rx", 1); ndR.setAttribute("ry", 1);
-      ndR.setAttribute("fill", "#12122A");
-      ndR.setAttribute("stroke", "rgba(226,226,255,.12)");
+      ndR.setAttribute("fill", "#C8CDD8");
+      ndR.setAttribute("stroke", "rgba(0,0,0,0.18)");
       ndR.setAttribute("stroke-width", "0.5");
       ndG.appendChild(ndR);
 
@@ -953,7 +955,7 @@
           : isoNum;
         body.innerHTML = `
           <div class="rwm-tt-header">
-            <div class="rwm-tt-swatch" style="background:#1c1c38; border-color:rgba(226,226,255,.12)"></div>
+            <div class="rwm-tt-swatch" style="background:#C8CDD8; border-color:rgba(0,0,0,0.15)"></div>
             <span class="rwm-tt-label">${esc(name)}</span>
           </div>
           <div class="rwm-tt-nodata">No data available</div>`;
