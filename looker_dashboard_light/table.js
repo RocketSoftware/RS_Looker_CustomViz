@@ -57,9 +57,6 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border-radius: 10px;
-      border: 1px solid ${T.bo};
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.08);
       box-sizing: border-box;
     }
     .rkt-topbar {
