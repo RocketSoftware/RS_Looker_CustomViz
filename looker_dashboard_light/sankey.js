@@ -95,7 +95,7 @@
     .rsk-body {
       flex: 1; display: flex; flex-direction: column;
       min-height: 0; overflow: hidden;
-      padding: 10px 14px 12px;
+      padding: 6px 8px 8px;
       box-sizing: border-box;
     }
 
@@ -576,25 +576,7 @@
       el.appendChild(root);
       this._root = root;
 
-      // Topbar
-      const topbar = document.createElement("div");
-      topbar.className = "rsk-topbar";
-      topbar.innerHTML = `
-        <div class="rsk-topbar-left">
-          ${LOGO_SVG}
-          <span class="rsk-title">Sankey</span>
-        </div>
-        <span class="rsk-subtitle"></span>`;
-      root.appendChild(topbar);
-      this._titleEl    = topbar.querySelector(".rsk-title");
-      this._subtitleEl = topbar.querySelector(".rsk-subtitle");
-
-      // Gradient accent line
-      const gline = document.createElement("div");
-      gline.className = "rsk-gline";
-      root.appendChild(gline);
-
-      // Body
+      // Body (no topbar — Looker's tile chrome is sufficient)
       const body = document.createElement("div");
       body.className = "rsk-body";
       root.appendChild(body);
@@ -639,10 +621,8 @@
 
     /* ── _render ─────────────────────────────────────────────────────────── */
     _render(data, el, config, queryResponse, details, done) {
-      const root       = this._root;
-      const wrap       = this._wrap;
-      const titleEl    = this._titleEl;
-      const subtitleEl = this._subtitleEl;
+      const root = this._root;
+      const wrap = this._wrap;
 
       const W = wrap.clientWidth  || 600;
       const H = wrap.clientHeight || 340;
@@ -655,11 +635,6 @@
       const allMeas = [...meass, ...tcs];
 
       const measField = allMeas[0];
-
-      titleEl.textContent    = config.title || "Sankey";
-      subtitleEl.textContent = measField
-        ? (measField.label_short || measField.label)
-        : "";
 
       /* ── Validate ── */
       if (dims.length < 2 || !measField) {
@@ -843,42 +818,7 @@
 
         nd._el = g;
 
-        // Labels: always show for every non-first-column node, regardless of node height.
-        const showLabel = !isFirst;
-        const smallLabel = nd.h < 14;
-
-        if (showLabel) {
-          // First column: label to the LEFT of the node (anchor=end)
-          // Last column:  label to the RIGHT of the node (anchor=start)
-          // Middle cols:  label to the RIGHT (keeps chart readable)
-          const labelX = nodeW + 6;
-          const anchor  = "start";
-
-          // Cap label length based on available right margin
-          const maxChars = Math.max(10, Math.floor(rightLabW / CH) - 1);
-          const displayLabel = nd.label.length > maxChars
-            ? nd.label.slice(0, maxChars - 1) + "…"
-            : nd.label;
-
-          const lab = svgEl("text", {
-            class: `rsk-node-label${smallLabel ? " small" : ""}`,
-            x: labelX, y: midY,
-            "text-anchor": anchor,
-          });
-          lab.textContent = displayLabel;
-          g.appendChild(lab);
-
-          // Value hint (only when node is tall enough)
-          if (nd.h >= 28 && !smallLabel) {
-            const valTxt = svgEl("text", {
-              class: "rsk-node-val",
-              x: labelX, y: midY + 13,
-              "text-anchor": anchor,
-            });
-            valTxt.textContent = fmtNumber(nd.value);
-            g.appendChild(valTxt);
-          }
-        }
+        // Labels are added to a dedicated layer after this loop (see labelsG below).
 
         // Events
         g.addEventListener("mouseenter", (e) => {
@@ -896,6 +836,41 @@
           e.stopPropagation();
           self._onPinNode(nd.id, nd, grandTotal, e);
         });
+      });
+
+      /* ── Labels layer (on top of everything, absolute SVG coords) ── */
+      // Rendered after nodes/links so they're never clipped by group transforms.
+      const labelsG = svgEl("g", { class: "rsk-labels", "pointer-events": "none" });
+      svg.appendChild(labelsG);
+
+      const maxChars = Math.max(10, Math.floor(rightLabW / CH) - 1);
+
+      nodes.forEach(nd => {
+        if (nd.column === 0) return;          // no labels for source column
+        const absX = nd.x + nodeW + 6;        // absolute SVG x (right of bar)
+        const absY = HEADER_H + nd.y + nd.h / 2;  // vertical centre of node
+
+        const maxC = Math.max(10, Math.floor((W - absX - 4) / CH));
+        const lbl  = nd.label.length > maxC ? nd.label.slice(0, maxC - 1) + "…" : nd.label;
+
+        const nameTxt = svgEl("text", {
+          class: nd.h < 14 ? "rsk-node-label small" : "rsk-node-label",
+          x: absX, y: absY - (nd.h >= 18 ? 5 : 0),
+          "text-anchor": "start",
+        });
+        nameTxt.textContent = lbl;
+        labelsG.appendChild(nameTxt);
+
+        // Value — always shown on a second line when there is vertical room,
+        // or inline when node is tiny (< 14 px tall)
+        const valTxt = svgEl("text", {
+          class: "rsk-node-val",
+          x: absX,
+          y: nd.h >= 18 ? absY + 7 : absY + 10,
+          "text-anchor": "start",
+        });
+        valTxt.textContent = fmtNumber(nd.value);
+        labelsG.appendChild(valTxt);
       });
 
       // SVG background click → clear pin
