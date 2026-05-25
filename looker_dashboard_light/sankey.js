@@ -384,7 +384,12 @@
       if (ct > maxColFlow) maxColFlow = ct;
     });
     const maxColNodes = Math.max(...columns.map(col => col.length));
-    const totalPadMax = nodePad * (maxColNodes - 1);
+    // Scale padding down so nodes never overflow the chart height.
+    // Reserve at most 35% of H for gaps; the rest goes to proportional node heights.
+    const effectivePad = maxColNodes > 1
+      ? Math.min(nodePad, Math.max(2, Math.floor((H * 0.35) / (maxColNodes - 1))))
+      : 0;
+    const totalPadMax = effectivePad * (maxColNodes - 1);
     const pxPerUnit   = maxColFlow > 0 ? (H - totalPadMax) / maxColFlow : 1;
 
     nodes.forEach(nd => {
@@ -395,12 +400,12 @@
     function repositionCol(col) {
       // Stack nodes with padding, then vertically center the whole group
       const totalH = col.reduce((s, i) => s + nodes[i].h, 0)
-                   + nodePad * (col.length - 1);
+                   + effectivePad * (col.length - 1);
       const startY = Math.max(0, (H - totalH) / 2);
       let cursor = startY;
       col.forEach(i => {
         nodes[i].y = cursor;
-        cursor += nodes[i].h + nodePad;
+        cursor += nodes[i].h + effectivePad;
       });
     }
 
@@ -834,9 +839,10 @@
         const isFirst = nd.column === 0;
         const isLast  = nd.column === numCols - 1;
         const midY    = nd.h / 2;
-        // No labels on the first column — avoids the messy left-side stacking
-        const showLabel = nd.h >= 10 && !isFirst;
-        const smallLabel = nd.h < 20;
+        // No labels on the first (source) column — avoids left-side stacking.
+        // Always show labels for all other columns regardless of node height.
+        const showLabel = !isFirst;
+        const smallLabel = nd.h < 14;
 
         if (showLabel) {
           // First column: label to the LEFT of the node (anchor=end)
