@@ -679,7 +679,7 @@
     /* ── updateAsync ─────────────────────────────────────────────────────── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const state   = this._state;
-      const perPage = Math.max(1, config.rows_per_page || 10);
+      const perPage = Math.max(1, config.rows_per_page || 100);
 
       // Use scoped refs stored in create() — never touch document.getElementById
       const titleEl   = this._titleEl;
