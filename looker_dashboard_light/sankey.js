@@ -823,24 +823,27 @@
         });
         g.style.animationDelay = `${ni * 20}ms`;
 
-        // Node rect
-        const rect = svgEl("rect", {
-          x: 0, y: 0,
-          width: nodeW, height: nd.h,
-          rx: 3, ry: 3,
-          fill: nd.color,
-        });
-        g.appendChild(rect);
+        // Label placement flags — needed before we decide what to render
+        const isFirst = nd.column === 0;
+        const isLast  = nd.column === numCols - 1;
+        const midY    = nd.h / 2;
+
+        // First-column (source) nodes: no visible bar — flows just emanate from the left.
+        // All other nodes: render the colored rectangle.
+        if (!isFirst) {
+          const rect = svgEl("rect", {
+            x: 0, y: 0,
+            width: nodeW, height: nd.h,
+            rx: 3, ry: 3,
+            fill: nd.color,
+          });
+          g.appendChild(rect);
+        }
         nodesG.appendChild(g);
 
         nd._el = g;
 
-        // Label placement
-        const isFirst = nd.column === 0;
-        const isLast  = nd.column === numCols - 1;
-        const midY    = nd.h / 2;
-        // No labels on the first (source) column — avoids left-side stacking.
-        // Always show labels for all other columns regardless of node height.
+        // Labels: always show for every non-first-column node, regardless of node height.
         const showLabel = !isFirst;
         const smallLabel = nd.h < 14;
 
