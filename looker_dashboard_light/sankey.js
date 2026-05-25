@@ -704,10 +704,10 @@
 
       /* ── Compute label clearance from actual label lengths ── */
       const CH = 5.8;  // avg px per char at 11px Inter
-      const leftMaxChars  = Math.max(0, ...columns[0].map(i => nodes[i].label.length));
+      // Left column nodes have no labels → use minimal left margin
+      const leftLabW  = colPad;
       const rightMaxChars = Math.max(0, ...columns[numCols - 1].map(i => nodes[i].label.length));
-      const leftLabW  = Math.min(180, Math.max(50, Math.ceil(leftMaxChars  * CH) + 12));
-      const rightLabW = Math.min(220, Math.max(50, Math.ceil(rightMaxChars * CH) + 12));
+      const rightLabW = Math.min(260, Math.max(80, Math.ceil(rightMaxChars * CH) + 20));
 
       // Recompute X positions with label margins
       const innerW  = W - leftLabW - rightLabW;
@@ -834,20 +834,19 @@
         const isFirst = nd.column === 0;
         const isLast  = nd.column === numCols - 1;
         const midY    = nd.h / 2;
-        const showLabel = nd.h >= 10;
+        // No labels on the first column — avoids the messy left-side stacking
+        const showLabel = nd.h >= 10 && !isFirst;
         const smallLabel = nd.h < 20;
 
         if (showLabel) {
           // First column: label to the LEFT of the node (anchor=end)
           // Last column:  label to the RIGHT of the node (anchor=start)
           // Middle cols:  label to the RIGHT (keeps chart readable)
-          const labelX = isFirst ? -6 : nodeW + 6;
-          const anchor  = isFirst ? "end" : "start";
+          const labelX = nodeW + 6;
+          const anchor  = "start";
 
-          // Cap label length based on available margin space
-          const maxChars = isFirst
-            ? Math.max(8, Math.floor(leftLabW  / CH) - 1)
-            : Math.max(8, Math.floor(rightLabW / CH) - 1);
+          // Cap label length based on available right margin
+          const maxChars = Math.max(10, Math.floor(rightLabW / CH) - 1);
           const displayLabel = nd.label.length > maxChars
             ? nd.label.slice(0, maxChars - 1) + "…"
             : nd.label;
