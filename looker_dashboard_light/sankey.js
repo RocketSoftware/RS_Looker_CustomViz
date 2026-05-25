@@ -95,7 +95,7 @@
     .rsk-body {
       flex: 1; display: flex; flex-direction: column;
       min-height: 0; overflow: hidden;
-      padding: 6px 8px 8px;
+      padding: 10px 14px 12px;
       box-sizing: border-box;
     }
 
@@ -576,7 +576,25 @@
       el.appendChild(root);
       this._root = root;
 
-      // Body (no topbar — Looker's tile chrome is sufficient)
+      // Topbar
+      const topbar = document.createElement("div");
+      topbar.className = "rsk-topbar";
+      topbar.innerHTML = `
+        <div class="rsk-topbar-left">
+          ${LOGO_SVG}
+          <span class="rsk-title">Sankey</span>
+        </div>
+        <span class="rsk-subtitle"></span>`;
+      root.appendChild(topbar);
+      this._titleEl    = topbar.querySelector(".rsk-title");
+      this._subtitleEl = topbar.querySelector(".rsk-subtitle");
+
+      // Gradient accent line
+      const gline = document.createElement("div");
+      gline.className = "rsk-gline";
+      root.appendChild(gline);
+
+      // Body
       const body = document.createElement("div");
       body.className = "rsk-body";
       root.appendChild(body);
@@ -621,8 +639,10 @@
 
     /* ── _render ─────────────────────────────────────────────────────────── */
     _render(data, el, config, queryResponse, details, done) {
-      const root = this._root;
-      const wrap = this._wrap;
+      const root       = this._root;
+      const wrap       = this._wrap;
+      const titleEl    = this._titleEl;
+      const subtitleEl = this._subtitleEl;
 
       const W = wrap.clientWidth  || 600;
       const H = wrap.clientHeight || 340;
@@ -635,6 +655,11 @@
       const allMeas = [...meass, ...tcs];
 
       const measField = allMeas[0];
+
+      titleEl.textContent    = config.title || "Sankey";
+      subtitleEl.textContent = measField
+        ? (measField.label_short || measField.label)
+        : "";
 
       /* ── Validate ── */
       if (dims.length < 2 || !measField) {
@@ -674,7 +699,7 @@
       const nodeW   = Math.max(6, config.node_width   || 14);
       const nodePad = Math.max(4, config.node_padding  || 18);
       const colPad  = 14;
-      const HEADER_H = (config.show_col_headers !== false) ? 24 : 0;
+      const HEADER_H = 0;  // column headers removed — they cluttered the top of the chart
       const chartH   = Math.max(60, H - HEADER_H);
       const linkAlpha = Math.max(0.05, Math.min(0.9, config.link_opacity != null ? config.link_opacity : 0.38));
 
@@ -706,33 +731,6 @@
         style: "display:block; overflow:visible;",
       });
       wrap.appendChild(svg);
-
-      /* ── Column headers ── */
-      if (config.show_col_headers !== false && dims.length >= 2) {
-        // Derive header labels from dimension names
-        const dimLabels = dims.map(d => d.label_short || d.label);
-        // But if there are more columns than dims, the chain folded over — just number them
-        const headerLabels = [];
-        if (numCols <= dims.length) {
-          for (let c = 0; c < numCols; c++) headerLabels.push(dimLabels[c] || `Level ${c + 1}`);
-        } else {
-          for (let c = 0; c < numCols; c++) headerLabels.push(`Level ${c + 1}`);
-        }
-
-        headerLabels.forEach((lbl, c) => {
-          // X center of this column's nodes
-          const colNodes = columns[c];
-          if (!colNodes.length) return;
-          const cx = nodes[colNodes[0]].x + nodeW / 2;
-          const tx = svgEl("text", {
-            class: "rsk-col-header",
-            x: cx, y: 15,
-            "text-anchor": "middle",
-          });
-          tx.textContent = lbl;
-          svg.appendChild(tx);
-        });
-      }
 
       /* ── Links layer ── */
       const linksG = svgEl("g", { class: "rsk-links" });
