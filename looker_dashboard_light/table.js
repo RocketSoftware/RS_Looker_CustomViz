@@ -523,7 +523,7 @@
       },
       rows_per_page: {
         type:    "number",
-        label:   "Rows per page",
+        label:   "Rows per page (default 100)",
         default: 100,
         section: "Display",
         order:   2,
@@ -679,7 +679,7 @@
     /* ── updateAsync ─────────────────────────────────────────────────────── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const state   = this._state;
-      const perPage = Math.max(1, config.rows_per_page || 100);
+      const perPage = Math.max(100, parseInt(config.rows_per_page, 10) || 100);
 
       // Use scoped refs stored in create() — never touch document.getElementById
       const titleEl   = this._titleEl;
