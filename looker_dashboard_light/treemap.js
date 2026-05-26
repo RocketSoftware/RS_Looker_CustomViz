@@ -73,10 +73,10 @@
     .rtm-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rtm-logo        { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rtm-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rtm-subtitle { font-size: 11px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
+    .rtm-subtitle { font-size: 13px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
 
     .rtm-gline {
       height: 2px;
@@ -149,20 +149,20 @@
     .rtm-tt-body   { padding: 10px 14px 13px; }
     .rtm-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rtm-tt-dot    { width: 8px; height: 8px; border-radius: 2px; background: ${T.P}; flex-shrink: 0; }
-    .rtm-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
+    .rtm-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
     .rtm-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
-    .rtm-tt-pct    { font-size: 11px; color: ${T.mt}; }
+    .rtm-tt-pct    { font-size: 13px; color: ${T.mt}; }
     .rtm-tt-sep    { height: 1px; background: rgba(0,0,0,0.08); margin: 7px 0 5px; }
     .rtm-tt-row    { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 3px; }
-    .rtm-tt-key    { font-size: 10px; color: ${T.mt}; white-space: nowrap; }
-    .rtm-tt-xval   { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; }
+    .rtm-tt-key    { font-size: 12px; color: ${T.mt}; white-space: nowrap; }
+    .rtm-tt-xval   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; }
 
     /* ── Empty ── */
-    .rtm-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; }
+    .rtm-empty { color: ${T.mt}; font-size: 14px; text-align: center; padding: 20px; }
 
     /* ── Responsive ── */
     .rtm-root[data-w="xs"] .rtm-topbar   { padding: 7px 10px; }
-    .rtm-root[data-w="xs"] .rtm-title    { font-size: 12px; }
+    .rtm-root[data-w="xs"] .rtm-title    { font-size: 13px; }
     .rtm-root[data-w="xs"] .rtm-subtitle { display: none; }
     .rtm-root[data-w="xs"] .rtm-body     { padding: 4px 5px; }
     .rtm-root[data-w="sm"] .rtm-subtitle { display: none; }
@@ -552,13 +552,13 @@
         if (showVal) {
           labels += `<text class="rtm-tile-label rtm-tile-val"
                           x="${cx.toFixed(1)}" y="${ly.toFixed(1)}"
-                          font-size="9">${fmtNumber(t.val)}</text>`;
+                          font-size="12">${fmtNumber(t.val)}</text>`;
           ly += lineH;
         }
         if (showPctEl) {
           labels += `<text class="rtm-tile-label rtm-tile-pct"
                           x="${cx.toFixed(1)}" y="${ly.toFixed(1)}"
-                          font-size="9">${pct}</text>`;
+                          font-size="12">${pct}</text>`;
         }
 
         tileEls += `

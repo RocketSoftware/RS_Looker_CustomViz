@@ -73,10 +73,10 @@
     .rkt-topbar-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
     .rkt-logo { width: 22px; height: 22px; flex-shrink: 0; }
     .rkt-title {
-      font-size: 15px; font-weight: 500; color: ${T.tx};
+      font-size: 16px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rkt-count { font-size: 12px; color: #8E8E93; white-space: nowrap; }
+    .rkt-count { font-size: 13px; color: #8E8E93; white-space: nowrap; }
     .rkt-gline {
       height: 2px;
       background: linear-gradient(90deg, ${T.B}, ${T.P}, ${T.K});
@@ -105,20 +105,20 @@
       border: 1px solid ${T.bo2};
       border-radius: 6px;
       padding: 6px 12px;
-      font-size: 13px;
+      font-size: 14px;
       color: ${T.tx};
       outline: none;
       transition: border-color .15s;
     }
     .rkt-search::placeholder { color: #6B6B7B; }
     .rkt-search:focus { border-color: rgba(59,126,246,0.50); }
-    .rkt-pg-info { font-size: 12px; color: #8E8E93; white-space: nowrap; }
+    .rkt-pg-info { font-size: 13px; color: #8E8E93; white-space: nowrap; }
     .rkt-pg-btn {
       background: ${T.card};
       border: 1px solid ${T.bo2};
       border-radius: 5px;
       color: ${T.tx};
-      font-size: 12px;
+      font-size: 13px;
       padding: 5px 11px;
       cursor: pointer;
       transition: all .15s;
@@ -133,7 +133,7 @@
     .rkt-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 14px;
       table-layout: auto;
     }
     .rkt-table thead { position: sticky; top: 0; z-index: 2; }
@@ -143,7 +143,7 @@
       background: ${T.surf};
       color: #6B6B7B;
       font-weight: 500;
-      font-size: 11px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: .6px;
       padding: 10px 14px;
@@ -168,7 +168,7 @@
       text-align: center;
       background: ${T.card};
       color: ${T.tx};
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
       letter-spacing: .5px;
       border-bottom: 1px solid #DDDDE5;
@@ -182,7 +182,7 @@
     .rkt-table th.rkt-th-measure {
       background: ${T.surf};
       color: #6B6B7B;
-      font-size: 10px;
+      font-size: 12px;
     }
     .rkt-table th.rkt-th-measure.rkt-col-start {
       border-left: 1px solid rgba(0,0,0,0.06);
@@ -209,7 +209,7 @@
     .rkt-table tbody tr { transition: background .12s; }
     .rkt-table tbody tr:hover td { background: ${T.card2}; }
     .rkt-badge {
-      font-size: 11px;
+      font-size: 13px;
       padding: 3px 9px;
       border-radius: 4px;
       display: inline-block;
@@ -226,7 +226,7 @@
       padding: 40px 20px;
       text-align: center;
       color: #8E8E93;
-      font-size: 14px;
+      font-size: 15px;
     }
     .rkt-number { font-variant-numeric: tabular-nums; }
     .rkt-diag-bg {
@@ -234,19 +234,19 @@
 
     /* ── Responsive: width breakpoints via data-w on rkt-wrap ── */
     .rkt-wrap[data-w="xs"] .rkt-topbar { padding: 8px 10px; }
-    .rkt-wrap[data-w="xs"] .rkt-title  { font-size: 13px; }
+    .rkt-wrap[data-w="xs"] .rkt-title  { font-size: 14px; }
     .rkt-wrap[data-w="xs"] .rkt-count  { display: none; }
     .rkt-wrap[data-w="xs"] .rkt-logo   { display: none; }
     .rkt-wrap[data-w="xs"] .rkt-toolbar { flex-direction: column; align-items: stretch; padding: 6px 10px; gap: 6px; }
     .rkt-wrap[data-w="xs"] .rkt-pg-info { display: none; }
-    .rkt-wrap[data-w="xs"] .rkt-pg-btn { padding: 4px 8px; font-size: 11px; }
-    .rkt-wrap[data-w="xs"] .rkt-table  { font-size: 11px; }
-    .rkt-wrap[data-w="xs"] .rkt-table th { padding: 7px 9px; font-size: 10px; letter-spacing: .3px; }
+    .rkt-wrap[data-w="xs"] .rkt-pg-btn { padding: 4px 8px; font-size: 13px; }
+    .rkt-wrap[data-w="xs"] .rkt-table  { font-size: 13px; }
+    .rkt-wrap[data-w="xs"] .rkt-table th { padding: 7px 9px; font-size: 12px; letter-spacing: .3px; }
     .rkt-wrap[data-w="xs"] .rkt-table td { padding: 7px 9px; max-width: 120px; }
-    .rkt-wrap[data-w="xs"] .rkt-badge  { font-size: 10px; padding: 2px 7px; }
+    .rkt-wrap[data-w="xs"] .rkt-badge  { font-size: 12px; padding: 2px 7px; }
 
     .rkt-wrap[data-w="sm"] .rkt-topbar { padding: 9px 12px; }
-    .rkt-wrap[data-w="sm"] .rkt-title  { font-size: 14px; }
+    .rkt-wrap[data-w="sm"] .rkt-title  { font-size: 15px; }
     .rkt-wrap[data-w="sm"] .rkt-count  { display: none; }
     .rkt-wrap[data-w="sm"] .rkt-toolbar { padding: 7px 12px; gap: 6px; }
     .rkt-wrap[data-w="sm"] .rkt-pg-info { display: none; }

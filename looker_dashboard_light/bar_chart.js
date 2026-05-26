@@ -77,10 +77,10 @@
     .rbc-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rbc-logo        { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rbc-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rbc-subtitle { font-size: 11px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
+    .rbc-subtitle { font-size: 13px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
 
     .rbc-gline {
       height: 2px;
@@ -120,7 +120,7 @@
     .rbc-leg-item.pinned { background: rgba(0,0,0,0.06) !important; }
     .rbc-leg-item.pinned .rbc-leg-name { color: ${T.tx}; font-weight: 600; }
     .rbc-leg-dot  { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
-    .rbc-leg-name { font-size: 11px; color: #8E8E93; white-space: nowrap; }
+    .rbc-leg-name { font-size: 13px; color: #8E8E93; white-space: nowrap; }
 
     /* ── Chart area ── */
     .rbc-chart-wrap {
@@ -133,7 +133,7 @@
     /* ── Axes ── */
     .rbc-axis-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 10px;
+      font-size: 12px;
       fill: ${T.mt};
     }
     .rbc-gridline { stroke: rgba(0,0,0,0.06); stroke-width: 1; }
@@ -168,7 +168,7 @@
     /* ── Value labels on bars ── */
     .rbc-val-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       fill: #8E8E93;
       text-anchor: middle;
       pointer-events: none;
@@ -198,17 +198,17 @@
     .rbc-tt-body   { padding: 10px 14px 13px; }
     .rbc-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rbc-tt-dot    { width: 8px; height: 8px; border-radius: 2px; background: ${T.P}; flex-shrink: 0; }
-    .rbc-tt-group  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
-    .rbc-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rbc-tt-group  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
+    .rbc-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rbc-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
-    .rbc-tt-pct    { font-size: 11px; color: ${T.mt}; letter-spacing: .2px; }
+    .rbc-tt-pct    { font-size: 13px; color: ${T.mt}; letter-spacing: .2px; }
 
     /* ── Empty ── */
-    .rbc-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; width: 100%; }
+    .rbc-empty { color: ${T.mt}; font-size: 14px; text-align: center; padding: 20px; width: 100%; }
 
     /* ── Responsive ── */
     .rbc-root[data-w="xs"] .rbc-topbar  { padding: 7px 10px; }
-    .rbc-root[data-w="xs"] .rbc-title   { font-size: 12px; }
+    .rbc-root[data-w="xs"] .rbc-title   { font-size: 13px; }
     .rbc-root[data-w="xs"] .rbc-subtitle { display: none; }
     .rbc-root[data-w="xs"] .rbc-body    { padding: 5px 7px; }
     .rbc-root[data-w="xs"] .rbc-legend  { display: none; }
@@ -665,7 +665,7 @@
                  x="${-(MT + chartH / 2)}" y="10"
                  text-anchor="middle"
                  transform="rotate(-90)"
-                 style="font-size:9px">${esc(yAxisTitle)}</text>`
+                 style="font-size:12px">${esc(yAxisTitle)}</text>`
         : "";
 
       /* Legend HTML */

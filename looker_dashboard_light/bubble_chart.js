@@ -68,10 +68,10 @@
     .rbu-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rbu-logo  { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rbu-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rbu-subtitle { font-size: 11px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
+    .rbu-subtitle { font-size: 13px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
 
     /* ── Gradient accent line ── */
     .rbu-gline {
@@ -113,7 +113,7 @@
     .rbu-leg-item.pinned { background: rgba(0,0,0,0.06) !important; }
     .rbu-leg-item.pinned .rbu-leg-name { color: ${T.tx}; font-weight: 600; }
     .rbu-leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .rbu-leg-name { font-size: 11px; color: #8E8E93; white-space: nowrap; }
+    .rbu-leg-name { font-size: 13px; color: #8E8E93; white-space: nowrap; }
 
     /* ── Chart area ── */
     .rbu-chart-wrap {
@@ -126,12 +126,12 @@
     /* ── Axes ── */
     .rbu-axis-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 10px;
+      font-size: 12px;
       fill: ${T.mt};
     }
     .rbu-axis-title {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
       fill: #6B6B7B;
     }
@@ -167,7 +167,7 @@
     /* ── Bubble labels ── */
     .rbu-bubble-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       fill: rgba(226,226,255,.85);
       text-anchor: middle;
       dominant-baseline: middle;
@@ -198,21 +198,21 @@
     .rbu-tt-body   { padding: 10px 14px 13px; }
     .rbu-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rbu-tt-dot    { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .rbu-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase;
+    .rbu-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase;
                      letter-spacing: 1.1px; color: #6B6B7B;
                      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rbu-tt-row    { display: flex; justify-content: space-between; align-items: baseline;
                      gap: 10px; margin-bottom: 3px; }
-    .rbu-tt-key    { font-size: 10px; color: ${T.mt}; white-space: nowrap; }
-    .rbu-tt-val    { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+    .rbu-tt-key    { font-size: 12px; color: ${T.mt}; white-space: nowrap; }
+    .rbu-tt-val    { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;
                      color: ${T.tx}; letter-spacing: -0.3px; }
 
     /* ── Empty ── */
-    .rbu-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; }
+    .rbu-empty { color: ${T.mt}; font-size: 14px; text-align: center; padding: 20px; }
 
     /* ── Responsive ── */
     .rbu-root[data-w="xs"] .rbu-topbar  { padding: 7px 10px; }
-    .rbu-root[data-w="xs"] .rbu-title   { font-size: 12px; }
+    .rbu-root[data-w="xs"] .rbu-title   { font-size: 13px; }
     .rbu-root[data-w="xs"] .rbu-subtitle { display: none; }
     .rbu-root[data-w="xs"] .rbu-body    { padding: 4px 6px; }
     .rbu-root[data-w="xs"] .rbu-legend  { display: none; }

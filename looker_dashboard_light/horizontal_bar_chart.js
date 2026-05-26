@@ -73,10 +73,10 @@
     .rhb-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rhb-logo        { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rhb-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rhb-subtitle { font-size: 11px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
+    .rhb-subtitle { font-size: 13px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
 
     .rhb-gline {
       height: 2px;
@@ -116,7 +116,7 @@
     .rhb-leg-item.pinned { background: rgba(0,0,0,0.06) !important; }
     .rhb-leg-item.pinned .rhb-leg-name { color: ${T.tx}; font-weight: 600; }
     .rhb-leg-dot  { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
-    .rhb-leg-name { font-size: 11px; color: #8E8E93; white-space: nowrap; }
+    .rhb-leg-name { font-size: 13px; color: #8E8E93; white-space: nowrap; }
 
     /* ── Chart area ── */
     .rhb-chart-wrap {
@@ -129,7 +129,7 @@
     /* ── Axes ── */
     .rhb-axis-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 10px;
+      font-size: 12px;
       fill: ${T.mt};
     }
     .rhb-gridline  { stroke: rgba(0,0,0,0.06); stroke-width: 1; }
@@ -162,7 +162,7 @@
     /* ── Value labels on bars ── */
     .rhb-val-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       fill: #8E8E93;
       dominant-baseline: middle;
       pointer-events: none;
@@ -192,17 +192,17 @@
     .rhb-tt-body   { padding: 10px 14px 13px; }
     .rhb-tt-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
     .rhb-tt-dot    { width: 8px; height: 8px; border-radius: 2px; background: ${T.P}; flex-shrink: 0; }
-    .rhb-tt-group  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
-    .rhb-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rhb-tt-group  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; }
+    .rhb-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rhb-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
-    .rhb-tt-pct    { font-size: 11px; color: ${T.mt}; letter-spacing: .2px; }
+    .rhb-tt-pct    { font-size: 13px; color: ${T.mt}; letter-spacing: .2px; }
 
     /* ── Empty ── */
-    .rhb-empty { color: ${T.mt}; font-size: 13px; text-align: center; padding: 20px; width: 100%; }
+    .rhb-empty { color: ${T.mt}; font-size: 14px; text-align: center; padding: 20px; width: 100%; }
 
     /* ── Responsive ── */
     .rhb-root[data-w="xs"] .rhb-topbar   { padding: 7px 10px; }
-    .rhb-root[data-w="xs"] .rhb-title    { font-size: 12px; }
+    .rhb-root[data-w="xs"] .rhb-title    { font-size: 13px; }
     .rhb-root[data-w="xs"] .rhb-subtitle { display: none; }
     .rhb-root[data-w="xs"] .rhb-body     { padding: 5px 7px; }
     .rhb-root[data-w="xs"] .rhb-legend   { display: none; }
@@ -574,7 +574,7 @@
         ? `<text class="rhb-axis-label"
                  x="${(ML + chartW / 2).toFixed(1)}" y="${(svgH - 2).toFixed(1)}"
                  text-anchor="middle"
-                 style="font-size:9px">${esc(xAxisTitle)}</text>`
+                 style="font-size:12px">${esc(xAxisTitle)}</text>`
         : "";
 
       /* Bar rects + interaction groups */

@@ -60,7 +60,7 @@
     .rgg-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rgg-logo        { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rgg-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
@@ -110,7 +110,7 @@
     /* Center text */
     .rgg-center-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 11px;
+      font-size: 13px;
       fill: ${T.mt};
       text-anchor: middle;
       dominant-baseline: auto;
@@ -126,7 +126,7 @@
     /* Min / max endpoint labels */
     .rgg-endpoint {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 11px;
+      font-size: 13px;
       fill: ${T.mt};
     }
   `;

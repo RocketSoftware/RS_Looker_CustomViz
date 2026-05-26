@@ -228,10 +228,10 @@
     .rwm-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rwm-logo  { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rwm-title {
-      font-size: 14px; font-weight: 500; color: ${T.tx};
+      font-size: 15px; font-weight: 500; color: ${T.tx};
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .rwm-subtitle { font-size: 11px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
+    .rwm-subtitle { font-size: 13px; color: ${T.mt}; white-space: nowrap; flex-shrink: 0; }
 
     /* ── Gradient accent line ── */
     .rwm-gline {
@@ -314,12 +314,12 @@
     }
     .rwm-legend-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       fill: ${T.mt};
     }
     .rwm-legend-title {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       fill: ${T.tx};
       text-transform: uppercase;
@@ -327,7 +327,7 @@
     }
     .rwm-nodata-label {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 9px;
+      font-size: 12px;
       fill: ${T.mt};
     }
 
@@ -358,22 +358,22 @@
       width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
       border: 1.5px solid rgba(0,0,0,0.15);
     }
-    .rwm-tt-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rwm-tt-label  { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: #6B6B7B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rwm-tt-value  { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; color: ${T.tx}; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
-    .rwm-tt-pct    { font-size: 11px; color: ${T.mt}; letter-spacing: .2px; }
-    .rwm-tt-nodata { font-size: 12px; color: ${T.mt}; padding: 4px 0 2px; }
+    .rwm-tt-pct    { font-size: 13px; color: ${T.mt}; letter-spacing: .2px; }
+    .rwm-tt-nodata { font-size: 13px; color: ${T.mt}; padding: 4px 0 2px; }
 
     /* ── Loading / Empty states ── */
     .rwm-state {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      color: ${T.mt}; font-size: 13px;
+      color: ${T.mt}; font-size: 14px;
       pointer-events: none;
     }
 
     /* ── Responsive ── */
     .rwm-root[data-w="xs"] .rwm-topbar  { padding: 7px 10px; }
-    .rwm-root[data-w="xs"] .rwm-title   { font-size: 12px; }
+    .rwm-root[data-w="xs"] .rwm-title   { font-size: 13px; }
     .rwm-root[data-w="xs"] .rwm-subtitle { display: none; }
     .rwm-root[data-w="sm"] .rwm-subtitle { display: none; }
     .rwm-root[data-h="xs"] .rwm-topbar  { display: none; }

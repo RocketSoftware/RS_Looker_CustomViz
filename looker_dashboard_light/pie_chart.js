@@ -81,7 +81,7 @@
     .rpc-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .rpc-logo        { width: 20px; height: 20px; flex-shrink: 0; opacity: .85; }
     .rpc-title {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
       color: ${T.tx};
       white-space: nowrap;
@@ -89,7 +89,7 @@
       text-overflow: ellipsis;
     }
     .rpc-subtitle {
-      font-size: 11px;
+      font-size: 13px;
       color: ${T.mt};
       white-space: nowrap;
       flex-shrink: 0;
@@ -157,7 +157,7 @@
       display: block;
     }
     .rpc-center-label-text {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 1.1px;
@@ -212,7 +212,7 @@
       flex-shrink: 0;
     }
     .rpc-legend-name {
-      font-size: 12px;
+      font-size: 13px;
       color: #6B6B7B;
       white-space: nowrap;
       overflow: hidden;
@@ -220,7 +220,7 @@
       max-width: 130px;
     }
     .rpc-legend-pct {
-      font-size: 11px;
+      font-size: 13px;
       color: ${T.mt};
       white-space: nowrap;
       margin-left: auto;
@@ -275,7 +275,7 @@
       flex-shrink: 0;
     }
     .rpc-tooltip-label {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1.1px;
@@ -294,7 +294,7 @@
       margin-bottom: 5px;
     }
     .rpc-tooltip-pct {
-      font-size: 11px;
+      font-size: 13px;
       color: ${T.mt};
       letter-spacing: .2px;
     }
@@ -329,7 +329,7 @@
     /* ── Empty / error state ── */
     .rpc-empty {
       color: ${T.mt};
-      font-size: 13px;
+      font-size: 14px;
       text-align: center;
       padding: 20px;
       width: 100%;
@@ -337,7 +337,7 @@
 
     /* ── Responsive width breakpoints via data-w on rpc-root ── */
     .rpc-root[data-w="xs"] .rpc-topbar  { padding: 7px 10px; }
-    .rpc-root[data-w="xs"] .rpc-title   { font-size: 12px; }
+    .rpc-root[data-w="xs"] .rpc-title   { font-size: 13px; }
     .rpc-root[data-w="xs"] .rpc-subtitle { display: none; }
     .rpc-root[data-w="xs"] .rpc-body    { padding: 6px 8px 5px; }
     .rpc-root[data-w="xs"] .rpc-legend  { display: none; }
