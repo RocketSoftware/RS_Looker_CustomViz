@@ -35,16 +35,16 @@
     tx:   "#1C1C1E",
     mt:   "#8E8E93",
     dm:   "#F2F2F7",
-    B: "#5050EE",
-    P: "#8341CB",
-    K: "#CC38A8",
+    B: "#6040EC",
+    P: "#813CDD",
+    K: "#B038C8",
     ok:   "#2DD4A0",
     wn:   "#F0A830",
     er:   "#F06060",
   };
 
   /* ─── Heatmap color stops (blue → purple → pink) ─────────────────────── */
-  const HEAT_STOPS = ["#DCDCFC", "#5050EE", "#8341CB", "#CC38A8"];
+  const HEAT_STOPS = ["#DFD9FB", "#6040EC", "#813CDD", "#B038C8"];
 
   /* ─── ISO alpha-2 → ISO numeric (3-digit string) ─────────────────────── */
   /* Covers all 249 UN M.49 territories recognised by world-atlas             */
