@@ -49,7 +49,7 @@
   /* ─── ISO alpha-2 → ISO numeric (3-digit string) ─────────────────────── */
   /* Covers all 249 UN M.49 territories recognised by world-atlas             */
   const ISO2_NUM = {
-    AF:"004",AX:"008",AL:"008",DZ:"012",AS:"016",AD:"020",AO:"024",
+    AF:"004",AX:"248",AL:"008",DZ:"012",AS:"016",AD:"020",AO:"024",
     AI:"660",AQ:"010",AG:"028",AR:"032",AM:"051",AW:"533",AU:"036",
     AT:"040",AZ:"031",BS:"044",BH:"048",BD:"050",BB:"052",BY:"112",
     BE:"056",BZ:"084",BJ:"204",BM:"060",BT:"064",BO:"068",BQ:"535",
@@ -155,6 +155,31 @@
     "palestine":"275","state of palestine":"275",
     "south sudan":"728",
     "kosovo":"383",
+    // French overseas territories (world-atlas may label these as "France")
+    "french guiana":"254","guyane":"254","guf":"254",
+    "guadeloupe":"312","glp":"312",
+    "martinique":"474","mtq":"474",
+    "réunion":"638","reunion":"638","reu":"638",
+    "mayotte":"175","myt":"175",
+    "french polynesia":"258","pf":"258","pyf":"258",
+    "new caledonia":"540","ncl":"540",
+    "saint martin":"663","saint-martin":"663","maf":"663",
+    "saint barthelemy":"652","saint barthélemy":"652","blm":"652",
+    "saint pierre and miquelon":"666","spm":"666",
+    // US territories
+    "puerto rico":"630","pri":"630",
+    "u.s. virgin islands":"850","us virgin islands":"850","vir":"850",
+    "guam":"316","gum":"316",
+    "american samoa":"016","asm":"016",
+    "northern mariana islands":"580","mnp":"580",
+    // UK territories
+    "bermuda":"060","bmu":"060",
+    "cayman islands":"136","cym":"136",
+    "british virgin islands":"092","vgb":"092",
+    "turks and caicos islands":"796","tca":"796",
+    "anguilla":"660","aia":"660",
+    "falkland islands":"238","malvinas":"238","flk":"238",
+    "gibraltar":"292","gib":"292",
     // Standard names
     "afghanistan":"004","albania":"008","algeria":"012","angola":"024",
     "argentina":"032","armenia":"051","australia":"036","austria":"040",
@@ -203,6 +228,37 @@
     "turkmenistan":"795","tuvalu":"798","uganda":"800","ukraine":"804",
     "united arab emirates":"784","uruguay":"858","uzbekistan":"860",
     "vanuatu":"548","yemen":"887","zambia":"894","zimbabwe":"716",
+  };
+
+  /**
+   * Override display names for territories that world-atlas / Natural Earth
+   * labels under the sovereign country name rather than the territory name.
+   * Key: ISO numeric (3-digit zero-padded string).
+   */
+  const ISO_NUM_NAME_OVERRIDE = {
+    "254": "French Guiana",
+    "312": "Guadeloupe",
+    "474": "Martinique",
+    "638": "Réunion",
+    "175": "Mayotte",
+    "258": "French Polynesia",
+    "540": "New Caledonia",
+    "663": "Saint Martin",
+    "652": "Saint Barthélemy",
+    "666": "Saint Pierre and Miquelon",
+    "630": "Puerto Rico",
+    "850": "U.S. Virgin Islands",
+    "316": "Guam",
+    "016": "American Samoa",
+    "580": "Northern Mariana Islands",
+    "060": "Bermuda",
+    "136": "Cayman Islands",
+    "092": "British Virgin Islands",
+    "796": "Turks and Caicos Islands",
+    "660": "Anguilla",
+    "238": "Falkland Islands",
+    "292": "Gibraltar",
+    "248": "Åland Islands",
   };
 
   /* ─── CSS ─────────────────────────────────────────────────────────────── */
@@ -932,21 +988,25 @@
 
       if (info) {
         const pct = total > 0 ? ((info.value / total) * 100).toFixed(1) + "%" : "—";
+        // Prefer our override name for known mis-labelled territories
+        const displayLabel = ISO_NUM_NAME_OVERRIDE[isoNum] || info.label;
         body.innerHTML = `
           <div class="rwm-tt-header">
             <div class="rwm-tt-swatch" style="background:${esc(color || T.P)}"></div>
-            <span class="rwm-tt-label">${esc(info.label)}</span>
+            <span class="rwm-tt-label">${esc(displayLabel)}</span>
           </div>
           <div class="rwm-tt-value">${esc(fmtNumber(info.value))}</div>
           <div class="rwm-tt-pct">${esc(pct)} of total${isPinned ? " · pinned" : ""}</div>`;
       } else {
-        // Look up name from feature
+        // Look up name: prefer our override table (catches mis-labelled territories),
+        // then the feature's own name property, then fall back to the numeric code.
         const feat = this._features
           ? this._features.find(f => String(f.id).padStart(3,"0") === isoNum)
           : null;
-        const name = feat && feat.properties && feat.properties.name
-          ? feat.properties.name
-          : isoNum;
+        const name = ISO_NUM_NAME_OVERRIDE[isoNum] ||
+          (feat && feat.properties && feat.properties.name
+            ? feat.properties.name
+            : isoNum);
         body.innerHTML = `
           <div class="rwm-tt-header">
             <div class="rwm-tt-swatch" style="background:#DFE2E9; border-color:rgba(0,0,0,0.15)"></div>
