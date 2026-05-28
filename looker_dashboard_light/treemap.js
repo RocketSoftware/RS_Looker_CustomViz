@@ -27,28 +27,19 @@
     bo:   "#E5E5EA",
     tx:   "#1C1C1E",
     mt:   "#8E8E93",
-    B:    "#3B7EF6",
-    P:    "#7B3FE4",
-    K:    "#D9349A",
+    B:    "#6040EC",
+    P:    "#843CDC",
+    K:    "#B038C8",
     ok:   "#2DD4A0",
     wn:   "#F0A830",
     er:   "#F06060",
   };
 
   /* ─── Color palette — blue → purple → pink brand family ─────────────── */
-  const PALETTE = [
-    "#3B7EF6",   // brand blue
-    "#5B5EF4",   // blue-indigo
-    "#7B3FE4",   // brand purple
-    "#9B30D0",   // purple-violet
-    "#B838B8",   // violet-magenta
-    "#D9349A",   // brand pink
-    "#2495CC",   // sky blue
-    "#4355E8",   // cobalt
-    "#6B28C8",   // deep purple
-    "#A020A8",   // magenta-purple
-    "#CC2888",   // deep pink
-    "#E03070",   // crimson-pink
+    const PALETTE = [
+    "#6040EC", "#673FE9", "#6F3FE5", "#763EE2",
+    "#7D3DDF", "#843CDC", "#8C3CD8", "#933BD5",
+    "#9A3AD2", "#A139CF", "#A939CB", "#B038C8",
   ];
 
   /* ─── CSS ─────────────────────────────────────────────────────────────── */
