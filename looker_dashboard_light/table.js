@@ -210,13 +210,13 @@
     .rkt-table td:last-child { border-right: none; }
     .rkt-table tbody tr { transition: background .12s; }
     .rkt-table tbody tr:hover td { background: ${T.card2}; }
-    .rkt-table tbody tr.rkt-row-link { cursor: pointer; }
-    .rkt-table tbody tr.rkt-row-link:hover td { background: ${T.dm}; }
-    .rkt-cell-url {
+    a.rkt-cell-url {
       color: ${T.B};
       text-decoration: underline;
       text-underline-offset: 2px;
+      cursor: pointer;
     }
+    a.rkt-cell-url:hover { color: ${T.P}; }
     .rkt-badge {
       font-size: 13px;
       padding: 3px 9px;
@@ -299,8 +299,35 @@
     return n.toLocaleString();
   }
 
-  function formatValue(cell) {
+  /**
+   * Format a Looker cell for display.
+   * @param {object} cell
+   * @param {boolean} forceNumFmt  When true, strip commas/currency and abbreviate the number
+   *                               even if Looker already supplied a rendered string.
+   */
+  function formatValue(cell, forceNumFmt) {
     if (cell == null) return "";
+
+    if (forceNumFmt) {
+      // Try cell.value first (may be JS number or numeric string)
+      let n = null;
+      const raw = cell.value;
+      if (typeof raw === "number" && !isNaN(raw)) {
+        n = raw;
+      } else if (raw != null) {
+        const cleaned = String(raw).replace(/[$€£¥%\s]/g, "").replace(/,/g, "").trim();
+        const parsed  = parseFloat(cleaned);
+        if (!isNaN(parsed) && cleaned !== "") n = parsed;
+      }
+      // Fall back to parsing rendered string
+      if (n === null && cell.rendered != null) {
+        const cleaned = String(cell.rendered).replace(/[$€£¥%\s]/g, "").replace(/,/g, "").trim();
+        const parsed  = parseFloat(cleaned);
+        if (!isNaN(parsed) && /^-?[\d.]+[KMB]?$/.test(cleaned)) n = parsed;
+      }
+      if (n !== null) return fmtNumber(n);
+    }
+
     if (cell.rendered != null) return cell.rendered;
     if (cell.value    == null) return "";
     const v = cell.value;
@@ -518,7 +545,15 @@
     }
 
     const raw  = cell ? cell.value : null;
-    const disp = formatValue(cell);
+
+    // Determine if this column should have big-number abbreviation applied
+    const fmtCols    = (config.fmt_number_cols || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+    const fieldId    = (col.field.name  || "").toLowerCase();
+    const fieldLabel = (col.field.label_short || col.field.label || "").toLowerCase();
+    const forceNumFmt = fmtCols.length > 0 &&
+      fmtCols.some(fc => fieldId.includes(fc) || fieldLabel.includes(fc));
+
+    const disp    = formatValue(cell, forceNumFmt);
     const rawDisp = (cell && cell.value != null) ? String(cell.value) : disp;
 
     // Pivot group start gets a visual separator
@@ -533,14 +568,14 @@
       return `<td class="${startClass.trim()}"><span class="rkt-badge ${hCls}">${escHtml(disp)}</span></td>`;
     }
 
-    // URL cells — render as styled link text (row click handles navigation)
+    // URL cells — render as a proper <a> link (only the link is clickable)
     const url = extractUrl(cell);
     if (url) {
-      return `<td class="${startClass.trim()}" title="${escHtml(url)}"><span class="rkt-cell-url">${escHtml(disp || url)}</span></td>`;
+      return `<td class="${startClass.trim()}" title="${escHtml(url)}"><a class="rkt-cell-url" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer">${escHtml(disp || url)}</a></td>`;
     }
 
     const align = isNumeric(col.field) ? ' style="text-align:right"' : "";
-    // title shows raw value so the full number is visible on hover even when abbreviated
+    // title shows the raw value so the full number is always visible on hover
     return `<td class="rkt-number${startClass}"${align} title="${escHtml(rawDisp)}">${escHtml(disp)}</td>`;
   }
 
@@ -610,6 +645,14 @@
         placeholder: "Comma-separated, case-insensitive",
         section:     "Health badges",
         order:       8,
+      },
+      fmt_number_cols: {
+        type:        "string",
+        label:       "Abbreviate numbers in columns (K / M / B)",
+        default:     "",
+        placeholder: "e.g. arr,revenue,count — partial field-name match, comma-separated",
+        section:     "Display",
+        order:       9,
       },
     },
 
@@ -803,19 +846,10 @@
         /* Build thead HTML */
         const theadHtml = buildHeader(columns, dims, measAll, pivots, state);
 
-        /* Build tbody HTML — detect first URL in each row for clickable-row support */
+        /* Build tbody HTML */
         const tbRows = slice.map(row => {
-          let rowUrl = null;
-          for (const col of columns) {
-            const cell = (col.type === "pivot_measure")
-              ? ((row[col.field.name] || {})[col.pivot.key] || null)
-              : (row[col.field.name] || null);
-            rowUrl = extractUrl(cell);
-            if (rowUrl) break;
-          }
-          const tds     = columns.map(col => buildCell(row, col, config)).join("");
-          const linkCls = rowUrl ? ` class="rkt-row-link" data-row-url="${escHtml(rowUrl)}"` : "";
-          return `<tr${linkCls}>${tds}</tr>`;
+          const tds = columns.map(col => buildCell(row, col, config)).join("");
+          return `<tr>${tds}</tr>`;
         }).join("");
 
         tableWrap.innerHTML = `
@@ -840,14 +874,6 @@
           };
         });
 
-        /* Bind URL row clicks — open in new tab */
-        tableWrap.querySelectorAll("tr.rkt-row-link").forEach(tr => {
-          tr.onclick = (e) => {
-            if (e.target.closest("th")) return; // ignore header clicks
-            const url = tr.dataset.rowUrl;
-            if (url) window.open(url, "_blank", "noopener,noreferrer");
-          };
-        });
       };
 
       try {
