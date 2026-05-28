@@ -814,7 +814,7 @@
           <div class="rpc-legend-item" data-idx="${i}">
             <span class="rpc-legend-dot" style="background:${s.color}"></span>
             <span class="rpc-legend-name" title="${esc(s.label)}">${esc(s.label)}</span>
-            <span class="rpc-legend-pct">${pct}</span>
+            <span class="rpc-legend-pct">${pct} (${esc(fmtNumber(s.val))})</span>
           </div>`;
       }).join("");
 
