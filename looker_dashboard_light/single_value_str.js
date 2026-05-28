@@ -180,6 +180,15 @@
       to   { background-position: 100% 50%; }
     }
 
+    /* ── Left accent strip — hidden by default, shown in compact mode ── */
+    .sv-strip {
+      width: 4px;
+      flex-shrink: 0;
+      display: none;
+      background-size: 100% 200%;
+      animation: sv-grad-flow 5s ease-in-out infinite alternate;
+    }
+
     /* ── Responsive: width breakpoints via data-w on sv-root ── */
 
     /* Narrow: < 260px wide */
@@ -198,15 +207,29 @@
 
     /* ── Responsive: height breakpoints via data-h on sv-root ── */
 
-    /* Very short: < 110px tall — show only the value */
-    .sv-root[data-h="xs"] .sv-label { display: none; }
-    .sv-root[data-h="xs"] .sv-body  { padding: 8px 16px; justify-content: center; }
-    .sv-root[data-h="xs"] .sv-value-row { margin-bottom: 0; }
+    /* Very short: < 110px — compact horizontal layout (2×1 tile) */
+    .sv-root[data-h="xs"] { flex-direction: row; }
+    .sv-root[data-h="xs"] .sv-strip      { display: block; }
+    .sv-root[data-h="xs"] .sv-line       { display: none; }
+    .sv-root[data-h="xs"] .sv-logo       { width: 12px; height: 12px; top: 5px; right: 7px; }
+    .sv-root[data-h="xs"] .sv-body       { padding: 7px 26px 7px 12px; justify-content: center; }
+    .sv-root[data-h="xs"] .sv-label      { display: block; font-size: 9px; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .sv-root[data-h="xs"] .sv-value      { font-size: 21px; }
+    .sv-root[data-h="xs"] .sv-prefix,
+    .sv-root[data-h="xs"] .sv-suffix     { font-size: 12px; }
+    .sv-root[data-h="xs"] .sv-value-row  { margin-bottom: 0; }
 
-    /* Short: 110–160px tall */
-    .sv-root[data-h="sm"] .sv-body { padding: 12px 24px 10px; }
-    .sv-root[data-h="sm"] .sv-value-row { margin-bottom: 4px; }
-    .sv-root[data-h="sm"] .sv-label { margin-bottom: 8px; }
+    /* Short: 110–160px — compact horizontal layout */
+    .sv-root[data-h="sm"] { flex-direction: row; }
+    .sv-root[data-h="sm"] .sv-strip      { display: block; }
+    .sv-root[data-h="sm"] .sv-line       { display: none; }
+    .sv-root[data-h="sm"] .sv-logo       { width: 14px; height: 14px; top: 7px; right: 9px; }
+    .sv-root[data-h="sm"] .sv-body       { padding: 8px 28px 8px 13px; }
+    .sv-root[data-h="sm"] .sv-label      { font-size: 10px; margin-bottom: 5px; }
+    .sv-root[data-h="sm"] .sv-value      { font-size: 24px; }
+    .sv-root[data-h="sm"] .sv-prefix,
+    .sv-root[data-h="sm"] .sv-suffix     { font-size: 13px; }
+    .sv-root[data-h="sm"] .sv-value-row  { margin-bottom: 0; }
   `;
 
   /* ─── SVG logo mark ───────────────────────────────────────────────────── */
@@ -396,6 +419,7 @@
       element.insertAdjacentHTML("beforeend",
         `<div class="sv-root" id="sv-root" data-size="auto" data-w="lg" data-h="lg"
               data-align="left" data-wrap="off">
+           <div class="sv-strip" id="sv-strip"></div>
            ${LOGO}
            <div class="sv-body" id="sv-body"></div>
            <div class="sv-line" id="sv-line"></div>
@@ -415,17 +439,20 @@
 
     /* ── Update ── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
-      const root = element.querySelector("#sv-root");
-      const body = element.querySelector("#sv-body");
-      const line = element.querySelector("#sv-line");
+      const root  = element.querySelector("#sv-root");
+      const body  = element.querySelector("#sv-body");
+      const line  = element.querySelector("#sv-line");
+      const strip = element.querySelector("#sv-strip");
 
       if (!root || !body || !line) { done(); return; }
 
-      /* ── Accent line ── */
+      /* ── Accent line (bottom) + strip (left, compact mode) ── */
       const thickness = config.line_thickness || "2";
       const gradKey   = config.gradient_stop  || "full";
+      const hGrad     = GRAD[gradKey] || GRAD.full;
       line.style.height          = thickness + "px";
-      line.style.backgroundImage = GRAD[gradKey] || GRAD.full;
+      line.style.backgroundImage = hGrad;
+      if (strip) strip.style.background = hGrad.replace ? hGrad.replace(/90deg/g, "180deg") : hGrad;
 
       /* ── Font size mode ── */
       const sizeMode = config.font_size || "auto";
