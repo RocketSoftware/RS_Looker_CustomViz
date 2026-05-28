@@ -200,14 +200,23 @@
       color: ${T.tx};
       white-space: nowrap;
       max-width: 220px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow-x: auto;
     }
+    .rkt-table td::-webkit-scrollbar { height: 3px; }
+    .rkt-table td::-webkit-scrollbar-track { background: transparent; }
+    .rkt-table td::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 2px; }
     .rkt-table tr:last-child td { border-bottom: none; }
     .rkt-table th:last-child,
     .rkt-table td:last-child { border-right: none; }
     .rkt-table tbody tr { transition: background .12s; }
     .rkt-table tbody tr:hover td { background: ${T.card2}; }
+    .rkt-table tbody tr.rkt-row-link { cursor: pointer; }
+    .rkt-table tbody tr.rkt-row-link:hover td { background: ${T.dm}; }
+    .rkt-cell-url {
+      color: ${T.B};
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
     .rkt-badge {
       font-size: 13px;
       padding: 3px 9px;
@@ -280,13 +289,35 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
+  /** Abbreviate large numbers: 10K, 1.2M, 3.4B */
+  function fmtNumber(n) {
+    const abs  = Math.abs(n);
+    const sign = n < 0 ? "-" : "";
+    if (abs >= 1e9) return sign + (abs / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+    if (abs >= 1e6) return sign + (abs / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    if (abs >= 1e4) return sign + (abs / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+    return n.toLocaleString();
+  }
+
   function formatValue(cell) {
     if (cell == null) return "";
     if (cell.rendered != null) return cell.rendered;
     if (cell.value    == null) return "";
     const v = cell.value;
-    if (typeof v === "number") return v.toLocaleString();
+    if (typeof v === "number") return fmtNumber(v);
     return String(v);
+  }
+
+  /** Extract the first navigable URL from a Looker cell (links array or raw string value). */
+  function extractUrl(cell) {
+    if (!cell) return null;
+    if (Array.isArray(cell.links)) {
+      const link = cell.links.find(l => l.url && /^https?:\/\//i.test(l.url));
+      if (link) return link.url;
+    }
+    const v = cell.value;
+    if (typeof v === "string" && /^https?:\/\//i.test(v.trim())) return v.trim();
+    return null;
   }
 
   function healthClass(rawVal, cfg) {
@@ -488,6 +519,7 @@
 
     const raw  = cell ? cell.value : null;
     const disp = formatValue(cell);
+    const rawDisp = (cell && cell.value != null) ? String(cell.value) : disp;
 
     // Pivot group start gets a visual separator
     const startClass = (col.type === "pivot_measure" && col.pivotGroupStart) ? " rkt-col-start" : "";
@@ -501,8 +533,15 @@
       return `<td class="${startClass.trim()}"><span class="rkt-badge ${hCls}">${escHtml(disp)}</span></td>`;
     }
 
+    // URL cells — render as styled link text (row click handles navigation)
+    const url = extractUrl(cell);
+    if (url) {
+      return `<td class="${startClass.trim()}" title="${escHtml(url)}"><span class="rkt-cell-url">${escHtml(disp || url)}</span></td>`;
+    }
+
     const align = isNumeric(col.field) ? ' style="text-align:right"' : "";
-    return `<td class="rkt-number${startClass}"${align} title="${escHtml(disp)}">${escHtml(disp)}</td>`;
+    // title shows raw value so the full number is visible on hover even when abbreviated
+    return `<td class="rkt-number${startClass}"${align} title="${escHtml(rawDisp)}">${escHtml(disp)}</td>`;
   }
 
   /* ─── Looker visualization definition ────────────────────────────────── */
@@ -764,10 +803,19 @@
         /* Build thead HTML */
         const theadHtml = buildHeader(columns, dims, measAll, pivots, state);
 
-        /* Build tbody HTML */
+        /* Build tbody HTML — detect first URL in each row for clickable-row support */
         const tbRows = slice.map(row => {
-          const tds = columns.map(col => buildCell(row, col, config)).join("");
-          return `<tr>${tds}</tr>`;
+          let rowUrl = null;
+          for (const col of columns) {
+            const cell = (col.type === "pivot_measure")
+              ? ((row[col.field.name] || {})[col.pivot.key] || null)
+              : (row[col.field.name] || null);
+            rowUrl = extractUrl(cell);
+            if (rowUrl) break;
+          }
+          const tds     = columns.map(col => buildCell(row, col, config)).join("");
+          const linkCls = rowUrl ? ` class="rkt-row-link" data-row-url="${escHtml(rowUrl)}"` : "";
+          return `<tr${linkCls}>${tds}</tr>`;
         }).join("");
 
         tableWrap.innerHTML = `
@@ -789,6 +837,15 @@
             }
             state.page = 0;
             render();
+          };
+        });
+
+        /* Bind URL row clicks — open in new tab */
+        tableWrap.querySelectorAll("tr.rkt-row-link").forEach(tr => {
+          tr.onclick = (e) => {
+            if (e.target.closest("th")) return; // ignore header clicks
+            const url = tr.dataset.rowUrl;
+            if (url) window.open(url, "_blank", "noopener,noreferrer");
           };
         });
       };
