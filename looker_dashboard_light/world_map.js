@@ -761,6 +761,93 @@
       const borders  = topojson.mesh(world, world.objects.countries,
                                      (a, b) => a !== b);
 
+      /* ── Split overseas territories out of sovereign MultiPolygons ────────
+       * Natural Earth (even at 50m) sometimes merges overseas departments into
+       * the sovereign country's MultiPolygon. We detect them by checking each
+       * polygon's rough centroid against known geographic bounding boxes, then
+       * inject synthetic features with the correct ISO numeric ID so they
+       * render and label independently.
+       * ----------------------------------------------------------------------- */
+      (function splitTerritories() {
+        // [minLon, minLat, maxLon, maxLat] for each territory ISO numeric
+        const BBOX = {
+          "254": [-54.6,  2.0, -51.5,  5.9],  // French Guiana
+          "474": [-61.3, 14.3, -60.7, 14.9],  // Martinique
+          "312": [-61.9, 15.8, -61.0, 16.6],  // Guadeloupe
+          "638": [ 55.1,-21.5,  55.9,-20.7],  // Réunion
+          "175": [ 44.9,-13.1,  45.4,-12.5],  // Mayotte
+          "258": [-153.0,-28.0,-134.0,-7.0],   // French Polynesia (approx)
+          "540": [163.0, -23.0, 168.0,-19.0],  // New Caledonia (approx)
+        };
+
+        // sovereign ISO numeric → list of territory IDs that may be merged in
+        const SOVEREIGN = {
+          "250": ["254","474","312","638","175","258","540"],  // France
+        };
+
+        function roughCentroid(ring) {
+          let sLon = 0, sLat = 0;
+          ring.forEach(function(pt) { sLon += pt[0]; sLat += pt[1]; });
+          return [sLon / ring.length, sLat / ring.length];
+        }
+
+        function inBbox(lon, lat, bb) {
+          return lon >= bb[0] && lon <= bb[2] && lat >= bb[1] && lat <= bb[3];
+        }
+
+        const toAdd = [];
+
+        features.forEach(function(feat) {
+          const sovId = String(feat.id).padStart(3, "0");
+          const territIds = SOVEREIGN[sovId];
+          if (!territIds) return;
+          if (!feat.geometry || feat.geometry.type !== "MultiPolygon") return;
+
+          // Only try to extract territories not already present as own features
+          const missing = territIds.filter(function(tid) {
+            return !features.some(function(f) {
+              return String(f.id).padStart(3, "0") === tid;
+            });
+          });
+          if (missing.length === 0) return;
+
+          const remaining  = [];
+          const extracted  = {};
+
+          feat.geometry.coordinates.forEach(function(poly) {
+            const [lon, lat] = roughCentroid(poly[0]);
+            let matched = null;
+            for (let i = 0; i < missing.length; i++) {
+              if (inBbox(lon, lat, BBOX[missing[i]])) { matched = missing[i]; break; }
+            }
+            if (matched) {
+              if (!extracted[matched]) extracted[matched] = [];
+              extracted[matched].push(poly);
+            } else {
+              remaining.push(poly);
+            }
+          });
+
+          if (Object.keys(extracted).length === 0) return;
+
+          // Remove extracted polygons from sovereign feature
+          feat.geometry.coordinates = remaining.length > 0 ? remaining : feat.geometry.coordinates;
+
+          // Queue new synthetic features
+          Object.keys(extracted).forEach(function(tid) {
+            toAdd.push({
+              type:       "Feature",
+              id:         parseInt(tid, 10),
+              properties: {},
+              geometry:   { type: "MultiPolygon", coordinates: extracted[tid] },
+            });
+          });
+        });
+
+        toAdd.forEach(function(f) { features.push(f); });
+      })();
+      /* ─── End territory split ─────────────────────────────────────────── */
+
       /* ── Projection ── */
       const proj = d3.geoNaturalEarth1()
         .fitSize([W, H], { type: "Sphere" });
