@@ -651,7 +651,7 @@
         loadScript("https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"),
         loadScript("https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"),
       ]).then(() =>
-        fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+        fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json")
           .then(r => r.json())
       );
 
