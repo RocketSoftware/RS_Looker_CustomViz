@@ -411,7 +411,7 @@
       w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
     );
     root.setAttribute("data-h",
-      h < 110 ? "xs" : h < 160 ? "sm" : "lg"
+      h < 80 ? "xs" : h < 120 ? "sm" : "lg"
     );
     if (root.getAttribute("data-size") === "auto") {
       const numeric = root.getAttribute("data-mode") === "num";
