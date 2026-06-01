@@ -58,11 +58,12 @@
       order:   1,
     },
     rows_per_page: {
-      type:    "number",
-      label:   "Rows per page (default 100)",
-      default: 100,
-      section: "Display",
-      order:   2,
+      type:        "string",
+      label:       "Rows per page",
+      default:     "100",
+      placeholder: "100",
+      section:     "Display",
+      order:       2,
     },
     show_search: {
       type:    "boolean",
@@ -793,7 +794,8 @@
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const self    = this;
       const state   = this._state;
-      const perPage = Math.max(1, parseInt(config.rows_per_page, 10) || 100);
+      const _rpp = parseInt(config.rows_per_page, 10);
+      const perPage = (!isNaN(_rpp) && _rpp > 0) ? _rpp : 100;
 
       const titleEl   = this._titleEl;
       const countEl   = this._countEl;
