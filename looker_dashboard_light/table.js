@@ -813,7 +813,7 @@
       toolbar.style.display = (config.show_search !== false) ? "flex" : "none";
 
       /* ── Grouping setup ── */
-      const canGroup   = config.enable_grouping && dims.length >= 1 && pivots.length === 0;
+      const canGroup   = config.enable_grouping && dims.length >= 1;
       const firstDim   = dims[0];
       expandBtn.style.display = canGroup ? "inline-block" : "none";
 
@@ -971,14 +971,7 @@
               } else {
                 state.expandedGroups.add(key);
               }
-              // Toggle visibility of sub-rows for this group
-              tableWrap.querySelectorAll(`tr.rkt-sub-row[data-sub-group="${CSS.escape ? CSS.escape(key) : key}"]`)
-                .forEach(function(sub) {
-                  sub.style.display = state.expandedGroups.has(key) ? "" : "none";
-                });
-              // Update toggle icon
-              const toggleEl = tr.querySelector(".rkt-group-toggle");
-              if (toggleEl) toggleEl.textContent = state.expandedGroups.has(key) ? "▾" : "▸";
+              render();
             };
           });
         }
