@@ -9,13 +9,14 @@
  *
  * Supported field types: dimensions, measures, table calculations — with and without pivots.
  *
- * Pivot support:
- *   When a pivot is applied, the table renders a two-row header:
- *     Row 1 — dimension columns (rowspan=2) | pivot-value groups (colspan = # measures each)
- *     Row 2 — measure / table-calc names repeated under each pivot group
- *   Sorting, search, and pagination all work across pivot columns.
+ * Features:
+ *   - Per-column label overrides: dynamic input fields appear in "Column Labels" config section
+ *   - Row grouping: group by first dimension with expand/collapse
+ *   - Pivot support: two-row header with group columns
+ *   - Search, sort, pagination
+ *   - Health/status badges, URL cells, big-number abbreviation
  *
- * Version: 1.2.0  |  May 2025
+ * Version: 1.3.0  |  May 2025
  */
 
 (function () {
@@ -47,6 +48,93 @@
     pTx:     "#6B2FD4",
   };
 
+  /* ─── Static options (also passed to registerOptions each update) ─────── */
+  const STATIC_OPTIONS = {
+    title: {
+      type:    "string",
+      label:   "Table title",
+      default: "Accounts",
+      section: "Style",
+      order:   1,
+    },
+    rows_per_page: {
+      type:    "number",
+      label:   "Rows per page (default 100)",
+      default: 100,
+      section: "Display",
+      order:   2,
+    },
+    show_search: {
+      type:    "boolean",
+      label:   "Show search bar",
+      default: true,
+      section: "Display",
+      order:   3,
+    },
+    enable_grouping: {
+      type:    "boolean",
+      label:   "Group rows by first dimension",
+      default: false,
+      section: "Display",
+      order:   4,
+    },
+    group_default_expanded: {
+      type:    "boolean",
+      label:   "Start with all groups expanded",
+      default: false,
+      section: "Display",
+      order:   5,
+    },
+    fmt_number_cols: {
+      type:        "string",
+      label:       "Abbreviate numbers in columns (K / M / B)",
+      default:     "",
+      placeholder: "e.g. arr,revenue,count — partial field-name match, comma-separated",
+      section:     "Display",
+      order:       6,
+    },
+    green_vals: {
+      type:        "string",
+      label:       "Healthy / green keywords",
+      default:     "healthy,green,expanding,active,on track,yes",
+      placeholder: "Comma-separated, case-insensitive",
+      section:     "Health badges",
+      order:       10,
+    },
+    warn_vals: {
+      type:        "string",
+      label:       "Warning / amber keywords",
+      default:     "at risk,warning,yellow,behind",
+      placeholder: "Comma-separated, case-insensitive",
+      section:     "Health badges",
+      order:       11,
+    },
+    err_vals: {
+      type:        "string",
+      label:       "Critical / red keywords",
+      default:     "critical,red,error,inactive,churned,lost,no",
+      placeholder: "Comma-separated, case-insensitive",
+      section:     "Health badges",
+      order:       12,
+    },
+    blue_vals: {
+      type:        "string",
+      label:       "Info / blue keywords",
+      default:     "new,prospect,qualified",
+      placeholder: "Comma-separated, case-insensitive",
+      section:     "Health badges",
+      order:       13,
+    },
+    purple_vals: {
+      type:        "string",
+      label:       "Neutral / purple keywords",
+      default:     "renewing,proposal,negotiating",
+      placeholder: "Comma-separated, case-insensitive",
+      section:     "Health badges",
+      order:       14,
+    },
+  };
+
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
   const CSS = `
     .rkt-wrap {
@@ -70,7 +158,8 @@
       flex-wrap: wrap;
       flex-shrink: 0;
     }
-    .rkt-topbar-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .rkt-topbar-left  { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .rkt-topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .rkt-logo { width: 22px; height: 22px; flex-shrink: 0; }
     .rkt-title {
       font-size: 16px; font-weight: 500; color: ${T.tx};
@@ -113,7 +202,7 @@
     .rkt-search::placeholder { color: #6B6B7B; }
     .rkt-search:focus { border-color: rgba(59,126,246,0.50); }
     .rkt-pg-info { font-size: 13px; color: #8E8E93; white-space: nowrap; }
-    .rkt-pg-btn {
+    .rkt-pg-btn, .rkt-expand-btn {
       background: ${T.card};
       border: 1px solid ${T.bo2};
       border-radius: 5px;
@@ -124,8 +213,9 @@
       transition: all .15s;
       white-space: nowrap;
     }
-    .rkt-pg-btn:hover:not(:disabled) { border-color: rgba(0,0,0,0.20); color: ${T.tx}; }
-    .rkt-pg-btn:disabled { opacity: .35; cursor: default; }
+    .rkt-pg-btn:hover:not(:disabled),
+    .rkt-expand-btn:hover { border-color: rgba(0,0,0,0.20); }
+    .rkt-pg-btn:disabled  { opacity: .35; cursor: default; }
     .rkt-table-wrap { flex: 1; overflow-y: auto; overflow-x: auto; }
     .rkt-table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
     .rkt-table-wrap::-webkit-scrollbar-track { background: ${T.bg}; }
@@ -154,16 +244,12 @@
       user-select: none;
       transition: color .15s;
     }
-
-    /* ── Sortable header cells (dimension + leaf measure under pivot) ── */
-    .rkt-table th.rkt-sortable {
-      cursor: pointer;
-    }
+    .rkt-table th.rkt-sortable { cursor: pointer; }
     .rkt-table th.rkt-sortable:hover { color: ${T.tx}; }
-    .rkt-table th.sort-asc::after    { content: ' ↑'; color: ${T.P}; }
-    .rkt-table th.sort-desc::after   { content: ' ↓'; color: ${T.P}; }
+    .rkt-table th.sort-asc::after  { content: ' ↑'; color: ${T.P}; }
+    .rkt-table th.sort-desc::after { content: ' ↓'; color: ${T.P}; }
 
-    /* ── Pivot group header (first header row, spans multiple measures) ── */
+    /* ── Pivot headers ── */
     .rkt-table th.rkt-th-pivot {
       text-align: center;
       background: ${T.card};
@@ -172,27 +258,17 @@
       font-weight: 600;
       letter-spacing: .5px;
       border-bottom: 1px solid #DDDDE5;
-      /* Left border marks the start of each pivot group */
     }
-    .rkt-table th.rkt-th-pivot-start {
-      border-left: 1px solid rgba(0,0,0,0.11);
-    }
-
-    /* ── Measure sub-header (second header row under pivot group) ── */
+    .rkt-table th.rkt-th-pivot-start { border-left: 1px solid rgba(0,0,0,0.11); }
     .rkt-table th.rkt-th-measure {
       background: ${T.surf};
       color: #6B6B7B;
       font-size: 12px;
     }
-    .rkt-table th.rkt-th-measure.rkt-col-start {
-      border-left: 1px solid rgba(0,0,0,0.06);
-    }
+    .rkt-table th.rkt-th-measure.rkt-col-start { border-left: 1px solid rgba(0,0,0,0.06); }
+    .rkt-table td.rkt-col-start { border-left: 1px solid rgba(0,0,0,0.06); }
 
-    /* ── Data cells that start a pivot group get a subtle left border ── */
-    .rkt-table td.rkt-col-start {
-      border-left: 1px solid rgba(0,0,0,0.06);
-    }
-
+    /* ── Data cells ── */
     .rkt-table td {
       padding: 10px 14px;
       border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -210,6 +286,39 @@
     .rkt-table td:last-child { border-right: none; }
     .rkt-table tbody tr { transition: background .12s; }
     .rkt-table tbody tr:hover td { background: ${T.card2}; }
+
+    /* ── Group rows (expand/collapse) ── */
+    .rkt-group-row td {
+      background: ${T.dm} !important;
+      font-weight: 600;
+      font-size: 13px;
+      color: ${T.tx};
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid ${T.bo};
+      padding: 9px 14px;
+    }
+    .rkt-group-row:hover td { background: #E8E8F0 !important; }
+    .rkt-group-toggle {
+      display: inline-block;
+      width: 14px;
+      font-size: 10px;
+      margin-right: 7px;
+      color: ${T.mt};
+    }
+    .rkt-group-count {
+      margin-left: 9px;
+      font-size: 11px;
+      font-weight: 400;
+      color: ${T.mt};
+      background: rgba(0,0,0,0.06);
+      padding: 1px 7px;
+      border-radius: 10px;
+      vertical-align: middle;
+    }
+    .rkt-sub-row td:first-child { padding-left: 30px; }
+
+    /* ── Badges / URLs ── */
     a.rkt-cell-url {
       color: ${T.B};
       text-decoration: underline;
@@ -218,12 +327,9 @@
     }
     a.rkt-cell-url:hover { color: ${T.P}; }
     .rkt-badge {
-      font-size: 13px;
-      padding: 3px 9px;
-      border-radius: 4px;
-      display: inline-block;
-      letter-spacing: .3px;
-      font-weight: 400;
+      font-size: 13px; padding: 3px 9px;
+      border-radius: 4px; display: inline-block;
+      letter-spacing: .3px; font-weight: 400;
     }
     .rkt-badge-ok   { background: ${T.okBg}; color: ${T.ok}; }
     .rkt-badge-warn { background: ${T.wnBg}; color: ${T.wn}; }
@@ -231,37 +337,28 @@
     .rkt-badge-blue { background: ${T.bBg};  color: ${T.bTx}; }
     .rkt-badge-purp { background: ${T.pBg};  color: ${T.pTx}; }
     .rkt-badge-neu  { background: rgba(0,0,0,0.06); color: ${T.mt}; }
-    .rkt-empty {
-      padding: 40px 20px;
-      text-align: center;
-      color: #8E8E93;
-      font-size: 15px;
-    }
+    .rkt-empty { padding: 40px 20px; text-align: center; color: #8E8E93; font-size: 15px; }
     .rkt-number { font-variant-numeric: tabular-nums; }
-    .rkt-diag-bg {
-    }
 
-    /* ── Responsive: width breakpoints via data-w on rkt-wrap ── */
-    .rkt-wrap[data-w="xs"] .rkt-topbar { padding: 8px 10px; }
-    .rkt-wrap[data-w="xs"] .rkt-title  { font-size: 14px; }
-    .rkt-wrap[data-w="xs"] .rkt-count  { display: none; }
-    .rkt-wrap[data-w="xs"] .rkt-logo   { display: none; }
+    /* ── Responsive ── */
+    .rkt-wrap[data-w="xs"] .rkt-topbar  { padding: 8px 10px; }
+    .rkt-wrap[data-w="xs"] .rkt-title   { font-size: 14px; }
+    .rkt-wrap[data-w="xs"] .rkt-count   { display: none; }
+    .rkt-wrap[data-w="xs"] .rkt-logo    { display: none; }
     .rkt-wrap[data-w="xs"] .rkt-toolbar { flex-direction: column; align-items: stretch; padding: 6px 10px; gap: 6px; }
     .rkt-wrap[data-w="xs"] .rkt-pg-info { display: none; }
-    .rkt-wrap[data-w="xs"] .rkt-pg-btn { padding: 4px 8px; font-size: 13px; }
-    .rkt-wrap[data-w="xs"] .rkt-table  { font-size: 13px; }
+    .rkt-wrap[data-w="xs"] .rkt-pg-btn  { padding: 4px 8px; font-size: 13px; }
+    .rkt-wrap[data-w="xs"] .rkt-table   { font-size: 13px; }
     .rkt-wrap[data-w="xs"] .rkt-table th { padding: 7px 9px; font-size: 12px; letter-spacing: .3px; }
     .rkt-wrap[data-w="xs"] .rkt-table td { padding: 7px 9px; max-width: 120px; }
-    .rkt-wrap[data-w="xs"] .rkt-badge  { font-size: 12px; padding: 2px 7px; }
-
-    .rkt-wrap[data-w="sm"] .rkt-topbar { padding: 9px 12px; }
-    .rkt-wrap[data-w="sm"] .rkt-title  { font-size: 15px; }
-    .rkt-wrap[data-w="sm"] .rkt-count  { display: none; }
+    .rkt-wrap[data-w="xs"] .rkt-badge   { font-size: 12px; padding: 2px 7px; }
+    .rkt-wrap[data-w="sm"] .rkt-topbar  { padding: 9px 12px; }
+    .rkt-wrap[data-w="sm"] .rkt-title   { font-size: 15px; }
+    .rkt-wrap[data-w="sm"] .rkt-count   { display: none; }
     .rkt-wrap[data-w="sm"] .rkt-toolbar { padding: 7px 12px; gap: 6px; }
     .rkt-wrap[data-w="sm"] .rkt-pg-info { display: none; }
     .rkt-wrap[data-w="sm"] .rkt-table th { padding: 8px 10px; }
     .rkt-wrap[data-w="sm"] .rkt-table td { padding: 8px 10px; max-width: 160px; }
-
     .rkt-wrap[data-w="md"] .rkt-table th { padding: 9px 12px; }
     .rkt-wrap[data-w="md"] .rkt-table td { padding: 9px 12px; }
   `;
@@ -289,7 +386,6 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  /** Abbreviate large numbers: 10K, 1.2M, 3.4B */
   function fmtNumber(n) {
     const abs  = Math.abs(n);
     const sign = n < 0 ? "-" : "";
@@ -299,17 +395,9 @@
     return n.toLocaleString();
   }
 
-  /**
-   * Format a Looker cell for display.
-   * @param {object} cell
-   * @param {boolean} forceNumFmt  When true, strip commas/currency and abbreviate the number
-   *                               even if Looker already supplied a rendered string.
-   */
   function formatValue(cell, forceNumFmt) {
     if (cell == null) return "";
-
     if (forceNumFmt) {
-      // Try cell.value first (may be JS number or numeric string)
       let n = null;
       const raw = cell.value;
       if (typeof raw === "number" && !isNaN(raw)) {
@@ -319,7 +407,6 @@
         const parsed  = parseFloat(cleaned);
         if (!isNaN(parsed) && cleaned !== "") n = parsed;
       }
-      // Fall back to parsing rendered string
       if (n === null && cell.rendered != null) {
         const cleaned = String(cell.rendered).replace(/[$€£¥%\s]/g, "").replace(/,/g, "").trim();
         const parsed  = parseFloat(cleaned);
@@ -327,7 +414,6 @@
       }
       if (n !== null) return fmtNumber(n);
     }
-
     if (cell.rendered != null) return cell.rendered;
     if (cell.value    == null) return "";
     const v = cell.value;
@@ -335,11 +421,10 @@
     return String(v);
   }
 
-  /** Extract the first navigable URL from a Looker cell (links array or raw string value). */
   function extractUrl(cell) {
     if (!cell) return null;
     if (Array.isArray(cell.links)) {
-      const link = cell.links.find(l => l.url && /^https?:\/\//i.test(l.url));
+      const link = cell.links.find(function(l) { return l.url && /^https?:\/\//i.test(l.url); });
       if (link) return link.url;
     }
     const v = cell.value;
@@ -350,58 +435,26 @@
   function healthClass(rawVal, cfg) {
     if (rawVal == null) return null;
     const v = String(rawVal).toLowerCase().trim();
-    const okWords   = (cfg.green_vals  || "healthy,green,expanding,on track,active").toLowerCase().split(",").map(s => s.trim());
-    const warnWords = (cfg.warn_vals   || "at risk,warning,yellow,behind,renewing").toLowerCase().split(",").map(s => s.trim());
-    const errWords  = (cfg.err_vals    || "critical,red,error,churned,lost").toLowerCase().split(",").map(s => s.trim());
-    const blueWords = (cfg.blue_vals   || "new,prospect,qualified").toLowerCase().split(",").map(s => s.trim());
-    const purpWords = (cfg.purple_vals || "renewing,proposal,negotiating").toLowerCase().split(",").map(s => s.trim());
-    if (errWords.some(w  => w && v.includes(w))) return "rkt-badge-err";
-    if (warnWords.some(w => w && v.includes(w))) return "rkt-badge-warn";
-    if (okWords.some(w   => w && v.includes(w))) return "rkt-badge-ok";
-    if (blueWords.some(w => w && v.includes(w))) return "rkt-badge-blue";
-    if (purpWords.some(w => w && v.includes(w))) return "rkt-badge-purp";
+    const okWords   = (cfg.green_vals  || "healthy,green,expanding,on track,active").toLowerCase().split(",").map(function(s) { return s.trim(); });
+    const warnWords = (cfg.warn_vals   || "at risk,warning,yellow,behind,renewing").toLowerCase().split(",").map(function(s) { return s.trim(); });
+    const errWords  = (cfg.err_vals    || "critical,red,error,churned,lost").toLowerCase().split(",").map(function(s) { return s.trim(); });
+    const blueWords = (cfg.blue_vals   || "new,prospect,qualified").toLowerCase().split(",").map(function(s) { return s.trim(); });
+    const purpWords = (cfg.purple_vals || "renewing,proposal,negotiating").toLowerCase().split(",").map(function(s) { return s.trim(); });
+    if (errWords.some(function(w)  { return w && v.includes(w); })) return "rkt-badge-err";
+    if (warnWords.some(function(w) { return w && v.includes(w); })) return "rkt-badge-warn";
+    if (okWords.some(function(w)   { return w && v.includes(w); })) return "rkt-badge-ok";
+    if (blueWords.some(function(w) { return w && v.includes(w); })) return "rkt-badge-blue";
+    if (purpWords.some(function(w) { return w && v.includes(w); })) return "rkt-badge-purp";
     return null;
   }
 
   function isLikelyHealthField(name) {
     const n = name.toLowerCase();
-    return ["health","status","stage","state","risk","flag","tier"].some(k => n.includes(k));
+    return ["health","status","stage","state","risk","flag","tier"].some(function(k) { return n.includes(k); });
   }
 
   function isNumeric(field) {
     return field.type === "number" || field.category === "measure";
-  }
-
-  /**
-   * Parse "arr:ARR, account_name:Company" into { "arr": "ARR", "account_name": "Company" }.
-   * Keys are lowercased; values are used as-is.
-   */
-  function parseColumnLabels(str) {
-    const map = {};
-    if (!str) return map;
-    str.split(",").forEach(function(part) {
-      const colon = part.indexOf(":");
-      if (colon < 0) return;
-      const key = part.slice(0, colon).trim().toLowerCase();
-      const val = part.slice(colon + 1).trim();
-      if (key) map[key] = val;
-    });
-    return map;
-  }
-
-  /**
-   * Return the display label for a field, applying any user override from labelMap.
-   * Matching is case-insensitive partial match on field name or label.
-   */
-  function getColumnLabel(field, labelMap) {
-    const fallback = field.label_short || field.label || field.name;
-    if (!labelMap || Object.keys(labelMap).length === 0) return fallback;
-    const fieldId  = (field.name || "").toLowerCase();
-    const fieldLbl = (field.label_short || field.label || "").toLowerCase();
-    for (const key of Object.keys(labelMap)) {
-      if (fieldId.includes(key) || fieldLbl.includes(key)) return labelMap[key];
-    }
-    return fallback;
   }
 
   function applyBreakpoint(root, w) {
@@ -410,32 +463,46 @@
     );
   }
 
-  /**
-   * Return a human-readable label for a pivot value.
-   * Handles single and multi-field pivots.
-   */
   function pivotLabel(pivot) {
     if (!pivot.data || Object.keys(pivot.data).length === 0) return pivot.key || "";
     return Object.values(pivot.data)
-      .map(c => {
+      .map(function(c) {
         if (c == null) return "";
         return c.rendered != null ? c.rendered : (c.value != null ? String(c.value) : "");
       })
-      .filter(s => s !== "")
+      .filter(function(s) { return s !== ""; })
       .join(" / ") || pivot.key || "";
   }
 
   /**
-   * Build the flat column descriptor array.
-   *
-   * Each column is one of:
-   *   { type: "dimension",     field, idx }
-   *   { type: "measure",       field, idx }          ← no-pivot path
-   *   { type: "pivot_measure", field, pivot, idx, pivotGroupStart }
-   *
-   * `idx` is the flat integer used as the sort key.
-   * `pivotGroupStart` marks the first measure column in each pivot group.
+   * Return the display label for a column.
+   * Checks config["col_label_N"] (set via dynamic registerOptions inputs) first,
+   * then falls back to the field's own label.
    */
+  function colLabel(col, config) {
+    const override = config["col_label_" + col.idx];
+    if (override && String(override).trim()) return String(override).trim();
+    return col.field.label_short || col.field.label || col.field.name;
+  }
+
+  /**
+   * Group an array of rows by the value of a given field name.
+   * Returns a Map<groupKey, rows[]> preserving insertion order.
+   */
+  function groupRows(rows, fieldName) {
+    const groups = new Map();
+    rows.forEach(function(row) {
+      const cell = row[fieldName];
+      const key  = cell != null
+        ? String(cell.rendered != null ? cell.rendered : (cell.value != null ? cell.value : ""))
+        : "";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(row);
+    });
+    return groups;
+  }
+
+  /* ─── Column model ────────────────────────────────────────────────────── */
   function buildColumns(queryResponse) {
     const dims    = queryResponse.fields.dimensions         || [];
     const meass   = queryResponse.fields.measures           || [];
@@ -446,27 +513,24 @@
     const columns = [];
     let idx = 0;
 
-    // Dimension columns are always flat
-    dims.forEach(f => {
+    dims.forEach(function(f) {
       columns.push({ type: "dimension", field: f, idx: idx++ });
     });
 
     if (pivots.length > 0) {
-      // Pivot path: for each pivot value, add one sub-column per measure
-      pivots.forEach(pv => {
-        measAll.forEach((mf, mi) => {
+      pivots.forEach(function(pv) {
+        measAll.forEach(function(mf, mi) {
           columns.push({
             type: "pivot_measure",
             field: mf,
             pivot: pv,
             idx: idx++,
-            pivotGroupStart: mi === 0,  // first measure of this pivot group
+            pivotGroupStart: mi === 0,
           });
         });
       });
     } else {
-      // Flat path: measures and table calculations as plain columns
-      measAll.forEach(f => {
+      measAll.forEach(function(f) {
         columns.push({ type: "measure", field: f, idx: idx++ });
       });
     }
@@ -474,11 +538,8 @@
     return { columns, dims, measAll, pivots };
   }
 
-  /**
-   * Build the <thead> HTML string.
-   * Returns a single <tr> when not pivoted; two <tr>s when pivoted.
-   */
-  function buildHeader(columns, dims, measAll, pivots, state, labelMap) {
+  /* ─── Header builder ──────────────────────────────────────────────────── */
+  function buildHeader(columns, dims, measAll, pivots, state, config) {
     const isPivoted = pivots.length > 0;
 
     function sortClass(col) {
@@ -487,41 +548,34 @@
     }
 
     if (!isPivoted) {
-      // Single header row
-      const cells = columns.map(col => {
-        const label = getColumnLabel(col.field, labelMap);
+      const cells = columns.map(function(col) {
+        const label = colLabel(col, config);
         const sc    = sortClass(col);
         return `<th class="rkt-sortable ${sc}" data-col="${col.idx}">${escHtml(label)}</th>`;
       }).join("");
       return `<tr>${cells}</tr>`;
     }
 
-    // ── Two-row pivot header ──
     const numMeas = measAll.length;
-
-    // Row 1: dimension placeholders (rowspan=2) + pivot group headers (colspan=numMeas)
     let row1 = "";
 
-    // Dimension cells span both header rows
-    dims.forEach(f => {
-      const label  = getColumnLabel(f, labelMap);
-      const dimCol = columns.find(c => c.type === "dimension" && c.field.name === f.name);
+    dims.forEach(function(f) {
+      const dimCol = columns.find(function(c) { return c.type === "dimension" && c.field.name === f.name; });
+      const label  = dimCol ? colLabel(dimCol, config) : (f.label_short || f.label || f.name);
       const colIdx = dimCol ? dimCol.idx : "";
       row1 += `<th rowspan="2" class="rkt-sortable" data-col="${colIdx}">${escHtml(label)}</th>`;
     });
 
-    // Pivot group cells
-    pivots.forEach((pv) => {
+    pivots.forEach(function(pv) {
       const label = pivotLabel(pv);
       row1 += `<th colspan="${numMeas}" class="rkt-th-pivot rkt-th-pivot-start">${escHtml(label)}</th>`;
     });
 
-    // Row 2: measure sub-headers under each pivot group
     let row2 = "";
-    pivots.forEach((pv) => {
-      measAll.forEach((mf, mi) => {
-        const label   = getColumnLabel(mf, labelMap);
-        const col     = columns.find(c => c.type === "pivot_measure" && c.field.name === mf.name && c.pivot.key === pv.key);
+    pivots.forEach(function(pv) {
+      measAll.forEach(function(mf, mi) {
+        const col     = columns.find(function(c) { return c.type === "pivot_measure" && c.field.name === mf.name && c.pivot.key === pv.key; });
+        const label   = col ? colLabel(col, config) : (mf.label_short || mf.label || mf.name);
         const sc      = col ? sortClass(col) : "";
         const startCl = mi === 0 ? " rkt-col-start" : "";
         const sortIdx = col ? col.idx : "";
@@ -532,24 +586,18 @@
     return `<tr>${row1}</tr><tr>${row2}</tr>`;
   }
 
-  /**
-   * Get the comparable value for a row + column descriptor (for sorting).
-   */
+  /* ─── Sort / display value helpers ───────────────────────────────────── */
   function sortValue(row, col) {
     if (col.type === "dimension" || col.type === "measure") {
       const cell = row[col.field.name];
       return cell ? (cell.value ?? "") : "";
     }
-    // pivot_measure
     const pivotCells = row[col.field.name];
     if (!pivotCells) return "";
     const cell = pivotCells[col.pivot.key];
     return cell ? (cell.value ?? "") : "";
   }
 
-  /**
-   * Get the display string for a row + column (for search).
-   */
   function displayValue(row, col) {
     if (col.type === "dimension" || col.type === "measure") {
       const cell = row[col.field.name];
@@ -561,35 +609,28 @@
     return cell ? String(cell.rendered ?? cell.value ?? "") : "";
   }
 
-  /**
-   * Build a single <td> HTML string.
-   */
+  /* ─── Cell builder ────────────────────────────────────────────────────── */
   function buildCell(row, col, config) {
     let cell;
     if (col.type === "dimension" || col.type === "measure") {
       cell = row[col.field.name] || null;
     } else {
-      // pivot_measure
       const pivotCells = row[col.field.name];
       cell = (pivotCells && pivotCells[col.pivot.key]) ? pivotCells[col.pivot.key] : null;
     }
 
-    const raw  = cell ? cell.value : null;
+    const raw = cell ? cell.value : null;
 
-    // Determine if this column should have big-number abbreviation applied
-    const fmtCols    = (config.fmt_number_cols || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-    const fieldId    = (col.field.name  || "").toLowerCase();
-    const fieldLabel = (col.field.label_short || col.field.label || "").toLowerCase();
+    const fmtCols     = (config.fmt_number_cols || "").split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
+    const fieldId     = (col.field.name  || "").toLowerCase();
+    const fieldLabel  = (col.field.label_short || col.field.label || "").toLowerCase();
     const forceNumFmt = fmtCols.length > 0 &&
-      fmtCols.some(fc => fieldId.includes(fc) || fieldLabel.includes(fc));
+      fmtCols.some(function(fc) { return fieldId.includes(fc) || fieldLabel.includes(fc); });
 
     const disp    = formatValue(cell, forceNumFmt);
     const rawDisp = (cell && cell.value != null) ? String(cell.value) : disp;
-
-    // Pivot group start gets a visual separator
     const startClass = (col.type === "pivot_measure" && col.pivotGroupStart) ? " rkt-col-start" : "";
 
-    // Health badges on dimension/measure cells
     const hCls = (col.type !== "pivot_measure") && isLikelyHealthField(col.field.name)
       ? healthClass(raw, config)
       : null;
@@ -598,14 +639,12 @@
       return `<td class="${startClass.trim()}"><span class="rkt-badge ${hCls}">${escHtml(disp)}</span></td>`;
     }
 
-    // URL cells — render as a proper <a> link (only the link is clickable)
     const url = extractUrl(cell);
     if (url) {
       return `<td class="${startClass.trim()}" title="${escHtml(url)}"><a class="rkt-cell-url" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer">${escHtml(disp || url)}</a></td>`;
     }
 
     const align = isNumeric(col.field) ? ' style="text-align:right"' : "";
-    // title shows the raw value so the full number is always visible on hover
     return `<td class="rkt-number${startClass}"${align} title="${escHtml(rawDisp)}">${escHtml(disp)}</td>`;
   }
 
@@ -614,101 +653,21 @@
     id:    "rocket_accounts_table_light",
     label: "Rocket — Accounts Table",
 
-    options: {
-      title: {
-        type:    "string",
-        label:   "Table title",
-        default: "Accounts",
-        section: "Style",
-        order:   1,
-      },
-      rows_per_page: {
-        type:    "number",
-        label:   "Rows per page (default 100)",
-        default: 100,
-        section: "Display",
-        order:   2,
-      },
-      show_search: {
-        type:    "boolean",
-        label:   "Show search bar",
-        default: true,
-        section: "Display",
-        order:   3,
-      },
-      green_vals: {
-        type:        "string",
-        label:       "Healthy / green keywords",
-        default:     "healthy,green,expanding,active,on track,yes",
-        placeholder: "Comma-separated, case-insensitive",
-        section:     "Health badges",
-        order:       4,
-      },
-      warn_vals: {
-        type:        "string",
-        label:       "Warning / amber keywords",
-        default:     "at risk,warning,yellow,behind",
-        placeholder: "Comma-separated, case-insensitive",
-        section:     "Health badges",
-        order:       5,
-      },
-      err_vals: {
-        type:        "string",
-        label:       "Critical / red keywords",
-        default:     "critical,red,error,inactive,churned,lost,no",
-        placeholder: "Comma-separated, case-insensitive",
-        section:     "Health badges",
-        order:       6,
-      },
-      blue_vals: {
-        type:        "string",
-        label:       "Info / blue keywords",
-        default:     "new,prospect,qualified",
-        placeholder: "Comma-separated, case-insensitive",
-        section:     "Health badges",
-        order:       7,
-      },
-      purple_vals: {
-        type:        "string",
-        label:       "Neutral / purple keywords",
-        default:     "renewing,proposal,negotiating",
-        placeholder: "Comma-separated, case-insensitive",
-        section:     "Health badges",
-        order:       8,
-      },
-      fmt_number_cols: {
-        type:        "string",
-        label:       "Abbreviate numbers in columns (K / M / B)",
-        default:     "",
-        placeholder: "e.g. arr,revenue,count — partial field-name match, comma-separated",
-        section:     "Display",
-        order:       9,
-      },
-      column_labels: {
-        type:        "string",
-        label:       "Column label overrides",
-        default:     "",
-        placeholder: "e.g. account_name:Company, arr:ARR, status:Health",
-        section:     "Display",
-        order:       10,
-      },
-    },
+    options: STATIC_OPTIONS,
 
     /* ── create ─────────────────────────────────────────────────────────── */
     create: function (element, config) {
-      // Inject styles into <head> once (keyed so duplicates are skipped)
-      if (!document.getElementById("rkt-styles-v2")) {
+      if (!document.getElementById("rkt-styles-v3")) {
         const styleEl = document.createElement("style");
-        styleEl.id = "rkt-styles-v2";
+        styleEl.id = "rkt-styles-v3";
         styleEl.textContent = CSS;
         document.head.appendChild(styleEl);
       }
 
-      // Build DOM with createElement so no existing nodes are destroyed
       element.innerHTML = "";
 
       const root = document.createElement("div");
-      root.className = "rkt-wrap rkt-diag-bg";
+      root.className = "rkt-wrap";
       root.setAttribute("data-w", "lg");
 
       // — topbar —
@@ -727,8 +686,19 @@
       const countEl = document.createElement("span");
       countEl.className = "rkt-count";
 
+      const topRight = document.createElement("div");
+      topRight.className = "rkt-topbar-right";
+
+      // Expand / Collapse all button (shown only when grouping is active)
+      const expandBtn = document.createElement("button");
+      expandBtn.className = "rkt-expand-btn";
+      expandBtn.textContent = "Expand all";
+      expandBtn.style.display = "none";
+      topRight.appendChild(expandBtn);
+      topRight.appendChild(countEl);
+
       topbar.appendChild(topLeft);
-      topbar.appendChild(countEl);
+      topbar.appendChild(topRight);
 
       // — gradient line —
       const gline = document.createElement("div");
@@ -744,7 +714,7 @@
       searchEl.type = "text";
       searchEl.placeholder = "Search…";
 
-      const pgInfo = document.createElement("span");
+      const pgInfo  = document.createElement("span");
       pgInfo.className = "rkt-pg-info";
 
       const prevBtn = document.createElement("button");
@@ -771,10 +741,10 @@
       root.appendChild(tableWrap);
       element.appendChild(root);
 
-      // Store scoped refs for use in updateAsync
       this._root      = root;
       this._titleEl   = titleEl;
       this._countEl   = countEl;
+      this._expandBtn = expandBtn;
       this._toolbar   = toolbar;
       this._searchEl  = searchEl;
       this._pgInfo    = pgInfo;
@@ -782,12 +752,18 @@
       this._nextBtn   = nextBtn;
       this._tableWrap = tableWrap;
 
-      this._state = { page: 0, sortCol: null, sortDir: 1, query: "" };
+      this._state = {
+        page:           0,
+        sortCol:        null,
+        sortDir:        1,
+        query:          "",
+        expandedGroups: new Set(),
+        allExpanded:    false,
+      };
 
       if (typeof ResizeObserver !== "undefined") {
-        this._ro = new ResizeObserver(entries => {
-          const { width } = entries[0].contentRect;
-          applyBreakpoint(this._root, width);
+        this._ro = new ResizeObserver(function(entries) {
+          applyBreakpoint(root, entries[0].contentRect.width);
         });
         this._ro.observe(element);
       }
@@ -795,12 +771,13 @@
 
     /* ── updateAsync ─────────────────────────────────────────────────────── */
     updateAsync: function (data, element, config, queryResponse, details, done) {
+      const self    = this;
       const state   = this._state;
-      const perPage = Math.max(100, parseInt(config.rows_per_page, 10) || 100);
+      const perPage = Math.max(1, parseInt(config.rows_per_page, 10) || 100);
 
-      // Use scoped refs stored in create() — never touch document.getElementById
       const titleEl   = this._titleEl;
       const countEl   = this._countEl;
+      const expandBtn = this._expandBtn;
       const toolbar   = this._toolbar;
       const searchEl  = this._searchEl;
       const pgInfo    = this._pgInfo;
@@ -813,41 +790,78 @@
       /* ── Build column model ── */
       const { columns, dims, measAll, pivots } = buildColumns(queryResponse);
 
-      /* ── Column label overrides ── */
-      const labelMap = parseColumnLabels(config.column_labels || "");
+      /* ── Register dynamic column-label options ── */
+      try {
+        const dynOpts = {};
+        columns.forEach(function(col) {
+          const defaultLabel = col.field.label_short || col.field.label || col.field.name;
+          dynOpts["col_label_" + col.idx] = {
+            type:        "string",
+            label:       defaultLabel,
+            default:     "",
+            placeholder: defaultLabel,
+            section:     "Column Labels",
+            order:       100 + col.idx,
+          };
+        });
+        const allOpts = Object.assign({}, STATIC_OPTIONS, dynOpts);
+        this.trigger("registerOptions", allOpts);
+      } catch (e) { /* registerOptions unavailable */ }
 
-      /* ── Update title ── */
-      titleEl.textContent = config.title || "Accounts";
-
-      /* ── Toggle toolbar ── */
+      /* ── Title + toolbar ── */
+      titleEl.textContent  = config.title || "Accounts";
       toolbar.style.display = (config.show_search !== false) ? "flex" : "none";
 
+      /* ── Grouping setup ── */
+      const canGroup   = config.enable_grouping && dims.length >= 1 && pivots.length === 0;
+      const firstDim   = dims[0];
+      expandBtn.style.display = canGroup ? "inline-block" : "none";
+
       /* ── Wire search ── */
-      searchEl.oninput = () => {
+      searchEl.oninput = function() {
         state.query = searchEl.value.toLowerCase();
         state.page  = 0;
         render();
       };
 
       /* ── Wire paging ── */
-      prevBtn.onclick = () => { state.page--; render(); };
-      nextBtn.onclick = () => { state.page++; render(); };
+      prevBtn.onclick = function() { state.page--; render(); };
+      nextBtn.onclick = function() { state.page++; render(); };
+
+      /* ── Wire expand/collapse all ── */
+      expandBtn.onclick = function() {
+        state.allExpanded = !state.allExpanded;
+        expandBtn.textContent = state.allExpanded ? "Collapse all" : "Expand all";
+        // Sync expandedGroups to all-or-nothing
+        if (state.allExpanded) {
+          data.forEach(function(row) {
+            const cell = row[firstDim.name];
+            const key  = cell != null
+              ? String(cell.rendered != null ? cell.rendered : (cell.value != null ? cell.value : ""))
+              : "";
+            state.expandedGroups.add(key);
+          });
+        } else {
+          state.expandedGroups.clear();
+        }
+        render();
+      };
 
       /* ── Render ── */
-      const render = () => {
-        /* Filter: match any displayed value across all columns */
-        let rows = data.filter(row => {
+      function render() {
+        /* Filter */
+        let rows = data.filter(function(row) {
           if (!state.query) return true;
-          return columns.some(col =>
-            displayValue(row, col).toLowerCase().includes(state.query)
-          );
+          return columns.some(function(col) {
+            return displayValue(row, col).toLowerCase().includes(state.query);
+          });
         });
 
         /* Sort */
         if (state.sortCol !== null) {
-          const col = columns.find(c => c.idx === state.sortCol);
+          const col = columns.find(function(c) { return c.idx === state.sortCol; });
           if (col) {
-            rows = rows.slice().sort((a, b) => {
+            rows = rows.slice().sort(function(a, b) {
               const av = sortValue(a, col);
               const bv = sortValue(b, col);
               if (av < bv) return -state.sortDir;
@@ -863,16 +877,14 @@
         state.page    = Math.min(Math.max(0, state.page), maxPage);
         const slice   = rows.slice(state.page * perPage, (state.page + 1) * perPage);
 
-        /* Count badge */
+        /* Count + paging info */
         countEl.textContent =
           total + (total !== data.length ? " of " + data.length : "") + " records";
-
-        /* Paging info */
         const start = total ? state.page * perPage + 1 : 0;
         const end   = Math.min((state.page + 1) * perPage, total);
-        pgInfo.textContent  = total ? `${start}–${end} of ${total}` : "No results";
-        prevBtn.disabled    = state.page === 0;
-        nextBtn.disabled    = state.page >= maxPage;
+        pgInfo.textContent = total ? `${start}–${end} of ${total}` : "No results";
+        prevBtn.disabled   = state.page === 0;
+        nextBtn.disabled   = state.page >= maxPage;
 
         /* Empty states */
         if (columns.length === 0) {
@@ -884,24 +896,58 @@
           return;
         }
 
-        /* Build thead HTML */
-        const theadHtml = buildHeader(columns, dims, measAll, pivots, state, labelMap);
+        /* thead */
+        const theadHtml = buildHeader(columns, dims, measAll, pivots, state, config);
 
-        /* Build tbody HTML */
-        const tbRows = slice.map(row => {
-          const tds = columns.map(col => buildCell(row, col, config)).join("");
-          return `<tr>${tds}</tr>`;
-        }).join("");
+        /* tbody */
+        let tbRows;
 
-        tableWrap.innerHTML = `
-          <table class="rkt-table">
-            <thead>${theadHtml}</thead>
-            <tbody>${tbRows}</tbody>
-          </table>`;
+        if (canGroup) {
+          /* ── Grouped rendering ── */
+          const groups = groupRows(slice, firstDim.name);
+          const parts  = [];
 
-        /* Bind sort headers — scoped to this tile's tableWrap only */
-        tableWrap.querySelectorAll("th[data-col]").forEach(th => {
-          th.onclick = () => {
+          groups.forEach(function(groupRowsList, groupKey) {
+            const isExpanded = state.expandedGroups.has(groupKey);
+            const toggle     = isExpanded ? "▾" : "▸";
+
+            parts.push(
+              `<tr class="rkt-group-row" data-group-key="${escHtml(groupKey)}">` +
+              `<td colspan="${columns.length}">` +
+              `<span class="rkt-group-toggle">${toggle}</span>` +
+              `${escHtml(groupKey || "—")}` +
+              `<span class="rkt-group-count">${groupRowsList.length}</span>` +
+              `</td></tr>`
+            );
+
+            groupRowsList.forEach(function(row) {
+              const tds = columns.map(function(col) { return buildCell(row, col, config); }).join("");
+              parts.push(
+                `<tr class="rkt-sub-row" data-sub-group="${escHtml(groupKey)}" style="${isExpanded ? "" : "display:none"}">` +
+                tds +
+                `</tr>`
+              );
+            });
+          });
+
+          tbRows = parts.join("");
+        } else {
+          /* ── Flat rendering ── */
+          tbRows = slice.map(function(row) {
+            const tds = columns.map(function(col) { return buildCell(row, col, config); }).join("");
+            return `<tr>${tds}</tr>`;
+          }).join("");
+        }
+
+        tableWrap.innerHTML =
+          `<table class="rkt-table">` +
+          `<thead>${theadHtml}</thead>` +
+          `<tbody>${tbRows}</tbody>` +
+          `</table>`;
+
+        /* Bind sort headers */
+        tableWrap.querySelectorAll("th[data-col]").forEach(function(th) {
+          th.onclick = function() {
             const col = parseInt(th.dataset.col, 10);
             if (isNaN(col)) return;
             if (state.sortCol === col) {
@@ -915,7 +961,28 @@
           };
         });
 
-      };
+        /* Bind group row toggles */
+        if (canGroup) {
+          tableWrap.querySelectorAll("tr.rkt-group-row").forEach(function(tr) {
+            tr.onclick = function() {
+              const key = tr.getAttribute("data-group-key");
+              if (state.expandedGroups.has(key)) {
+                state.expandedGroups.delete(key);
+              } else {
+                state.expandedGroups.add(key);
+              }
+              // Toggle visibility of sub-rows for this group
+              tableWrap.querySelectorAll(`tr.rkt-sub-row[data-sub-group="${CSS.escape ? CSS.escape(key) : key}"]`)
+                .forEach(function(sub) {
+                  sub.style.display = state.expandedGroups.has(key) ? "" : "none";
+                });
+              // Update toggle icon
+              const toggleEl = tr.querySelector(".rkt-group-toggle");
+              if (toggleEl) toggleEl.textContent = state.expandedGroups.has(key) ? "▾" : "▸";
+            };
+          });
+        }
+      }
 
       try {
         render();
@@ -924,6 +991,10 @@
         tableWrap.innerHTML = `<div class="rkt-empty">Error rendering table — check browser console.</div>`;
       }
       done();
+    },
+
+    destroy: function() {
+      if (this._ro) this._ro.disconnect();
     },
   });
 })();
