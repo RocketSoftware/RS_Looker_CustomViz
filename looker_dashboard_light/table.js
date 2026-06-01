@@ -486,6 +486,36 @@
   }
 
   /**
+   * Sum the numeric values of a column across a set of rows.
+   * Returns the numeric total, or null if no numeric values were found.
+   */
+  function sumColumn(rows, col) {
+    let total = 0;
+    let count = 0;
+    rows.forEach(function(row) {
+      var cell;
+      if (col.type === "dimension" || col.type === "measure") {
+        cell = row[col.field.name] || null;
+      } else {
+        var pc = row[col.field.name];
+        cell = pc && pc[col.pivot.key] ? pc[col.pivot.key] : null;
+      }
+      if (!cell) return;
+      var n = null;
+      var raw = cell.value;
+      if (typeof raw === "number" && !isNaN(raw)) {
+        n = raw;
+      } else if (raw != null) {
+        var s = String(raw).replace(/[$€£¥%\s,]/g, "").trim();
+        var p = parseFloat(s);
+        if (!isNaN(p) && s !== "") n = p;
+      }
+      if (n !== null) { total += n; count++; }
+    });
+    return count > 0 ? total : null;
+  }
+
+  /**
    * Group an array of rows by the value of a given field name.
    * Returns a Map<groupKey, rows[]> preserving insertion order.
    */
@@ -911,13 +941,48 @@
             const isExpanded = state.expandedGroups.has(groupKey);
             const toggle     = isExpanded ? "▾" : "▸";
 
+            // Build one cell per column: toggle+label in first dim, sums in measures
+            const fmtCols = (config.fmt_number_cols || "")
+              .split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
+
+            const groupCells = columns.map(function(col) {
+              const startClass = (col.type === "pivot_measure" && col.pivotGroupStart)
+                ? " rkt-col-start" : "";
+
+              // First dimension — toggle + group key + count badge
+              if (col.type === "dimension" && col.field.name === firstDim.name) {
+                return `<td class="${startClass.trim()}">` +
+                  `<span class="rkt-group-toggle">${toggle}</span>` +
+                  `${escHtml(groupKey || "—")}` +
+                  `<span class="rkt-group-count">${groupRowsList.length}</span>` +
+                  `</td>`;
+              }
+
+              // Other dimension columns — empty
+              if (col.type === "dimension") {
+                return `<td class="${startClass.trim()}"></td>`;
+              }
+
+              // Measure / pivot measure — show sum of inner rows
+              const sum = sumColumn(groupRowsList, col);
+              if (sum === null) {
+                return `<td class="${startClass.trim()}"></td>`;
+              }
+              const fieldId    = (col.field.name  || "").toLowerCase();
+              const fieldLabel = (col.field.label_short || col.field.label || "").toLowerCase();
+              const useAbbr    = fmtCols.length > 0 &&
+                fmtCols.some(function(fc) { return fieldId.includes(fc) || fieldLabel.includes(fc); });
+              const dispSum    = useAbbr
+                ? fmtNumber(sum)
+                : (Number.isInteger(sum) ? sum.toLocaleString() : sum.toFixed(2));
+              return `<td class="rkt-number${startClass}" style="text-align:right;font-weight:600;" ` +
+                `title="${escHtml(String(sum))}">${escHtml(dispSum)}</td>`;
+            }).join("");
+
             parts.push(
               `<tr class="rkt-group-row" data-group-key="${escHtml(groupKey)}">` +
-              `<td colspan="${columns.length}">` +
-              `<span class="rkt-group-toggle">${toggle}</span>` +
-              `${escHtml(groupKey || "—")}` +
-              `<span class="rkt-group-count">${groupRowsList.length}</span>` +
-              `</td></tr>`
+              groupCells +
+              `</tr>`
             );
 
             groupRowsList.forEach(function(row) {
