@@ -461,7 +461,7 @@
         svg.appendChild(line);
 
         // Label name
-        const rawVal  = prefix + (s.rendered || fmtNumber(s.value)) + suffix;
+        const rawVal  = prefix + fmtNumber(s.value) + suffix;
         const pctTxt  = showPct ? " (" + (s.value / total * 100).toFixed(1) + "%)" : "";
 
         // Only show label text if segment is tall enough
@@ -566,7 +566,7 @@
       const tip   = this._tip;
       const total = this._total || 1;
       const pct   = (seg.value / total * 100).toFixed(1) + "%";
-      const disp  = this._prefix + (seg.rendered || fmtNumber(seg.value)) + this._suffix;
+      const disp  = this._prefix + fmtNumber(seg.value) + this._suffix;
 
       tip.querySelector(".rfn-tt-accent").style.background = seg.color;
       tip.querySelector(".rfn-tt-label").textContent = seg.label;
