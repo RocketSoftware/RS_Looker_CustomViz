@@ -372,6 +372,38 @@
     return field.type === "number" || field.category === "measure";
   }
 
+  /**
+   * Parse "arr:ARR, account_name:Company" into { "arr": "ARR", "account_name": "Company" }.
+   * Keys are lowercased; values are used as-is.
+   */
+  function parseColumnLabels(str) {
+    const map = {};
+    if (!str) return map;
+    str.split(",").forEach(function(part) {
+      const colon = part.indexOf(":");
+      if (colon < 0) return;
+      const key = part.slice(0, colon).trim().toLowerCase();
+      const val = part.slice(colon + 1).trim();
+      if (key) map[key] = val;
+    });
+    return map;
+  }
+
+  /**
+   * Return the display label for a field, applying any user override from labelMap.
+   * Matching is case-insensitive partial match on field name or label.
+   */
+  function getColumnLabel(field, labelMap) {
+    const fallback = field.label_short || field.label || field.name;
+    if (!labelMap || Object.keys(labelMap).length === 0) return fallback;
+    const fieldId  = (field.name || "").toLowerCase();
+    const fieldLbl = (field.label_short || field.label || "").toLowerCase();
+    for (const key of Object.keys(labelMap)) {
+      if (fieldId.includes(key) || fieldLbl.includes(key)) return labelMap[key];
+    }
+    return fallback;
+  }
+
   function applyBreakpoint(root, w) {
     root.setAttribute("data-w",
       w < 340 ? "xs" : w < 520 ? "sm" : w < 760 ? "md" : "lg"
@@ -446,7 +478,7 @@
    * Build the <thead> HTML string.
    * Returns a single <tr> when not pivoted; two <tr>s when pivoted.
    */
-  function buildHeader(columns, dims, measAll, pivots, state) {
+  function buildHeader(columns, dims, measAll, pivots, state, labelMap) {
     const isPivoted = pivots.length > 0;
 
     function sortClass(col) {
@@ -457,7 +489,7 @@
     if (!isPivoted) {
       // Single header row
       const cells = columns.map(col => {
-        const label = col.field.label_short || col.field.label || col.field.name;
+        const label = getColumnLabel(col.field, labelMap);
         const sc    = sortClass(col);
         return `<th class="rkt-sortable ${sc}" data-col="${col.idx}">${escHtml(label)}</th>`;
       }).join("");
@@ -472,25 +504,23 @@
 
     // Dimension cells span both header rows
     dims.forEach(f => {
-      const label  = f.label_short || f.label || f.name;
-      // Use name-based matching — object references can differ across updateAsync calls
+      const label  = getColumnLabel(f, labelMap);
       const dimCol = columns.find(c => c.type === "dimension" && c.field.name === f.name);
       const colIdx = dimCol ? dimCol.idx : "";
       row1 += `<th rowspan="2" class="rkt-sortable" data-col="${colIdx}">${escHtml(label)}</th>`;
     });
 
     // Pivot group cells
-    pivots.forEach((pv, pi) => {
+    pivots.forEach((pv) => {
       const label = pivotLabel(pv);
-      const startClass = "rkt-th-pivot rkt-th-pivot-start";
-      row1 += `<th colspan="${numMeas}" class="${startClass}">${escHtml(label)}</th>`;
+      row1 += `<th colspan="${numMeas}" class="rkt-th-pivot rkt-th-pivot-start">${escHtml(label)}</th>`;
     });
 
     // Row 2: measure sub-headers under each pivot group
     let row2 = "";
-    pivots.forEach((pv, pi) => {
+    pivots.forEach((pv) => {
       measAll.forEach((mf, mi) => {
-        const label   = mf.label_short || mf.label || mf.name;
+        const label   = getColumnLabel(mf, labelMap);
         const col     = columns.find(c => c.type === "pivot_measure" && c.field.name === mf.name && c.pivot.key === pv.key);
         const sc      = col ? sortClass(col) : "";
         const startCl = mi === 0 ? " rkt-col-start" : "";
@@ -654,6 +684,14 @@
         section:     "Display",
         order:       9,
       },
+      column_labels: {
+        type:        "string",
+        label:       "Column label overrides",
+        default:     "",
+        placeholder: "e.g. account_name:Company, arr:ARR, status:Health",
+        section:     "Display",
+        order:       10,
+      },
     },
 
     /* ── create ─────────────────────────────────────────────────────────── */
@@ -775,6 +813,9 @@
       /* ── Build column model ── */
       const { columns, dims, measAll, pivots } = buildColumns(queryResponse);
 
+      /* ── Column label overrides ── */
+      const labelMap = parseColumnLabels(config.column_labels || "");
+
       /* ── Update title ── */
       titleEl.textContent = config.title || "Accounts";
 
@@ -844,7 +885,7 @@
         }
 
         /* Build thead HTML */
-        const theadHtml = buildHeader(columns, dims, measAll, pivots, state);
+        const theadHtml = buildHeader(columns, dims, measAll, pivots, state, labelMap);
 
         /* Build tbody HTML */
         const tbRows = slice.map(row => {
