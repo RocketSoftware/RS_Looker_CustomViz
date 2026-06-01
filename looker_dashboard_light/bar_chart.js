@@ -173,6 +173,25 @@
       text-anchor: middle;
       pointer-events: none;
     }
+    /* White label centered inside each stacked segment */
+    .rbc-seg-label {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      fill: rgba(255,255,255,0.92);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+    /* Grand total above the whole stacked bar */
+    .rbc-total-label {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      fill: ${T.tx};
+      text-anchor: middle;
+      pointer-events: none;
+    }
 
     /* ── Tooltip ── */
     .rbc-tooltip {
@@ -634,8 +653,20 @@
           const barKey = `${si}-${gi}`;
           const delay  = (gi * 0.04 + si * 0.015).toFixed(3);
           const radius = Math.min(3, barW / 3, bh / 2);
-          /* Value label: above positive bars, below negative bars */
+          /* Value label placement */
           const labelY = isNeg ? (by + bh + 10).toFixed(1) : (by - 3).toFixed(1);
+          const cx     = (bx + barW / 2).toFixed(1);
+
+          let valueLabelHtml = "";
+          if (showValues) {
+            if (isStacked && bh >= 18) {
+              /* White label centered inside the stacked segment */
+              valueLabelHtml = `<text class="rbc-seg-label" x="${cx}" y="${(by + bh / 2).toFixed(1)}">${fmtNumber(val)}</text>`;
+            } else if (!isStacked && bh > 14) {
+              /* Muted label above grouped bars */
+              valueLabelHtml = `<text class="rbc-val-label" x="${cx}" y="${labelY}">${fmtNumber(val)}</text>`;
+            }
+          }
 
           barGroups += `
             <g class="rbc-bar${isNeg ? ' negative' : ''}" data-si="${si}" data-gi="${gi}" data-key="${esc(barKey)}">
@@ -644,13 +675,24 @@
                     fill="${se.color}" fill-opacity="0.85"
                     rx="${radius}"
                     style="animation-delay:${delay}s"/>
-              ${showValues && bh > 14 ? `
-              <text class="rbc-val-label"
-                    x="${(bx + barW / 2).toFixed(1)}"
-                    y="${labelY}">${fmtNumber(val)}</text>` : ""}
+              ${valueLabelHtml}
             </g>`;
         });
       });
+
+      /* Grand total labels above stacked bars */
+      let totalLabels = "";
+      if (isStacked && showValues) {
+        groups.forEach(function(g, gi) {
+          const posTotal = series.reduce(function(s, se) {
+            const v = se.values[gi]; return s + (v > 0 ? v : 0);
+          }, 0);
+          if (posTotal === 0) return;
+          const cx = (groupX(gi) + innerW / 2).toFixed(1);
+          const ty = (MT + yScale(posTotal) - 5).toFixed(1);
+          totalLabels += `<text class="rbc-total-label" x="${cx}" y="${ty}">${fmtNumber(posTotal)}</text>`;
+        });
+      }
 
       /* Axis lines */
       const axisLines = `
@@ -691,6 +733,7 @@
                aria-label="${esc(chartTitle)}">
             ${gridLines}
             ${barGroups}
+            ${totalLabels}
             ${axisLines}
             ${xLabels}
             ${yAxisLabelEl}
@@ -712,18 +755,25 @@
         series.reduce((s, se) => s + se.values[gi], 0));
 
       function showTooltip(si, gi) {
-        const se  = series[si];
-        const val = se.values[gi];
-        const grp = groups[gi];
-        const pct = groupTotals[gi] > 0
-          ? ((val / groupTotals[gi]) * 100).toFixed(1) + "% of group"
-          : "";
+        const se    = series[si];
+        const val   = se.values[gi];
+        const grp   = groups[gi];
+        const total = groupTotals[gi];
+
+        let pctHtml = "";
+        if (isStacked && total > 0) {
+          const pct = ((val / total) * 100).toFixed(1) + "%";
+          pctHtml = `${pct} of total &nbsp;·&nbsp; <span style="font-weight:600;color:${T.tx}">Total: ${fmtNumber(total)}</span>`;
+        } else if (!isStacked && total > 0) {
+          pctHtml = ((val / total) * 100).toFixed(1) + "% of group";
+        }
+
         if (ttDot)    ttDot.style.background    = se.color;
         if (ttAccent) ttAccent.style.background = se.color;
         if (ttGroup)  ttGroup.textContent = grp;
         if (ttLabel)  ttLabel.textContent = se.label;
         if (ttValue)  ttValue.textContent = fmtNumber(val);
-        if (ttPct)    ttPct.textContent   = pct;
+        if (ttPct)    ttPct.innerHTML     = pctHtml;
         tooltip.classList.add("visible");
       }
 
