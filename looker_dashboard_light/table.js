@@ -86,6 +86,13 @@
       section: "Display",
       order:   5,
     },
+    show_totals: {
+      type:    "boolean",
+      label:   "Show grand totals row",
+      default: false,
+      section: "Display",
+      order:   6,
+    },
     // fmt_number_cols removed — per-column abbreviation toggles are now
     // injected dynamically via registerOptions (see updateAsync)
     green_vals: {
@@ -334,6 +341,26 @@
     .rkt-badge-neu  { background: rgba(0,0,0,0.06); color: ${T.mt}; }
     .rkt-empty { padding: 40px 20px; text-align: center; color: #8E8E93; font-size: 15px; }
     .rkt-number { font-variant-numeric: tabular-nums; }
+
+    /* ── Grand totals row ── */
+    .rkt-totals-row td {
+      background: ${T.surf} !important;
+      font-weight: 600;
+      font-size: 13px;
+      color: ${T.tx};
+      border-top: 2px solid ${T.bo};
+      border-bottom: none;
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+    }
+    .rkt-totals-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: ${T.mt};
+    }
 
     /* ── Responsive ── */
     .rkt-wrap[data-w="xs"] .rkt-topbar  { padding: 8px 10px; }
@@ -997,10 +1024,42 @@
           }).join("");
         }
 
+        /* Grand totals row — computed from ALL filtered rows (not just current page) */
+        let tfoot = "";
+        if (config.show_totals) {
+          const totalCells = columns.map(function(col) {
+            const startClass = (col.type === "pivot_measure" && col.pivotGroupStart)
+              ? " rkt-col-start" : "";
+
+            // First column: "Grand Total" label
+            if (col.idx === 0) {
+              return `<td class="${startClass.trim()}"><span class="rkt-totals-label">Grand Total</span></td>`;
+            }
+
+            // Dimension columns: empty
+            if (col.type === "dimension") {
+              return `<td class="${startClass.trim()}"></td>`;
+            }
+
+            // Measure / pivot-measure: sum across all filtered rows
+            const sum = sumColumn(rows, col);
+            if (sum === null) return `<td class="${startClass.trim()}"></td>`;
+
+            const useAbbr  = config["col_abbr_" + col.idx] === true;
+            const dispSum  = useAbbr
+              ? fmtNumber(sum)
+              : (Number.isInteger(sum) ? sum.toLocaleString() : sum.toFixed(2));
+            return `<td class="rkt-number${startClass}" style="text-align:right;" title="${escHtml(String(sum))}">${escHtml(dispSum)}</td>`;
+          }).join("");
+
+          tfoot = `<tfoot><tr class="rkt-totals-row">${totalCells}</tr></tfoot>`;
+        }
+
         tableWrap.innerHTML =
           `<table class="rkt-table">` +
           `<thead>${theadHtml}</thead>` +
           `<tbody>${tbRows}</tbody>` +
+          tfoot +
           `</table>`;
 
         /* Bind sort headers */
