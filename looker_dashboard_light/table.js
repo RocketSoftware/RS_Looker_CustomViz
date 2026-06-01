@@ -85,14 +85,8 @@
       section: "Display",
       order:   5,
     },
-    fmt_number_cols: {
-      type:        "string",
-      label:       "Abbreviate numbers in columns (K / M / B)",
-      default:     "",
-      placeholder: "e.g. arr,revenue,count — partial field-name match, comma-separated",
-      section:     "Display",
-      order:       6,
-    },
+    // fmt_number_cols removed — per-column abbreviation toggles are now
+    // injected dynamically via registerOptions (see updateAsync)
     green_vals: {
       type:        "string",
       label:       "Healthy / green keywords",
@@ -651,11 +645,7 @@
 
     const raw = cell ? cell.value : null;
 
-    const fmtCols     = (config.fmt_number_cols || "").split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
-    const fieldId     = (col.field.name  || "").toLowerCase();
-    const fieldLabel  = (col.field.label_short || col.field.label || "").toLowerCase();
-    const forceNumFmt = fmtCols.length > 0 &&
-      fmtCols.some(function(fc) { return fieldId.includes(fc) || fieldLabel.includes(fc); });
+    const forceNumFmt = config["col_abbr_" + col.idx] === true;
 
     const disp    = formatValue(cell, forceNumFmt);
     const rawDisp = (cell && cell.value != null) ? String(cell.value) : disp;
@@ -831,7 +821,14 @@
             default:     "",
             placeholder: defaultLabel,
             section:     "Column Labels",
-            order:       100 + col.idx,
+            order:       100 + col.idx * 2,
+          };
+          dynOpts["col_abbr_" + col.idx] = {
+            type:    "boolean",
+            label:   "Abbreviate numbers (K / M / B)",
+            default: false,
+            section: "Column Labels",
+            order:   100 + col.idx * 2 + 1,
           };
         });
         const allOpts = Object.assign({}, STATIC_OPTIONS, dynOpts);
@@ -942,9 +939,6 @@
             const toggle     = isExpanded ? "▾" : "▸";
 
             // Build one cell per column: toggle+label in first dim, sums in measures
-            const fmtCols = (config.fmt_number_cols || "")
-              .split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
-
             const groupCells = columns.map(function(col) {
               const startClass = (col.type === "pivot_measure" && col.pivotGroupStart)
                 ? " rkt-col-start" : "";
@@ -968,11 +962,8 @@
               if (sum === null) {
                 return `<td class="${startClass.trim()}"></td>`;
               }
-              const fieldId    = (col.field.name  || "").toLowerCase();
-              const fieldLabel = (col.field.label_short || col.field.label || "").toLowerCase();
-              const useAbbr    = fmtCols.length > 0 &&
-                fmtCols.some(function(fc) { return fieldId.includes(fc) || fieldLabel.includes(fc); });
-              const dispSum    = useAbbr
+              const useAbbr = config["col_abbr_" + col.idx] === true;
+              const dispSum = useAbbr
                 ? fmtNumber(sum)
                 : (Number.isInteger(sum) ? sum.toLocaleString() : sum.toFixed(2));
               return `<td class="rkt-number${startClass}" style="text-align:right;font-weight:600;" ` +
