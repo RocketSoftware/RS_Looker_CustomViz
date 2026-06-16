@@ -163,26 +163,14 @@
       overflow-wrap: anywhere;
     }
 
-    /* Fixed size tiers driven by data-size on sv-root */
-    .sv-root[data-size="sm"]  .sv-value  { font-size: 36px; }
-    .sv-root[data-size="sm"]  .sv-prefix,
-    .sv-root[data-size="sm"]  .sv-suffix { font-size: 20px; }
-    .sv-root[data-size="md"]  .sv-value  { font-size: 52px; }
-    .sv-root[data-size="md"]  .sv-prefix,
-    .sv-root[data-size="md"]  .sv-suffix { font-size: 28px; }
-    .sv-root[data-size="lg"]  .sv-value  { font-size: 68px; }
-    .sv-root[data-size="lg"]  .sv-prefix,
-    .sv-root[data-size="lg"]  .sv-suffix { font-size: 36px; }
-    .sv-root[data-size="xl"]  .sv-value  { font-size: 88px; }
-    .sv-root[data-size="xl"]  .sv-prefix,
-    .sv-root[data-size="xl"]  .sv-suffix { font-size: 46px; }
-
-    /* Auto size: driven by CSS custom property set by ResizeObserver */
-    .sv-root[data-size="auto"] .sv-value {
+    /* Value font size — always driven by CSS custom properties (set by auto-fit logic).
+     * The "Maximum size" config option caps how large the auto-fit is allowed to grow.
+     * Compact-mode overrides below use higher-specificity selectors and win naturally. */
+    .sv-value {
       font-size: var(--sv-auto-fs, 52px);
     }
-    .sv-root[data-size="auto"] .sv-prefix,
-    .sv-root[data-size="auto"] .sv-suffix {
+    .sv-prefix,
+    .sv-suffix {
       font-size: var(--sv-auto-pre, 28px);
     }
 
@@ -399,17 +387,23 @@
     return [fs, Math.round(fs * 0.52)];
   }
 
+  /* ── Size cap constants ────────────────────────────────────────────────── */
+  /* Maps the "Maximum size" config option to a hard pixel ceiling.          */
+  const SIZE_CAPS = { sm: 44, md: 68, lg: 112 };
+
   /**
-   * Fit font size so the value text fills as much of the tile as possible.
+   * Fit font size so the value text fills as much of the tile as possible,
+   * without exceeding `capPx` (the user-selected maximum size).
    * Uses canvas text measurement + binary search for accuracy.
    *
    * @param {string}  text     The full display string (prefix + value + suffix)
    * @param {number}  w        Container width in px
    * @param {number}  h        Container height in px
    * @param {boolean} numeric  true → numeric mode (taller usable fraction)
+   * @param {number}  capPx    Hard upper bound on font size in px
    * Returns [valueFontSize, prefixSuffixFontSize] in px.
    */
-  function fitFontSizeToText(text, w, h, numeric) {
+  function fitFontSizeToText(text, w, h, numeric, capPx) {
     if (!text) return autoSize(w, h, numeric);
 
     /* Reuse a single off-screen canvas for all measurements */
@@ -430,12 +424,13 @@
      */
     var heightFrac = numeric ? 0.50 : 0.55;
     var maxByH     = Math.floor(h * heightFrac);
-    var maxFs      = Math.min(numeric ? 120 : 80, Math.max(numeric ? 20 : 14, maxByH));
+    var hardCap    = capPx || (numeric ? 112 : 68);   /* fallback to "lg" cap */
+    var maxFs      = Math.min(hardCap, Math.max(numeric ? 20 : 14, maxByH));
     var minFs      = numeric ? 20 : 14;
 
     if (maxFs <= minFs) return [minFs, Math.round(minFs * 0.52)];
 
-    /* Binary search: find largest font size whose rendered width ≤ availW */
+    /* Binary search: find largest size whose rendered width ≤ availW */
     var lo = minFs, hi = maxFs, best = minFs;
     while (lo <= hi) {
       var mid = Math.floor((lo + hi) / 2);
@@ -451,24 +446,24 @@
   }
 
   /**
-   * Apply width/height breakpoint attributes and (if auto) font-size custom properties.
-   * Pass `text` to use canvas-fitted sizing; omit/null for dimension-only fallback.
+   * Apply width/height breakpoint attributes and recompute the auto font size.
+   * Pass `text` for canvas-fitted sizing; omit/null to fall back to dimension estimate.
+   * Pass `capPx` to honour the user's maximum-size setting.
    * Called by ResizeObserver and each updateAsync.
    */
-  function applyBreakpoints(root, w, h, text) {
+  function applyBreakpoints(root, w, h, text, capPx) {
     root.setAttribute("data-w",
       w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
     );
     root.setAttribute("data-h",
       h < 80 ? "xs" : h < 120 ? "sm" : "lg"
     );
-    if (root.getAttribute("data-size") === "auto") {
-      const numeric = root.getAttribute("data-mode") === "num";
-      const sized   = text ? fitFontSizeToText(text, w, h, numeric)
-                           : autoSize(w, h, numeric);
-      root.style.setProperty("--sv-auto-fs",  sized[0] + "px");
-      root.style.setProperty("--sv-auto-pre", sized[1] + "px");
-    }
+    const numeric = root.getAttribute("data-mode") === "num";
+    const sized   = text
+      ? fitFontSizeToText(text, w, h, numeric, capPx)
+      : autoSize(w, h, numeric);
+    root.style.setProperty("--sv-auto-fs",  sized[0] + "px");
+    root.style.setProperty("--sv-auto-pre", sized[1] + "px");
   }
 
   /** Build a compact SVG sparkline from an array of numbers. */
@@ -558,16 +553,14 @@
       },
       font_size: {
         type:    "string",
-        label:   "Value size",
+        label:   "Maximum value size",
         display: "select",
         values:  [
-          { "Auto (fills tile)": "auto" },
-          { "Small":             "sm"   },
-          { "Medium":            "md"   },
-          { "Large":             "lg"   },
-          { "Extra large":       "xl"   },
+          { "Small":  "sm" },
+          { "Medium": "md" },
+          { "Large":  "lg" },
         ],
-        default: "auto",
+        default: "lg",
         section: "Value",
         order:   5,
       },
@@ -682,7 +675,7 @@
       element.appendChild(style);
       element.insertAdjacentHTML("beforeend",
         `<div class="sv-root" id="sv-root"
-              data-size="auto" data-w="lg" data-h="lg"
+              data-w="lg" data-h="lg"
               data-mode="num" data-align="left" data-wrap="off">
            <div class="sv-strip" id="sv-strip"></div>
            ${LOGO}
@@ -691,14 +684,14 @@
          </div>`
       );
 
-      /* ResizeObserver: update breakpoint attributes whenever tile is resized.
-       * Pass the stored display text so auto-sizing re-fits to the new dimensions. */
+      /* ResizeObserver: re-fit on every tile resize using the stored text + cap. */
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(entries => {
           const { width, height } = entries[0].contentRect;
           const root = element.querySelector("#sv-root");
           if (root) {
-            applyBreakpoints(root, width, height, root.dataset.val || undefined);
+            const cap = parseInt(root.dataset.cap, 10) || undefined;
+            applyBreakpoints(root, width, height, root.dataset.val || undefined, cap);
           }
         });
         this._ro.observe(element);
@@ -724,9 +717,9 @@
         ? hGrad.replace(/90deg/g, "180deg")
         : hGrad;
 
-      /* ── Font size mode ── */
-      const sizeMode = config.font_size || "auto";
-      root.setAttribute("data-size", sizeMode);
+      /* ── Size cap — resolve configured maximum to a pixel ceiling ── */
+      const capPx = SIZE_CAPS[config.font_size] || SIZE_CAPS.lg;
+      root.dataset.cap = capPx;
 
       /* ── Collect fields ── */
       const dims     = queryResponse.fields.dimensions         || [];
@@ -736,7 +729,7 @@
 
       if (allFields.length === 0 || data.length === 0) {
         root.setAttribute("data-mode", "num");
-        applyBreakpoints(root, element.offsetWidth || 300, element.offsetHeight || 200);
+        applyBreakpoints(root, element.offsetWidth || 300, element.offsetHeight || 200, null, capPx);
         body.innerHTML = `<div style="color:${T.mt};font-size:14px;padding:20px 0;">
           Add at least one field to display a value.</div>`;
         done();
@@ -758,10 +751,10 @@
       root.setAttribute("data-wrap",  config.allow_wrap ? "on" : "off");
 
       /* Apply layout breakpoints now (mode must be set first).
-       * Font-size auto-fitting will be refined below once we have the display text. */
+       * Font-size will be refined below once we have the actual display text. */
       const w = element.offsetWidth  || 300;
       const h = element.offsetHeight || 200;
-      applyBreakpoints(root, w, h);
+      applyBreakpoints(root, w, h, null, capPx);
 
       /* ── Value color ── */
       const colorKey = config.value_color || "default";
@@ -783,14 +776,12 @@
         const cell       = data[0][primaryField.name];
         const displayVal = esc(cellStr(cell));
 
-        /* Fit font size to the actual text now that we know it */
+        /* Fit font size to the actual text, capped at the user's maximum size */
         const strFull = (config.value_prefix || "") + cellStr(cell) + (config.value_suffix || "");
         root.dataset.val = strFull;
-        if ((config.font_size || "auto") === "auto") {
-          const [fs, pre] = fitFontSizeToText(strFull, w, h, false);
-          root.style.setProperty("--sv-auto-fs",  fs  + "px");
-          root.style.setProperty("--sv-auto-pre", pre + "px");
-        }
+        const [sfs, spre] = fitFontSizeToText(strFull, w, h, false, capPx);
+        root.style.setProperty("--sv-auto-fs",  sfs  + "px");
+        root.style.setProperty("--sv-auto-pre", spre + "px");
 
         body.innerHTML = `
           <div class="sv-label">${esc(label)}</div>
@@ -863,14 +854,12 @@
         displayVal = fmtNumber(primaryRaw, false);
       }
 
-      /* ── Fit font size to the actual display text ── */
+      /* ── Fit font size to the actual display text, capped at user's maximum size ── */
       const numFull = (config.value_prefix || "") + displayVal + (config.value_suffix || "");
       root.dataset.val = numFull;
-      if ((config.font_size || "auto") === "auto") {
-        const [fs, pre] = fitFontSizeToText(numFull, w, h, true);
-        root.style.setProperty("--sv-auto-fs",  fs  + "px");
-        root.style.setProperty("--sv-auto-pre", pre + "px");
-      }
+      const [nfs, npre] = fitFontSizeToText(numFull, w, h, true, capPx);
+      root.style.setProperty("--sv-auto-fs",  nfs  + "px");
+      root.style.setProperty("--sv-auto-pre", npre + "px");
 
       /* ── Format delta ── */
       let deltaHtml = "";
