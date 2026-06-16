@@ -268,16 +268,8 @@
     .sv-root[data-h="xs"] .sv-value-row      { margin-bottom: 0; }
     .sv-root[data-h="xs"] .sv-delta          { display: none; }
     .sv-root[data-h="xs"] .sv-sparkline-wrap { display: none; }
-    /* Numeric compact xs */
-    .sv-root[data-h="xs"][data-mode="num"] .sv-value  { font-size: 24px; }
-    .sv-root[data-h="xs"][data-mode="num"] .sv-prefix,
-    .sv-root[data-h="xs"][data-mode="num"] .sv-suffix { font-size: 13px; }
-    /* Text compact xs */
-    .sv-root[data-h="xs"][data-mode="str"] .sv-value  { font-size: 21px; }
-    .sv-root[data-h="xs"][data-mode="str"] .sv-prefix,
-    .sv-root[data-h="xs"][data-mode="str"] .sv-suffix { font-size: 12px; }
 
-    /* Short: 110–160px — compact horizontal layout with delta badge */
+    /* Short: 80–120px — compact horizontal layout with delta badge */
     .sv-root[data-h="sm"] { flex-direction: row; }
     .sv-root[data-h="sm"] .sv-strip          { display: block; }
     .sv-root[data-h="sm"] .sv-line           { display: none; }
@@ -287,14 +279,6 @@
     .sv-root[data-h="sm"] .sv-value-row      { margin-bottom: 5px; }
     .sv-root[data-h="sm"] .sv-delta-label    { display: none; }
     .sv-root[data-h="sm"] .sv-sparkline-wrap { display: none; }
-    /* Numeric compact sm */
-    .sv-root[data-h="sm"][data-mode="num"] .sv-value  { font-size: 28px; }
-    .sv-root[data-h="sm"][data-mode="num"] .sv-prefix,
-    .sv-root[data-h="sm"][data-mode="num"] .sv-suffix { font-size: 15px; }
-    /* Text compact sm */
-    .sv-root[data-h="sm"][data-mode="str"] .sv-value  { font-size: 24px; }
-    .sv-root[data-h="sm"][data-mode="str"] .sv-prefix,
-    .sv-root[data-h="sm"][data-mode="str"] .sv-suffix { font-size: 13px; }
     .sv-root[data-h="sm"][data-mode="str"] .sv-value-row { margin-bottom: 0; }
   `;
 
@@ -449,18 +433,33 @@
    * Apply width/height breakpoint attributes and recompute the auto font size.
    * Pass `text` for canvas-fitted sizing; omit/null to fall back to dimension estimate.
    * Pass `capPx` to honour the user's maximum-size setting.
+   *
+   * Compact heights (xs / sm) impose their own tighter caps so the label,
+   * optional delta badge, and padding all fit without overflowing the tile.
+   *
    * Called by ResizeObserver and each updateAsync.
    */
   function applyBreakpoints(root, w, h, text, capPx) {
-    root.setAttribute("data-w",
-      w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
-    );
-    root.setAttribute("data-h",
-      h < 80 ? "xs" : h < 120 ? "sm" : "lg"
-    );
-    const numeric = root.getAttribute("data-mode") === "num";
-    const sized   = text
-      ? fitFontSizeToText(text, w, h, numeric, capPx)
+    const hw = w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg";
+    const hh = h < 80  ? "xs" : h < 120 ? "sm" : "lg";
+    root.setAttribute("data-w", hw);
+    root.setAttribute("data-h", hh);
+
+    const numeric  = root.getAttribute("data-mode") === "num";
+    const userCap  = capPx || SIZE_CAPS.lg;
+
+    /*
+     * Compact-height overrides:
+     *   xs (< 80 px)  — no delta, tight padding  →  24 px num / 21 px str
+     *   sm (< 120 px) — delta badge may show      →  32 px num / 26 px str
+     */
+    const compactCap = hh === "xs" ? (numeric ? 24 : 21)
+                     : hh === "sm" ? (numeric ? 32 : 26)
+                     : userCap;
+    const effectiveCap = Math.min(userCap, compactCap);
+
+    const sized = text
+      ? fitFontSizeToText(text, w, h, numeric, effectiveCap)
       : autoSize(w, h, numeric);
     root.style.setProperty("--sv-auto-fs",  sized[0] + "px");
     root.style.setProperty("--sv-auto-pre", sized[1] + "px");
