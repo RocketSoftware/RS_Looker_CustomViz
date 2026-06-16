@@ -387,11 +387,8 @@
   }
 
   /**
-   * Compute auto font size from container dimensions.
-   * @param {number} w  Container width
-   * @param {number} h  Container height
-   * @param {boolean} numeric  Use larger scale factor for numbers
-   * Returns [valueFontSize, prefixSuffixFontSize] in px.
+   * Fallback auto font size from container dimensions alone (no text available).
+   * Used when the display value isn't known yet (e.g. initial layout pass).
    */
   function autoSize(w, h, numeric) {
     const factor = numeric ? 0.42 : 0.36;
@@ -403,10 +400,62 @@
   }
 
   /**
+   * Fit font size so the value text fills as much of the tile as possible.
+   * Uses canvas text measurement + binary search for accuracy.
+   *
+   * @param {string}  text     The full display string (prefix + value + suffix)
+   * @param {number}  w        Container width in px
+   * @param {number}  h        Container height in px
+   * @param {boolean} numeric  true → numeric mode (taller usable fraction)
+   * Returns [valueFontSize, prefixSuffixFontSize] in px.
+   */
+  function fitFontSizeToText(text, w, h, numeric) {
+    if (!text) return autoSize(w, h, numeric);
+
+    /* Reuse a single off-screen canvas for all measurements */
+    var cvs = fitFontSizeToText._c;
+    if (!cvs) {
+      cvs = document.createElement("canvas");
+      fitFontSizeToText._c = cvs;
+    }
+    var ctx = cvs.getContext("2d");
+
+    /* Available width: subtract horizontal body padding (32px × 2) */
+    var availW = Math.max(40, w - 64);
+
+    /*
+     * Available height for the value text:
+     *   numeric: ~50% of tile height (rest is label + delta + padding)
+     *   text:    ~55% of tile height (rest is label + padding)
+     */
+    var heightFrac = numeric ? 0.50 : 0.55;
+    var maxByH     = Math.floor(h * heightFrac);
+    var maxFs      = Math.min(numeric ? 120 : 80, Math.max(numeric ? 20 : 14, maxByH));
+    var minFs      = numeric ? 20 : 14;
+
+    if (maxFs <= minFs) return [minFs, Math.round(minFs * 0.52)];
+
+    /* Binary search: find largest font size whose rendered width ≤ availW */
+    var lo = minFs, hi = maxFs, best = minFs;
+    while (lo <= hi) {
+      var mid = Math.floor((lo + hi) / 2);
+      ctx.font = "500 " + mid + "px Inter, system-ui, -apple-system, sans-serif";
+      if (ctx.measureText(text).width <= availW) {
+        best = mid;
+        lo   = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return [best, Math.round(best * 0.52)];
+  }
+
+  /**
    * Apply width/height breakpoint attributes and (if auto) font-size custom properties.
+   * Pass `text` to use canvas-fitted sizing; omit/null for dimension-only fallback.
    * Called by ResizeObserver and each updateAsync.
    */
-  function applyBreakpoints(root, w, h) {
+  function applyBreakpoints(root, w, h, text) {
     root.setAttribute("data-w",
       w < 260 ? "xs" : w < 380 ? "sm" : w < 560 ? "md" : "lg"
     );
@@ -415,9 +464,10 @@
     );
     if (root.getAttribute("data-size") === "auto") {
       const numeric = root.getAttribute("data-mode") === "num";
-      const [fs, pre] = autoSize(w, h, numeric);
-      root.style.setProperty("--sv-auto-fs",  fs  + "px");
-      root.style.setProperty("--sv-auto-pre", pre + "px");
+      const sized   = text ? fitFontSizeToText(text, w, h, numeric)
+                           : autoSize(w, h, numeric);
+      root.style.setProperty("--sv-auto-fs",  sized[0] + "px");
+      root.style.setProperty("--sv-auto-pre", sized[1] + "px");
     }
   }
 
@@ -641,12 +691,15 @@
          </div>`
       );
 
-      /* ResizeObserver: update breakpoint attributes whenever tile is resized */
+      /* ResizeObserver: update breakpoint attributes whenever tile is resized.
+       * Pass the stored display text so auto-sizing re-fits to the new dimensions. */
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(entries => {
           const { width, height } = entries[0].contentRect;
           const root = element.querySelector("#sv-root");
-          if (root) applyBreakpoints(root, width, height);
+          if (root) {
+            applyBreakpoints(root, width, height, root.dataset.val || undefined);
+          }
         });
         this._ro.observe(element);
       }
@@ -704,7 +757,8 @@
       root.setAttribute("data-align", config.text_align || "left");
       root.setAttribute("data-wrap",  config.allow_wrap ? "on" : "off");
 
-      /* Apply breakpoints now (mode must be set first for correct autoSize) */
+      /* Apply layout breakpoints now (mode must be set first).
+       * Font-size auto-fitting will be refined below once we have the display text. */
       const w = element.offsetWidth  || 300;
       const h = element.offsetHeight || 200;
       applyBreakpoints(root, w, h);
@@ -728,6 +782,15 @@
       if (!numMode) {
         const cell       = data[0][primaryField.name];
         const displayVal = esc(cellStr(cell));
+
+        /* Fit font size to the actual text now that we know it */
+        const strFull = (config.value_prefix || "") + cellStr(cell) + (config.value_suffix || "");
+        root.dataset.val = strFull;
+        if ((config.font_size || "auto") === "auto") {
+          const [fs, pre] = fitFontSizeToText(strFull, w, h, false);
+          root.style.setProperty("--sv-auto-fs",  fs  + "px");
+          root.style.setProperty("--sv-auto-pre", pre + "px");
+        }
 
         body.innerHTML = `
           <div class="sv-label">${esc(label)}</div>
@@ -798,6 +861,15 @@
       } else {
         /* Raw fallback — no abbreviation */
         displayVal = fmtNumber(primaryRaw, false);
+      }
+
+      /* ── Fit font size to the actual display text ── */
+      const numFull = (config.value_prefix || "") + displayVal + (config.value_suffix || "");
+      root.dataset.val = numFull;
+      if ((config.font_size || "auto") === "auto") {
+        const [fs, pre] = fitFontSizeToText(numFull, w, h, true);
+        root.style.setProperty("--sv-auto-fs",  fs  + "px");
+        root.style.setProperty("--sv-auto-pre", pre + "px");
       }
 
       /* ── Format delta ── */
