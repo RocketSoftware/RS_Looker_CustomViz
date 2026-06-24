@@ -829,10 +829,19 @@
     updateAsync: function (data, element, config, queryResponse, details, done) {
       const self    = this;
       const state   = this._state;
-      /* ── Row limit — tell Looker how many rows to fetch ── */
+
+      /* ── Row limit — only trigger when the value actually changes.
+       * Calling trigger("limit") causes Looker to re-execute the query and
+       * call updateAsync again. Triggering unconditionally every call creates
+       * an infinite reload loop. ── */
       const _maxRows = parseInt(config.max_rows, 10);
       const maxRows  = (!isNaN(_maxRows) && _maxRows > 0) ? _maxRows : 500;
-      try { this.trigger("limit", [maxRows]); } catch (e) { /* not supported */ }
+      if (this._appliedLimit !== maxRows) {
+        this._appliedLimit = maxRows;
+        try { this.trigger("limit", [maxRows]); } catch (e) { /* not supported */ }
+        done();
+        return; /* Looker will re-call updateAsync with the new row data */
+      }
 
       const _rpp = parseInt(config.rows_per_page, 10);
       const perPage = (!isNaN(_rpp) && _rpp > 0) ? _rpp : 100;
@@ -852,30 +861,40 @@
       /* ── Build column model ── */
       const { columns, dims, measAll, pivots } = buildColumns(queryResponse);
 
-      /* ── Register dynamic column-label options ── */
-      try {
-        const dynOpts = {};
-        columns.forEach(function(col) {
-          const defaultLabel = col.field.label_short || col.field.label || col.field.name;
-          dynOpts["col_label_" + col.idx] = {
-            type:        "string",
-            label:       defaultLabel,
-            default:     "",
-            placeholder: defaultLabel,
-            section:     "Column Labels",
-            order:       100 + col.idx * 2,
-          };
-          dynOpts["col_abbr_" + col.idx] = {
-            type:    "boolean",
-            label:   "Abbreviate numbers (K / M / B)",
-            default: false,
-            section: "Column Labels",
-            order:   100 + col.idx * 2 + 1,
-          };
-        });
-        const allOpts = Object.assign({}, STATIC_OPTIONS, dynOpts);
-        this.trigger("registerOptions", allOpts);
-      } catch (e) { /* registerOptions unavailable */ }
+      /* ── Register dynamic column-label options ──
+       * Only re-register when the column structure changes (different fields or
+       * pivots). Calling registerOptions on every render can cause Looker to
+       * treat it as a config change and trigger another updateAsync cycle. ── */
+      const colSig = columns.map(function(c) {
+        return c.field.name + (c.pivot ? ":" + c.pivot.key : "");
+      }).join("|");
+
+      if (this._lastColSig !== colSig) {
+        this._lastColSig = colSig;
+        try {
+          const dynOpts = {};
+          columns.forEach(function(col) {
+            const defaultLabel = col.field.label_short || col.field.label || col.field.name;
+            dynOpts["col_label_" + col.idx] = {
+              type:        "string",
+              label:       defaultLabel,
+              default:     "",
+              placeholder: defaultLabel,
+              section:     "Column Labels",
+              order:       100 + col.idx * 2,
+            };
+            dynOpts["col_abbr_" + col.idx] = {
+              type:    "boolean",
+              label:   "Abbreviate numbers (K / M / B)",
+              default: false,
+              section: "Column Labels",
+              order:   100 + col.idx * 2 + 1,
+            };
+          });
+          const allOpts = Object.assign({}, STATIC_OPTIONS, dynOpts);
+          this.trigger("registerOptions", allOpts);
+        } catch (e) { /* registerOptions unavailable */ }
+      }
 
       /* ── Title + toolbar ── */
       titleEl.textContent  = config.title || "Accounts";
