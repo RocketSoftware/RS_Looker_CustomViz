@@ -68,8 +68,8 @@
     max_rows: {
       type:        "string",
       label:       "Maximum rows to fetch",
-      default:     "5000",
-      placeholder: "5000",
+      default:     "500",
+      placeholder: "500",
       section:     "Display",
       order:       3,
     },
@@ -831,7 +831,7 @@
       const state   = this._state;
       /* ── Row limit — tell Looker how many rows to fetch ── */
       const _maxRows = parseInt(config.max_rows, 10);
-      const maxRows  = (!isNaN(_maxRows) && _maxRows > 0) ? _maxRows : 5000;
+      const maxRows  = (!isNaN(_maxRows) && _maxRows > 0) ? _maxRows : 500;
       try { this.trigger("limit", [maxRows]); } catch (e) { /* not supported */ }
 
       const _rpp = parseInt(config.rows_per_page, 10);
