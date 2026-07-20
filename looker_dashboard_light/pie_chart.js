@@ -52,7 +52,7 @@
    *  Purple #58209E         #8638CA                #9E58D8              #BF90E8
    *  Mgta   #7A1898         #A038C4                #BE58CC              #D888E0
    *  Pink   #901878         #C038B5                #D458C0              #E888D0
-   *  Teal   #1EA882         #2DD4A0                #44C4B8              #70D8D0
+   *  Rose   #A01868         #C83888                #DC60A0              #EE90C0
    */
   const PALETTE = [
     /* ── Blues ── */
@@ -85,11 +85,11 @@
     "#D458C0",   // medium pink
     "#E888D0",   // light blush
 
-    /* ── Teal accent family (contrast anchor for 20+ slice charts) ── */
-    "#2DD4A0",   // brand teal (core)
-    "#1EA882",   // deep teal
-    "#44C4B8",   // teal-cyan
-    "#70D8D0",   // light aqua
+    /* ── Deep rose / crimson extension ── */
+    "#A01868",   // deep rose
+    "#C83888",   // rose
+    "#DC60A0",   // medium rose
+    "#EE90C0",   // blush
   ];
 
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
