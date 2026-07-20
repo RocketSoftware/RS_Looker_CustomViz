@@ -37,21 +37,60 @@
     er:    "#F06060",
   };
 
-  /* ─── Slice color palette — blue → purple → pink brand family ────────── */
-    const PALETTE = [
-  "#5040F5",
-  "#8638CA",
-  "#593FEE",
-  "#9138C6",
-  "#613DE6",
-  "#9D38C2",
-  "#6A3CDF",
-  "#A938BD",
-  "#733AD7",
-  "#B438B9",
-  "#7C39D0",
-  "#C038B5",
-];
+  /* ─── Slice color palette — extended Rocket brand family ─────────────── */
+  /*
+   * 24 entries covering the full blue → violet → purple → magenta → pink arc,
+   * plus the brand teal as a complementary accent for high-slice-count charts.
+   *
+   * Arranged so that every group of 4 consecutive picks spans the full hue
+   * range, meaning adjacent slices never land on similar colors.
+   *
+   *  Col 1  deep/dark       Col 2  brand core      Col 3  mid-tone       Col 4  light/bright
+   *  ──────────────────────────────────────────────────────────────────────────────────────
+   *  Blues  #2E22D4         #5040F5                #7055EF              #9888F7
+   *  Violet #4228C8         #6038E4                #7C52DE              #A48CF2
+   *  Purple #58209E         #8638CA                #9E58D8              #BF90E8
+   *  Mgta   #7A1898         #A038C4                #BE58CC              #D888E0
+   *  Pink   #901878         #C038B5                #D458C0              #E888D0
+   *  Teal   #1EA882         #2DD4A0                #44C4B8              #70D8D0
+   */
+  const PALETTE = [
+    /* ── Blues ── */
+    "#5040F5",   // brand blue (core)
+    "#2E22D4",   // deep blue
+    "#7055EF",   // medium blue
+    "#9888F7",   // light periwinkle
+
+    /* ── Violets ── */
+    "#6038E4",   // brand violet
+    "#4228C8",   // deep violet
+    "#7C52DE",   // medium violet
+    "#A48CF2",   // soft lavender
+
+    /* ── Purples ── */
+    "#8638CA",   // brand purple (core)
+    "#58209E",   // deep purple
+    "#9E58D8",   // medium purple
+    "#BF90E8",   // light purple
+
+    /* ── Magenta-purples ── */
+    "#A038C4",   // brand step
+    "#7A1898",   // deep magenta-purple
+    "#BE58CC",   // medium orchid
+    "#D888E0",   // light orchid
+
+    /* ── Pinks / Magentas ── */
+    "#C038B5",   // brand pink (core)
+    "#901878",   // deep magenta
+    "#D458C0",   // medium pink
+    "#E888D0",   // light blush
+
+    /* ── Teal accent family (contrast anchor for 20+ slice charts) ── */
+    "#2DD4A0",   // brand teal (core)
+    "#1EA882",   // deep teal
+    "#44C4B8",   // teal-cyan
+    "#70D8D0",   // light aqua
+  ];
 
   /* ─── Injected CSS ────────────────────────────────────────────────────── */
   const CSS = `
