@@ -694,7 +694,7 @@
         const val   = parseFloat(raw) || 0;
         const rend  = row[measField.name]?.rendered;
         const rend2 = measField2 ? row[measField2.name]?.rendered : null;
-        return { label, val, rend, rend2, idx: i };
+        return { label, val, rend, rend2, idx: i, row }; // row kept for drill links
       }).filter(s => s.val > 0);
 
       if (!rawSlices.length) {
@@ -935,6 +935,31 @@
         applyPinState();
       }
 
+      /**
+       * Open Looker's native drill menu for a slice.
+       * Collects links from both the dimension cell and the measure cell so all
+       * available drill paths are presented. Falls back to pin/highlight if the
+       * slice has no links (e.g. the "Other" bucket) or if LookerCharts is not
+       * available in the current environment.
+       */
+      function drillSlice(s, e) {
+        if (!s.row) { togglePin(slices.indexOf(s)); return; }
+
+        const dimCell  = s.row[dimField.name];
+        const measCell = s.row[measField.name];
+        const links    = [
+          ...((dimCell  && dimCell.links)  ? dimCell.links  : []),
+          ...((measCell && measCell.links) ? measCell.links : []),
+        ];
+
+        if (links.length && typeof LookerCharts !== "undefined" && LookerCharts.Utils) {
+          LookerCharts.Utils.openDrillMenu({ links, event: e });
+        } else {
+          /* No drill links available — fall back to pin highlight */
+          togglePin(slices.indexOf(s));
+        }
+      }
+
       /* ── Slice events ── */
       svgEl.querySelectorAll(".rpc-slice").forEach(g => {
         const idx = parseInt(g.dataset.idx, 10);
@@ -945,7 +970,7 @@
         g.addEventListener("mouseleave", () => deactivateHover());
         g.addEventListener("click", (e) => {
           e.stopPropagation();
-          togglePin(idx);
+          drillSlice(s, e);
         });
       });
 
@@ -959,7 +984,7 @@
         li.addEventListener("mouseleave", () => deactivateHover());
         li.addEventListener("click", (e) => {
           e.stopPropagation();
-          togglePin(idx);
+          drillSlice(s, e);
         });
       });
 
